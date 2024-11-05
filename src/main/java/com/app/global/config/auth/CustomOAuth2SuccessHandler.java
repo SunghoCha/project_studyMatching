@@ -38,19 +38,11 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         OAuth2User oAuth2User = oauth2Token.getPrincipal();
         String accessToken = createAccessToken(oAuth2User);
         String refreshToken = createRefreshToken(oAuth2User);
-        JwtTokenDto jwtTokenDto = JwtTokenDto.builder()
-                .grantType(GrantType.JWT_BEARER.getValue())
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .accessTokenExpireTime(createAccessTokenExpireTime())
-                .refreshTokenExpireTime(createAccessTokenExpireTime())
-                .build();
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        response.setContentType("application/json");
-        response.setStatus(HttpServletResponse.SC_OK);
-        String jsonResponse = objectMapper.writeValueAsString(jwtTokenDto);
-        response.getWriter().write(jsonResponse);
+        String redirectUrlWithToken = "http://localhost:8082/login-success?accessToken=" + accessToken
+                + "&refreshToken=" + refreshToken;
+
+        response.sendRedirect(redirectUrlWithToken);
     }
 
     private String createAccessToken(OAuth2User oAuth2User) {
@@ -60,7 +52,9 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
                 .setIssuedAt(new Date())
                 .setExpiration(createAccessTokenExpireTime())
                 .claim("role", oAuth2User.getAuthorities())
-                .claim("email", oAuth2User.getAttributes().get("email")) // 이메일
+                .claim("id", oAuth2User.getAttributes().get("id"))
+                .claim("email", oAuth2User.getAttributes().get("email"))
+                .claim("name", oAuth2User.getAttributes().get("name"))
                 .signWith(Keys.hmacShaKeyFor(secretKey.getBytes(UTF_8)), SignatureAlgorithm.HS512)
                 .compact();
     }

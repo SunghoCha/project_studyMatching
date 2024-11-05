@@ -2,11 +2,15 @@ package com.app.domain.user;
 
 import com.app.domain.common.BaseTimeEntity;
 import com.app.domain.user.constant.Role;
+import com.app.domain.userTag.UserTag;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -31,6 +35,9 @@ public class User extends BaseTimeEntity {
     @Column(nullable = false)
     private Role role;
 
+    @OneToMany(mappedBy = "user")
+    private final Set<UserTag> userTags = new HashSet<>();
+
     @Builder
     public User(String name, String email, String picture, Role role) {
         this.name = name;
@@ -48,6 +55,10 @@ public class User extends BaseTimeEntity {
 
     public String getRoleKey() {
         return this.role.getKey();
+    }
+
+    public void addUserTags(Set<UserTag> newUserTags) {
+        this.userTags.addAll(newUserTags);
     }
 }
 

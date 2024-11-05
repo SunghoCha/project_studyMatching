@@ -4,13 +4,15 @@ import com.app.domain.user.User;
 import com.app.domain.user.constant.Role;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Getter
 public class OAuthAttributes {
 
-    private final Map<String, Object> attributes;
+    private Map<String, Object> attributes;
     private final String nameAttributeKey;
     private final String name;
     private final String email;
@@ -66,5 +68,11 @@ public class OAuthAttributes {
                 .picture(picture)
                 .role(Role.GUEST)
                 .build();
+    }
+
+    public void setUserId(Long id) {
+        Map<String, Object> newAttributes = new HashMap<>(attributes);
+        newAttributes.put("id", id);
+        this.attributes = newAttributes;
     }
 }

@@ -49,6 +49,7 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
 
         User user = userService.saveOrUpdate(attributes);
         log.info("유저 정보 생성 또는 업데이트 완료");
+        attributes.setUserId(user.getId());
         // 무상태 코드로 바꿀 예정
         String userJson = convertToJson(new SessionUser(user));
         httpSession.setAttribute("user", userJson);
