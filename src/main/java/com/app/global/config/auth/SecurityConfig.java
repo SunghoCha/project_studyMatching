@@ -19,7 +19,7 @@ public class SecurityConfig {
 
     private final CorsConfigurationSource corsConfigurationSource;
     private final CustomOauth2UserService customOAuth2UserService;
-    private final CustomRequestLoggingFilter requestLoggingFilter;
+    //private final CustomRequestLoggingFilter requestLoggingFilter;
     private final NimbusJwtDecoder customJwtDecoder;
     private final CustomOAuth2SuccessHandler customOAuth2SuccessHandler;
 
@@ -43,7 +43,7 @@ public class SecurityConfig {
                                 .userService(customOAuth2UserService))
                         .successHandler(customOAuth2SuccessHandler))
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.decoder(customJwtDecoder))) // jwt 토큰을 검증하는 빈들과 클래스를 생성하고 초기화함
-                .addFilterBefore(requestLoggingFilter, OAuth2LoginAuthenticationFilter.class);
+               // .addFilterBefore(requestLoggingFilter, OAuth2LoginAuthenticationFilter.class);
         ;
 
         return http.build();

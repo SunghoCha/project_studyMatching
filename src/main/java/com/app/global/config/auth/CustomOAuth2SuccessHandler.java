@@ -1,15 +1,13 @@
 package com.app.global.config.auth;
 
-import com.app.global.config.auth.dto.JwtTokenDto;
 import com.app.global.jwt.TokenType;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nimbusds.oauth2.sdk.GrantType;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -20,6 +18,7 @@ import java.util.Date;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+@Slf4j
 public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
     private final String accessTokenExpirationTime;
@@ -37,7 +36,9 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         OAuth2AuthenticationToken oauth2Token = (OAuth2AuthenticationToken) authentication;
         OAuth2User oAuth2User = oauth2Token.getPrincipal();
         String accessToken = createAccessToken(oAuth2User);
+        log.info("accessToken 생성 완료");
         String refreshToken = createRefreshToken(oAuth2User);
+        log.info("refreshToken 생성 완료");
 
         String redirectUrlWithToken = "http://localhost:8082/login-success?accessToken=" + accessToken
                 + "&refreshToken=" + refreshToken;

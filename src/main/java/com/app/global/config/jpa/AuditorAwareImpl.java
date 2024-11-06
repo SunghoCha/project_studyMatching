@@ -1,6 +1,7 @@
 package com.app.global.config.jpa;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -10,6 +11,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import java.util.Optional;
 
 @Slf4j
+@Profile("!test")
 public class AuditorAwareImpl implements AuditorAware<String> {
 
     @Override

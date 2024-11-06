@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.AbstractRequestLoggingFilter;
 
 @Slf4j
-@Component
+@Component // 비동기 처리 못하는 필터라 보류
 public class CustomRequestLoggingFilter extends AbstractRequestLoggingFilter {
 
     public CustomRequestLoggingFilter() {
