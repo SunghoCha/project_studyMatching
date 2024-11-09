@@ -31,6 +31,7 @@ public class SecurityConfig {
                         .requestMatchers("/user").hasRole(Role.USER.name())
                         .requestMatchers("/admin").hasRole(Role.ADMIN.name())
                         .requestMatchers("/authenticated").authenticated()
+                        .requestMatchers("/tag/**").authenticated()
                         .requestMatchers("/**").permitAll())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .csrf(AbstractHttpConfigurer::disable)

@@ -1,20 +1,21 @@
-package com.app.domain.userTag;
+package com.app.domain.study.studyManager;
 
-import com.app.domain.tag.Tag;
+import com.app.domain.study.Study;
 import com.app.domain.user.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@EqualsAndHashCode(of = "id")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class UserTag {
+public class StudyManager {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_tag_id")
+    @Column(name = "study_manager_id")
     private Long id;
 
     @ManyToOne
@@ -22,12 +23,6 @@ public class UserTag {
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "tag_id")
-    private Tag tag;
-
-    @Builder
-    private UserTag(User user, Tag tag) {
-        this.user = user;
-        this.tag = tag;
-    }
+    @JoinColumn(name = "study_id")
+    private Study study;
 }

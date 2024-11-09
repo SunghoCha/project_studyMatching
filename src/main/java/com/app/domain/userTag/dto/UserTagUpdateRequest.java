@@ -10,10 +10,10 @@ import java.util.Set;
 @Getter @Setter
 @NoArgsConstructor
 public class UserTagUpdateRequest {
-    private  Set<String> userTags;
+    private  Set<String> tags;
 
     @Builder
-    public UserTagUpdateRequest(Set<String> userTags) {
-        this.userTags = userTags;
+    public UserTagUpdateRequest(Set<String> tags) {
+        this.tags = tags;
     }
 }

@@ -3,6 +3,7 @@ package com.app.domain.user;
 import com.app.domain.common.BaseTimeEntity;
 import com.app.domain.user.constant.Role;
 import com.app.domain.userTag.UserTag;
+import com.app.domain.userZone.UserZone;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -38,6 +39,9 @@ public class User extends BaseTimeEntity {
     @OneToMany(mappedBy = "user")
     private final Set<UserTag> userTags = new HashSet<>();
 
+    @OneToMany(mappedBy = "user")
+    private final Set<UserZone> userZones = new HashSet<>();
+
     @Builder
     public User(String name, String email, String picture, Role role) {
         this.name = name;
@@ -57,8 +61,15 @@ public class User extends BaseTimeEntity {
         return this.role.getKey();
     }
 
-    public void addUserTags(Set<UserTag> newUserTags) {
-        this.userTags.addAll(newUserTags);
+    public void setUserZones(Set<UserZone> userZones) {
+        this.userZones.clear();
+        this.userZones.addAll(userZones);
+    }
+    
+    // final 없애고 새 set으로 바꾸면 JPA 호환성 이슈있을수도 있음
+    public void setUserTags(Set<UserTag> userTags) {
+        this.userTags.clear();
+        this.userTags.addAll(userTags);
     }
 }
 

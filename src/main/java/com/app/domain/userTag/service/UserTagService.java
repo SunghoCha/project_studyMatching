@@ -15,6 +15,7 @@ import com.app.global.error.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Set;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class UserTagService {
 
     private final UserTagRepository userTagRepository;
@@ -32,32 +34,55 @@ public class UserTagService {
     public UserTagUpdateResponse update(Long userId, UserTagUpdateRequest request) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(ErrorCode.MEMBER_NOT_EXISTS));
 
-        Set<String> tagTitles = request.getUserTags();
         // 유효한 태그인지 확인
+        Set<String> tagTitles = request.getTags();
         tagService.validate(tagTitles);
 
-        // 새로운 태그들만 필터랑
-        List<String> existingTagTitles = user.getUserTags().stream()
-                .map(userTag -> userTag.getTag().getTitle()).toList();
-
-        Set<String> newTagTitle = tagTitles.stream()
-                .filter(tagTitle -> !existingTagTitles.contains(tagTitle))
-                .collect(Collectors.toSet());
-
-        // 새로운 태그 기반으로 유저태그 생성
-        Set<UserTag> newUserTags = tagService.findTags(newTagTitle).stream()
-                .map(tag -> UserTag.builder()
+        Set<UserTag> userTags = request.getTags().stream()
+                .map(tagTitle -> UserTag.builder()
                         .user(user)
-                        .tag(tag)
+                        .tag(new Tag(tagTitle))
                         .build())
                 .collect(Collectors.toSet());
 
+        userTagRepository.deleteAllByUserId(userId);
         // 연관관계 편의 메서드
-        user.addUserTags(newUserTags);
-        userTagRepository.saveAll(newUserTags);
+        user.setUserTags(userTags);
+        userTagRepository.saveAll(userTags);
 
         return UserTagUpdateResponse.of(user.getUserTags());
     }
+
+//    public UserTagUpdateResponse update2(Long userId, UserTagUpdateRequest request) {
+//        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(ErrorCode.MEMBER_NOT_EXISTS));
+//
+//        Set<String> tagTitles = request.getTags();
+//        // 유효한 태그인지 확인
+//        tagService.validate(tagTitles);
+//
+//        // 새로운 태그들만 필터랑
+//        // N+1 문제
+//        List<String> existingTagTitles = user.getUserTags().stream()
+//                .map(userTag -> userTag.getTag().getTitle()).toList();
+//
+//        Set<String> newTagTitle = tagTitles.stream()
+//                .filter(tagTitle -> !existingTagTitles.contains(tagTitle))
+//                .collect(Collectors.toSet());
+//
+//        // 새로운 태그 기반으로 유저태그 생성
+//        Set<UserTag> newUserTags = tagService.findTags(newTagTitle).stream()
+//                .map(tag -> UserTag.builder()
+//                        .user(user)
+//                        .tag(tag)
+//                        .build())
+//                .collect(Collectors.toSet());
+//
+//        // 연관관계 편의 메서드
+//        user.addUserTags(newUserTags);
+//        userTagRepository.saveAll(newUserTags);
+//
+//        return UserTagUpdateResponse.of(user.getUserTags());
+//    }
 
     public Set<UserTag> getUserTags(Long userId) {
         return userTagRepository.findByUserId(userId);

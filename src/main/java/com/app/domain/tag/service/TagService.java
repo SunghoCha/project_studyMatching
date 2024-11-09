@@ -2,7 +2,7 @@ package com.app.domain.tag.service;
 
 import com.app.domain.tag.Tag;
 import com.app.domain.tag.repository.TagRepository;
-import com.app.domain.tag.dto.TagUpdateRequest;
+import com.app.domain.tag.dto.TagRequest;
 import com.app.domain.user.User;
 import com.app.domain.user.repository.UserRepository;
 import com.app.global.error.ErrorCode;
@@ -11,6 +11,7 @@ import com.app.global.error.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Service
@@ -20,7 +21,7 @@ public class TagService {
     private final TagRepository tagRepository;
     private final UserRepository userRepository;
 
-    public void updateTags(Long userId, TagUpdateRequest request) {
+    public void updateTags(Long userId, TagRequest request) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(ErrorCode.MEMBER_NOT_EXISTS));
     }
 
@@ -42,5 +43,9 @@ public class TagService {
         if (tagTitles.size() != tags.size()) {
             throw new InvalidTagException(ErrorCode.INVALID_TAG);
         };
+    }
+
+    public Set<Tag> getTags(TagRequest request) {
+        return new HashSet<>(tagRepository.findAll());
     }
 }

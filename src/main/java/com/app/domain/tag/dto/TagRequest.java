@@ -7,11 +7,12 @@ import lombok.Setter;
 import java.util.Set;
 
 @Getter @Setter
-public class TagUpdateRequest {
+public class TagRequest {
+
     private Set<String> tags;
 
     @Builder
-    public TagUpdateRequest(Set<String> tags) {
+    public TagRequest(Set<String> tags) {
         this.tags = tags;
     }
 }

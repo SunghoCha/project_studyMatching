@@ -23,7 +23,11 @@ public enum ErrorCode {
 //    INVALID_MEMBER_TYPE(HttpStatus.BAD_REQUEST, "M-003", "잘못된 회원 타입 입니다."),
 
     // Tag
-    INVALID_TAG(HttpStatus.BAD_REQUEST, "T-001", "잘못된 태그 입니다.")
+    INVALID_TAG(HttpStatus.BAD_REQUEST, "T-001", "잘못된 태그 입니다."),
+
+    // Zone
+    ZONE_NOT_EXISTS(HttpStatus.BAD_REQUEST, "Z-001", "해당 지역은 존재하지 않습니다."),
+    INVALID_ZONE(HttpStatus.BAD_REQUEST, "T-002", "잘못된 지역명 입니다."),
     ;
 
     ErrorCode(HttpStatus httpStatus, String errorCode, String message) {

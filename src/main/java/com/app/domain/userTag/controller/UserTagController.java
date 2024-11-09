@@ -41,6 +41,8 @@ public class UserTagController {
 
     @PatchMapping("/{userId}")
     public ResponseEntity<UserTagUpdateResponse> edit(@PathVariable("userId") Long userId, @RequestBody UserTagUpdateRequest request) {
+        log.info("유저 태그 업데이트 요청");
+        log.info(request.getTags().toString());
         UserTagUpdateResponse response = userTagService.update(userId, request);
 
         return ResponseEntity.ok(response);

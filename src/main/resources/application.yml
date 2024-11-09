@@ -12,7 +12,9 @@ spring:
     username: sa
     password:
     driver-class-name: org.h2.Driver
-
+  sql:
+    init:
+      mode: always
   jpa:
     hibernate:
       ddl-auto: create
@@ -30,9 +32,10 @@ spring:
 
 logging:
   level:
-    org.hibernate.type: trace # Hibernate 타입 관련 정보 출력
-    com.app: debug
+    org.hibernate.type: INFO # Hibernate 타입 관련 정보 출력
+    com.app: INFO
     org.springframework.security: DEBUG
+    org.springframework.web.filter: DEBUG
 
 
 

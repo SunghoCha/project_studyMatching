@@ -8,4 +8,6 @@ import java.util.Set;
 public interface UserTagRepository extends JpaRepository<UserTag, Long> {
 
     Set<UserTag> findByUserId(Long userId);
+
+    void deleteAllByUserId(Long userId);
 }

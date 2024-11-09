@@ -2,9 +2,7 @@ package com.app.domain.userTag.controller;
 
 import com.app.WithAccount;
 import com.app.domain.tag.Tag;
-import com.app.domain.tag.dto.TagUpdateRequest;
 import com.app.domain.tag.repository.TagRepository;
-import com.app.domain.tag.service.TagService;
 import com.app.domain.userTag.dto.UserTagUpdateRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.Matchers;
@@ -23,12 +21,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
@@ -60,7 +54,7 @@ class UserTagControllerTest {
         Long id = (Long) oAuth2User.getAttributes().get("id");
 
         UserTagUpdateRequest updateRequest = UserTagUpdateRequest.builder()
-                .userTags(Set.of("SPRING", "JAVA"))
+                .tags(Set.of("SPRING", "JAVA"))
                 .build();
 
         // expected
@@ -81,7 +75,7 @@ class UserTagControllerTest {
         Long id = (Long) oAuth2User.getAttributes().get("id");
 
         UserTagUpdateRequest updateRequest = UserTagUpdateRequest.builder()
-                .userTags(Set.of("SPRING2", "JAVA"))
+                .tags(Set.of("SPRING2", "JAVA"))
                 .build();
 
         // expected
