@@ -57,9 +57,7 @@ class UserZoneControllerTest {
         // given
         User user = getUserFromContext();
 
-        List<Zone> zones = createZones("Andong", "안동시", "North Gyeongsang", 5);
         List<Zone> newZones = createZones("Seoul", "서울특별시", "none", 3);
-        List<Zone> findZones = zoneRepository.saveAll(zones);
         List<Zone> findNewZones = zoneRepository.saveAll(newZones);
 
         List<UserZoneUpdateRequest> requests = findNewZones.stream()
