@@ -1,7 +1,9 @@
 package com.app.domain.study.dto;
 
+import com.app.domain.study.Study;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -29,4 +31,20 @@ public class StudyCreateRequest {
     @NotBlank
     private String fullDescription;
 
+    @Builder
+    public StudyCreateRequest(String path, String title, String shortDescription, String fullDescription) {
+        this.path = path;
+        this.title = title;
+        this.shortDescription = shortDescription;
+        this.fullDescription = fullDescription;
+    }
+
+    public Study toEntity() {
+        return Study.builder()
+                .path(path)
+                .title(title)
+                .shortDescription(shortDescription)
+                .fullDescription(fullDescription)
+                .build();
+    }
 }

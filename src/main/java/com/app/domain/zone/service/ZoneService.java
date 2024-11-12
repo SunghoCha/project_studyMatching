@@ -73,7 +73,7 @@ public class ZoneService {
                     || !matchingZone.getLocalName().equals(userZone.getLocalName())
                     || !matchingZone.getProvince().equals(userZone.getProvince()))
 
-                throw new InvalidZoneException(ErrorCode.INVALID_ZONE);
+                throw new InvalidZoneException();
         }
     }
 }

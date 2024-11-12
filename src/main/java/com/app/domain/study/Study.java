@@ -1,23 +1,22 @@
 package com.app.domain.study;
 
+import com.app.domain.common.BaseTimeEntity;
 import com.app.domain.study.studyManager.StudyManager;
 import com.app.domain.study.studyMember.StudyMember;
 import com.app.domain.study.studyTag.StudyTag;
 import com.app.domain.study.studyZone.StudyZone;
+import com.app.domain.user.User;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
 @Getter
-@EqualsAndHashCode(of = "id")
+@EqualsAndHashCode(of = "id", callSuper = false)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Study {
+public class Study extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,7 +34,7 @@ public class Study {
     @OneToMany(mappedBy = "study")
     private Set<StudyZone> studyZones = new HashSet<>();
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String path;
 
     private String title;
@@ -50,5 +49,17 @@ public class Study {
     @Basic(fetch = FetchType.EAGER)
     private String image;
 
+    @Builder
+    public Study(String path, String title, String shortDescription, String fullDescription, String image) {
+        this.path = path;
+        this.title = title;
+        this.shortDescription = shortDescription;
+        this.fullDescription = fullDescription;
+        this.image = image;
+    }
 
+    public void addManager(User user) {
+        StudyManager manager = StudyManager.createManager(user, this);
+        this.studyManagers.add(manager);
+    }
 }

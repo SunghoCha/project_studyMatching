@@ -37,7 +37,7 @@ public class UserZoneService {
     }
 
     public Set<UserZoneResponse> updateUserZones(Long userId, Set<UserZoneUpdateRequest> request) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(ErrorCode.MEMBER_NOT_EXISTS));
+        User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
 
         zoneService.validate(request);
 

@@ -1,13 +1,14 @@
 package com.app.domain.tag;
 
+import com.app.domain.common.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@EqualsAndHashCode(of = "id")
-public class Tag {
+@EqualsAndHashCode(of = "id", callSuper = false)
+public class Tag extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "tag_id")

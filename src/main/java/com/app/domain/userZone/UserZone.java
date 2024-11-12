@@ -1,5 +1,6 @@
 package com.app.domain.userZone;
 
+import com.app.domain.common.BaseTimeEntity;
 import com.app.domain.user.User;
 import com.app.domain.zone.Zone;
 import jakarta.persistence.*;
@@ -7,9 +8,9 @@ import lombok.*;
 
 @Entity
 @Getter
-@EqualsAndHashCode(of = {"id", "user", "zone"})
+@EqualsAndHashCode(of = {"user", "zone"}, callSuper = false)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class UserZone {
+public class UserZone extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_zone_id")

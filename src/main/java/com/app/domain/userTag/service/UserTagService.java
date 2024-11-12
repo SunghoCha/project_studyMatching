@@ -32,7 +32,7 @@ public class UserTagService {
     private final TagService tagService;
 
     public UserTagUpdateResponse update(Long userId, UserTagUpdateRequest request) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(ErrorCode.MEMBER_NOT_EXISTS));
+        User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
 
         // 유효한 태그인지 확인
         Set<String> tagTitles = request.getTags();

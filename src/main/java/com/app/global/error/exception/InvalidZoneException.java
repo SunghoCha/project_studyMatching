@@ -4,7 +4,9 @@ import com.app.global.error.ErrorCode;
 
 public class InvalidZoneException extends BusinessException {
 
-    public InvalidZoneException(ErrorCode errorCode) {
+    private static final ErrorCode errorCode = ErrorCode.INVALID_ZONE;
+
+    public InvalidZoneException() {
         super(errorCode);
     }
 }

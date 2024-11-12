@@ -4,7 +4,9 @@ import com.app.global.error.ErrorCode;
 
 public class UserNotFoundException extends BusinessException {
 
-    public UserNotFoundException(ErrorCode errorCode) {
+    private static final ErrorCode errorCode = ErrorCode.USER_NOT_EXISTS;
+
+    public UserNotFoundException() {
         super(errorCode);
     }
 

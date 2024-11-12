@@ -1,5 +1,6 @@
 package com.app.domain.study.studyMember;
 
+import com.app.domain.common.BaseTimeEntity;
 import com.app.domain.study.Study;
 import com.app.domain.user.User;
 import jakarta.persistence.*;
@@ -10,9 +11,9 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@EqualsAndHashCode(of = "id")
+@EqualsAndHashCode(of = {"study", "user"}, callSuper = false)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class StudyMember {
+public class StudyMember extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "study_member_id")

@@ -1,17 +1,16 @@
 package com.app.domain.userTag;
 
+import com.app.domain.common.BaseTimeEntity;
 import com.app.domain.tag.Tag;
 import com.app.domain.user.User;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class UserTag {
+@EqualsAndHashCode(of = {"user", "tag"}, callSuper = false)
+public class UserTag extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_tag_id")

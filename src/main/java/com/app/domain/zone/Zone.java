@@ -1,13 +1,14 @@
 package com.app.domain.zone;
 
+import com.app.domain.common.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
 @Getter
-@EqualsAndHashCode(of = {"city", "localName", "province"})
+@EqualsAndHashCode(of = {"city", "localName", "province"}, callSuper = false)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Zone {
+public class Zone extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

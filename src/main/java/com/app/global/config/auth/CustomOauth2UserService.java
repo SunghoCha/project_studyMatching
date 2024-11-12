@@ -1,10 +1,9 @@
 package com.app.global.config.auth;
 
 import com.app.domain.user.User;
-import com.app.domain.user.repository.UserRepository;
 import com.app.domain.user.service.UserService;
 import com.app.global.config.auth.dto.OAuthAttributes;
-import com.app.global.config.auth.dto.SessionUser;
+import com.app.global.config.auth.dto.CurrentUser;
 import com.app.global.error.JsonSerializationException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -51,8 +50,8 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
         log.info("유저 정보 생성 또는 업데이트 완료");
         attributes.setUserId(user.getId());
         // 무상태 코드로 바꿀 예정
-        String userJson = convertToJson(new SessionUser(user));
-        httpSession.setAttribute("user", userJson);
+        //String userJson = convertToJson(new CurrentUser(user));
+        //httpSession.setAttribute("user", userJson);
         // 싱글톤으로 하면 불변이라 권한 추가 불가능함에 유의
         // 토큰기반 무상태 방식으로 하고 @AuthenticationPrincipal로 DefaultOAuth2User 정보 가져오는 방식으로 해야할듯
         return new DefaultOAuth2User(
@@ -61,10 +60,10 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
                 attributes.getNameAttributeKey());
     }
 
-    private String convertToJson(SessionUser sessionUser) {
+    private String convertToJson(CurrentUser currentUser) {
         String userJson;
         try {
-            userJson = objectMapper.writeValueAsString(sessionUser);
+            userJson = objectMapper.writeValueAsString(currentUser);
         } catch (JsonProcessingException e) {
             throw new JsonSerializationException("JSON 직렬화 실패");
         }

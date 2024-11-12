@@ -22,7 +22,7 @@ public class TagService {
     private final UserRepository userRepository;
 
     public void updateTags(Long userId, TagRequest request) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(ErrorCode.MEMBER_NOT_EXISTS));
+        User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
     }
 
     public boolean isValid(Set<String> userTags) {
@@ -33,7 +33,7 @@ public class TagService {
     public Set<Tag> findTags(Set<String> tagTitles) {
         Set<Tag> tags = tagRepository.findByTitleIn(tagTitles);
         if (tags.size() != tagTitles.size()) {
-            throw new InvalidTagException(ErrorCode.INVALID_TAG);
+            throw new InvalidTagException();
         }
         return tags;
     }
@@ -41,7 +41,7 @@ public class TagService {
     public void validate(Set<String> tagTitles) {
         Set<Tag> tags = tagRepository.findByTitleIn(tagTitles);
         if (tagTitles.size() != tags.size()) {
-            throw new InvalidTagException(ErrorCode.INVALID_TAG);
+            throw new InvalidTagException();
         };
     }
 
