@@ -36,4 +36,8 @@ public class StudyManager extends BaseTimeEntity {
                 .study(study)
                 .build();
     }
+
+    public boolean isSameUser(User user) {
+        return this.user.equals(user);
+    }
 }

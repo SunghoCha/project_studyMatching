@@ -1,9 +1,12 @@
 package com.app.global.config.auth.dto;
 
 import com.app.domain.user.User;
+import com.app.global.error.exception.InvalidJwtException;
+import com.app.global.error.exception.MissingJwtClaimsException;
 import lombok.Builder;
 import lombok.Getter;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.oauth2.jwt.Jwt;
 
 import java.util.Map;
 
@@ -30,6 +33,26 @@ public class CurrentUser {
                 .name((String) attributes.get("name"))
                 .email((String) attributes.get("email"))
                 .picture((String) attributes.get("picture"))
+                .build();
+    }
+
+    public static CurrentUser of(Jwt jwt) {
+        if (jwt == null) {
+            throw new InvalidJwtException();
+        }
+        String id = jwt.getClaimAsString("id");
+        String name = jwt.getClaimAsString("name");
+        String email = jwt.getClaimAsString("email");
+        String picture = jwt.getClaimAsString("picture");
+
+        if (id == null || name == null ||email == null) {
+            throw new MissingJwtClaimsException();
+        }
+        return CurrentUser.builder()
+                .id(Long.parseLong(id))
+                .name(name)
+                .email(email)
+                .picture(picture)
                 .build();
     }
 }

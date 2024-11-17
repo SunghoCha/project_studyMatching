@@ -51,11 +51,12 @@ public class OAuthAttributes {
 
     private static OAuthAttributes ofNaver(String userNameAttributeName, Map<String, Object> attributes) {
         Map<String, Object> response = (Map<String, Object>) attributes.get("response");
+        response.put("picture", response.get("profile_image")); // Oauth2User의 map에 "picture"를 key로 해서 저장하기 위함
 
         return OAuthAttributes.builder()
                 .name((String) response.get("name"))
                 .email((String) response.get("email"))
-                .picture((String) response.get("profile_image"))
+                .picture((String) response.get("picture"))
                 .attributes(response)
                 .nameAttributeKey(userNameAttributeName)
                 .build();

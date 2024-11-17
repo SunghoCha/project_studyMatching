@@ -26,4 +26,8 @@ public class StudyMember extends BaseTimeEntity {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+    public boolean isSameUser(User user) {
+        return this.user.equals(user);
+    }
 }

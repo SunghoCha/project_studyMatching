@@ -3,6 +3,7 @@ package com.app.domain.user.service;
 import com.app.domain.user.User;
 import com.app.domain.user.repository.UserRepository;
 import com.app.global.config.auth.dto.OAuthAttributes;
+import com.app.global.error.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,5 +20,9 @@ public class UserService {
                 .orElse(attributes.toEntity());
 
         return userRepository.save(user);
+    }
+
+    public User getById(Long id) {
+        return userRepository.findById(id).orElseThrow(UserNotFoundException::new);
     }
 }

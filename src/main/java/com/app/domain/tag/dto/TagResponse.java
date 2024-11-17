@@ -11,18 +11,16 @@ import java.util.stream.Collectors;
 @Getter @Setter
 public class TagResponse {
 
-    private Set<String> tags;
+    private String tag;
 
     @Builder
-    private TagResponse(Set<String> tags) {
-        this.tags = tags;
+    private TagResponse(String tag) {
+        this.tag = tag;
     }
 
-    public static TagResponse of(Set<Tag> tags) {
+    public static TagResponse of(Tag tag) {
         return TagResponse.builder()
-                .tags(tags.stream()
-                        .map(Tag::getTitle)
-                        .collect(Collectors.toSet()))
+                .tag(tag.getTitle())
                 .build();
     }
 }

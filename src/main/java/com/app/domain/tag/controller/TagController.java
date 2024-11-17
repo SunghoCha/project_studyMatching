@@ -8,7 +8,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @RequestMapping("/tag")
 @RestController
@@ -18,9 +20,12 @@ public class TagController {
     private final TagService tagService;
 
     @GetMapping
-    public ResponseEntity<TagResponse> getTags(TagRequest request) {
+    public ResponseEntity<List<TagResponse>> getTags(TagRequest request) {
         Set<Tag> tags = tagService.getTags(request);
+        List<TagResponse> tagResponses = tags.stream()
+                .map(TagResponse::of)
+                .toList();
 
-        return ResponseEntity.ok(TagResponse.of(tags));
+        return ResponseEntity.ok(tagResponses);
     }
 }

@@ -56,6 +56,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
                 .claim("id", oAuth2User.getAttributes().get("id"))
                 .claim("email", oAuth2User.getAttributes().get("email"))
                 .claim("name", oAuth2User.getAttributes().get("name"))
+                .claim("picture", oAuth2User.getAttributes().get("picture"))
                 .signWith(Keys.hmacShaKeyFor(secretKey.getBytes(UTF_8)), SignatureAlgorithm.HS256)
                 .compact();
     }
