@@ -22,6 +22,11 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    // initDb용
+    public User save(User user) {
+        return userRepository.save(user);
+    }
+
     public User getById(Long id) {
         return userRepository.findById(id).orElseThrow(UserNotFoundException::new);
     }

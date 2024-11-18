@@ -42,6 +42,7 @@ class StudyControllerTest {
 
         String json = objectMapper.writeValueAsString(request);
 
+        // expected
         mockMvc.perform(MockMvcRequestBuilders.post("/study/new")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
@@ -51,9 +52,6 @@ class StudyControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.shortDescription").value("짧은 글 설명"))
                 .andDo(MockMvcResultHandlers.print());
 
-        // when
-
-        // then
     }
 
 }
