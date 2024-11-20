@@ -96,4 +96,8 @@ public class Study extends BaseTimeEntity {
         return this.isPublished() && this.isRecruiting()
                 && !isMember(user) && !isManager(user);
     }
+
+    public void setStudyTags(Set<StudyTag> studyTags) {
+        this.studyTags.addAll(studyTags);
+    }
 }

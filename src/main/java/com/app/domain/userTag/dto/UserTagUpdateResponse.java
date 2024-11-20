@@ -7,25 +7,22 @@ import lombok.Setter;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Getter @Setter
 public class UserTagUpdateResponse {
-
-    private Set<String> Tags;
+    private List<String> userTags;
 
     @Builder
-    private UserTagUpdateResponse(Set<String> tags) {
-        Tags = tags;
+    private UserTagUpdateResponse(List<String> userTags) {
+        this.userTags = userTags;
     }
 
     public static UserTagUpdateResponse of(Set<UserTag> userTags) {
-        Set<String> tags = userTags.stream()
-                .map(userTag -> userTag.getTag().getTitle())
-                .collect(Collectors.toSet());
-
+        // TODO: 쿼리 최적화
         return UserTagUpdateResponse.builder()
-                .tags(tags)
+                .userTags(userTags.stream()
+                        .map(userTag -> userTag.getTag().getTitle())
+                        .toList())
                 .build();
     }
 }

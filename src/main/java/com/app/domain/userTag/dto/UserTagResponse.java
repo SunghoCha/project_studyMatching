@@ -5,20 +5,21 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
 import java.util.Set;
 
 @Getter @Setter
 @NoArgsConstructor
 public class UserTagResponse {
-
-    private Set<String> userTags;
+    // TODO 필드값 List 형태로 변환
+    private List<String> userTags;
 
     @Builder
-    private UserTagResponse(Set<String> userTags) {
+    private UserTagResponse(List<String> userTags) {
         this.userTags = userTags;
     }
 
-    public static UserTagResponse of(Set<String> userTags) {
+    public static UserTagResponse of(List<String> userTags) {
         return UserTagResponse.builder()
                 .userTags(userTags)
                 .build();

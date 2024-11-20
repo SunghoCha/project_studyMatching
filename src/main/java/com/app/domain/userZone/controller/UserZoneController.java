@@ -2,6 +2,7 @@ package com.app.domain.userZone.controller;
 
 import com.app.domain.userZone.dto.UserZoneResponse;
 import com.app.domain.userZone.dto.UserZoneUpdateRequest;
+import com.app.domain.userZone.dto.UserZoneUpdateResponse;
 import com.app.domain.userZone.service.UserZoneService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,15 +20,15 @@ public class UserZoneController {
 
     @GetMapping("/{userId}")
     public ResponseEntity<Set<UserZoneResponse>> getUserZones(@PathVariable(name = "userId") Long userId) {
-        Set<UserZoneResponse> userZones = userZoneService.getUserZones(userId);
+       Set<UserZoneResponse> userZones = userZoneService.getUserZones(userId);
 
         return ResponseEntity.ok(userZones);
     }
 
     @PatchMapping("/{userId}")
-    public ResponseEntity<Set<UserZoneResponse>> editUserZones(@PathVariable(name = "userId") Long userId,
-                                                               @RequestBody Set<UserZoneUpdateRequest> request) {
-        Set<UserZoneResponse> response = userZoneService.updateUserZones(userId, request);
+    public ResponseEntity<Set<UserZoneUpdateResponse>> editUserZones(@PathVariable(name = "userId") Long userId,
+                                                                              @RequestBody Set<UserZoneUpdateRequest> request) {
+        Set<UserZoneUpdateResponse> response = userZoneService.updateUserZones(userId, request);
 
         return ResponseEntity.ok(response);
     }

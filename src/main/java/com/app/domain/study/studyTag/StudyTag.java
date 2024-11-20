@@ -4,10 +4,7 @@ import com.app.domain.common.BaseTimeEntity;
 import com.app.domain.study.Study;
 import com.app.domain.tag.Tag;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
@@ -26,4 +23,10 @@ public class StudyTag extends BaseTimeEntity {
     @ManyToOne
     @JoinColumn(name = "tag_id")
     private Tag tag;
+
+    @Builder
+    private StudyTag(Study study, Tag tag) {
+        this.study = study;
+        this.tag = tag;
+    }
 }

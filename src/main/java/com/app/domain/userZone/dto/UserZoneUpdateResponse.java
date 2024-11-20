@@ -1,27 +1,27 @@
 package com.app.domain.userZone.dto;
 
 import com.app.domain.userZone.UserZone;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter @Setter
-public class UserZoneResponse {
+@EqualsAndHashCode(of = {"city", "localName", "province"})
+@NoArgsConstructor
+public class UserZoneUpdateResponse {
 
     private String city;
     private String localName;
     private String province;
 
     @Builder
-    public UserZoneResponse(String city, String localName, String province) {
+    public UserZoneUpdateResponse(String city, String localName, String province) {
         this.city = city;
         this.localName = localName;
         this.province = province;
     }
 
-    public static UserZoneResponse of(UserZone userZone) {
+    public static UserZoneUpdateResponse of(UserZone userZone) {
         // TODO 쿼리 최적화
-        return UserZoneResponse.builder()
+        return UserZoneUpdateResponse.builder()
                 .city(userZone.getZone().getCity())
                 .localName(userZone.getZone().getLocalName())
                 .province(userZone.getZone().getProvince())

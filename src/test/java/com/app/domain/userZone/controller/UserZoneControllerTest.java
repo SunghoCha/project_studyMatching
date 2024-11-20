@@ -5,14 +5,13 @@ import com.app.domain.user.User;
 import com.app.domain.user.repository.UserRepository;
 import com.app.domain.userZone.UserZone;
 import com.app.domain.userZone.dto.UserZoneUpdateRequest;
+import com.app.domain.userZone.dto.UserZoneUpdateResponse;
 import com.app.domain.zone.Zone;
 import com.app.domain.zone.repository.ZoneRepository;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,13 +23,14 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static java.nio.charset.StandardCharsets.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -77,12 +77,20 @@ class UserZoneControllerTest {
                         .content(json)
                 )
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].city").value("Seoul0"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].localName").value("서울특별시0"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].province").value("none0"))
-                .andDo(MockMvcResultHandlers.print());
+                .andExpect(result -> {
+                    String content = result.getResponse().getContentAsString(UTF_8);
 
-        // then
+                    List<UserZoneUpdateResponse> responses = objectMapper.readValue(
+                            content, new TypeReference<>() {}
+                    );
+
+                    assertThat(responses).containsExactlyInAnyOrder(
+                            new UserZoneUpdateResponse("Seoul0", "서울특별시0", "none0"),
+                            new UserZoneUpdateResponse("Seoul1", "서울특별시1", "none1"),
+                            new UserZoneUpdateResponse("Seoul2", "서울특별시2", "none2")
+                    );
+                })
+                .andDo(MockMvcResultHandlers.print());
     }
 
     private User getUserFromContext() {

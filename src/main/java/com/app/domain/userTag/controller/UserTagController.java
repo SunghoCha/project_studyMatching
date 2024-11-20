@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -27,15 +28,13 @@ public class UserTagController {
     @GetMapping("/{userId}")
     public ResponseEntity<UserTagResponse> getUserTags(@PathVariable("userId") Long userId) {
         log.info("유저 태그 정보 요청");
-        Set<String> userTags = Optional.ofNullable(userTagService.getUserTags(userId))
+        List<String> userTags = Optional.ofNullable(userTagService.getUserTags(userId))
                 .orElse(Collections.emptySet()) // 사용자가 태그설정 처음이면 null일수도 있음
                 .stream()
                 .map(userTag -> userTag.getTag().getTitle())
-                .collect(Collectors.toSet());
+                .toList();
 
-        UserTagResponse userTagResponse = UserTagResponse.of(userTags);
-
-        return ResponseEntity.ok(userTagResponse);
+        return ResponseEntity.ok(UserTagResponse.of(userTags));
     }
 
 

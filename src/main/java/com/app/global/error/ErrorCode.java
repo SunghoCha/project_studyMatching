@@ -27,6 +27,7 @@ public enum ErrorCode {
     // Study
     STUDY_PATH_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "S-001", "이미 존재하는 스터디경로입니다."),
     STUDY_NOT_EXISTS(HttpStatus.BAD_REQUEST, "S-001", "해당 스터디는 존재하지 않습니다."),
+    UNAUTHORIZED_ACCESS_EXCEPTION(HttpStatus.UNAUTHORIZED, "S-002", "스터디 수정 권한이 없습니다"),
     ;
 
     ErrorCode(HttpStatus httpStatus, String errorCode, String message) {

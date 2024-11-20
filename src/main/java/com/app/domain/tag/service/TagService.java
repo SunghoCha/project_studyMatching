@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -32,13 +33,12 @@ public class TagService {
 
     public Set<Tag> findTags(Set<String> tagTitles) {
         Set<Tag> tags = tagRepository.findByTitleIn(tagTitles);
-        if (tags.size() != tagTitles.size()) {
-            throw new InvalidTagException();
-        }
+        validate(tagTitles);
+
         return tags;
     }
 
-    public void validate(Set<String> tagTitles) {
+    private void validate(Set<String> tagTitles) {
         Set<Tag> tags = tagRepository.findByTitleIn(tagTitles);
         if (tagTitles.size() != tags.size()) {
             throw new InvalidTagException();
@@ -47,5 +47,14 @@ public class TagService {
 
     public Set<Tag> getTags(TagRequest request) {
         return new HashSet<>(tagRepository.findAll());
+    }
+
+    public void saveAll(List<Tag> tags) {
+        // TODO 태그 종복 체크 로직
+        tagRepository.saveAll(tags);
+    }
+
+    public Tag findByTitle(String title) {
+        return tagRepository.findByTitle(title).orElseThrow(InvalidTagException::new);
     }
 }

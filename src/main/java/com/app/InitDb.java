@@ -3,15 +3,19 @@ package com.app;
 import com.app.domain.study.dto.StudyCreateRequest;
 import com.app.domain.study.dto.StudyCreateResponse;
 import com.app.domain.study.service.StudyService;
+import com.app.domain.tag.Tag;
+import com.app.domain.tag.service.TagService;
 import com.app.domain.user.User;
 import com.app.domain.user.constant.Role;
 import com.app.domain.user.service.UserService;
+import com.app.domain.zone.service.ZoneService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Random;
 
@@ -24,12 +28,16 @@ public class InitDb {
 
     private final UserService userService;
     private final StudyService studyService;
+    private final TagService tagService;
+    private final ZoneService zoneService;
 
     @PostConstruct
-    public void init() {
+    public void init() throws IOException {
         log.info("initUser 실행");
+        initTags();
         User user = initUser();
         initStudies(user.getId());
+        zoneService.initZoneData();
     }
 
     private User initUser() {
@@ -40,6 +48,18 @@ public class InitDb {
                 .build();
 
         return userService.save(user);
+    }
+
+    private void initTags() {
+        List<Tag> tags = List.of(new Tag("JavaScript"),
+                new Tag("Vue.js"),
+                new Tag("React"),
+                new Tag("Node.js"),
+                new Tag("CSS"),
+                new Tag("HTML"),
+                new Tag("Spring"),
+                new Tag("Java"));
+        tagService.saveAll(tags);
     }
 
     private void initStudies(Long id) {

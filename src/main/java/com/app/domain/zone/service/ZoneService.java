@@ -31,8 +31,7 @@ public class ZoneService {
 
     private final ZoneRepository zoneRepository;
 
-    @Profile("oauth")
-    @PostConstruct
+
     public void initZoneData() throws IOException {
         if (zoneRepository.count() == 0) {
             Resource resource = new ClassPathResource("zones_kr.csv");

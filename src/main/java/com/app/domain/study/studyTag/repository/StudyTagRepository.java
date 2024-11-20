@@ -1,16 +1,14 @@
-package com.app.domain.study.repository;
+package com.app.domain.study.studyTag.repository;
 
-import com.app.domain.study.Study;
 import com.app.domain.study.dto.StudyQueryResponse;
+import com.app.domain.study.studyTag.StudyTag;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
-import java.util.Optional;
 
-public interface StudyRepository extends JpaRepository<Study, Long> {
-    Optional<Study> findByPath(String path);
+public interface StudyTagRepository extends JpaRepository<StudyTag, Long> {
 
 
 }

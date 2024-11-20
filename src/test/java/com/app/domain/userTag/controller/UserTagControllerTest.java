@@ -62,7 +62,7 @@ class UserTagControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.tags[*]", Matchers.containsInAnyOrder("SPRING","JAVA")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[*].tag", Matchers.containsInAnyOrder("SPRING","JAVA")))
                 .andDo(MockMvcResultHandlers.print());
     }
 

@@ -8,6 +8,7 @@ import com.app.global.config.auth.LoginUser;
 import com.app.global.config.auth.dto.CurrentUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,8 +38,8 @@ public class StudyController {
     }
 
     @GetMapping("/list")
-    public ResponseEntity<List<StudyResponse>> getStudies() {
-        List<StudyResponse> response = studyService.getStudies();
+    public ResponseEntity<List<StudyResponse>> getStudies(Pageable pageable) {
+        List<StudyResponse> response = studyService.getStudies(pageable);
         log.info("response: {}", response);
 
         return ResponseEntity.ok(response);

@@ -1,20 +1,19 @@
 package com.app.domain.tag.dto;
 
 import com.app.domain.tag.Tag;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Getter @Setter
+@NoArgsConstructor
 public class TagResponse {
-
+    // TODO 필드값 List 형태로 변환
     private String tag;
 
     @Builder
-    private TagResponse(String tag) {
+    public TagResponse(String tag) {
         this.tag = tag;
     }
 

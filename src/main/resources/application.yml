@@ -13,16 +13,22 @@ spring:
     username: sa
     password:
     driver-class-name: org.h2.Driver
+  h2:
+    console:
+      enabled: true
+
   sql:
     init:
       mode: always
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: create-drop
     show-sql: true # 콘솔창에 sql 출력
     properties:
       hibernate:
         format_sql: true # sql 예쁘게 출력
+        highlight_sql: true # ANSI 코드에 색을 나타낸다
+        use_sql_comments: true # SQL 내부에 /* */ 주석 추가
         default_batch_fetch_size: 500 # 일대다 컬렉션 조회 시 성능 최적화
     open-in-view: false # 영속성 컨텍스트의 생존 범위를 트랜잭션 범위로 한정
 
@@ -34,9 +40,21 @@ spring:
 logging:
   level:
     org.hibernate.type: INFO # Hibernate 타입 관련 정보 출력
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE
+
     com.app: INFO
     org.springframework.security: DEBUG
     org.springframework.web.filter: DEBUG
+
+    logging:
+      level:
+        org:
+          hibernate:
+            orm:
+              jdbc:
+                bind=TRACE:
+
 
 
 

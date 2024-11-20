@@ -34,14 +34,12 @@ public class UserTagService {
     public UserTagUpdateResponse update(Long userId, UserTagUpdateRequest request) {
         User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
 
-        // 유효한 태그인지 확인
-        Set<String> tagTitles = request.getTags();
-        tagService.validate(tagTitles);
+        Set<Tag> tags = tagService.findTags(request.getTags());
 
-        Set<UserTag> userTags = request.getTags().stream()
-                .map(tagTitle -> UserTag.builder()
+        Set<UserTag> userTags = tags.stream()
+                .map(tag -> UserTag.builder()
                         .user(user)
-                        .tag(new Tag(tagTitle))
+                        .tag(tag)
                         .build())
                 .collect(Collectors.toSet());
 
@@ -50,39 +48,8 @@ public class UserTagService {
         user.setUserTags(userTags);
         userTagRepository.saveAll(userTags);
 
-        return UserTagUpdateResponse.of(user.getUserTags());
+        return UserTagUpdateResponse.of(userTags);
     }
-
-//    public UserTagUpdateResponse update2(Long userId, UserTagUpdateRequest request) {
-//        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(ErrorCode.MEMBER_NOT_EXISTS));
-//
-//        Set<String> tagTitles = request.getTags();
-//        // 유효한 태그인지 확인
-//        tagService.validate(tagTitles);
-//
-//        // 새로운 태그들만 필터랑
-//        // N+1 문제
-//        List<String> existingTagTitles = user.getUserTags().stream()
-//                .map(userTag -> userTag.getTag().getTitle()).toList();
-//
-//        Set<String> newTagTitle = tagTitles.stream()
-//                .filter(tagTitle -> !existingTagTitles.contains(tagTitle))
-//                .collect(Collectors.toSet());
-//
-//        // 새로운 태그 기반으로 유저태그 생성
-//        Set<UserTag> newUserTags = tagService.findTags(newTagTitle).stream()
-//                .map(tag -> UserTag.builder()
-//                        .user(user)
-//                        .tag(tag)
-//                        .build())
-//                .collect(Collectors.toSet());
-//
-//        // 연관관계 편의 메서드
-//        user.addUserTags(newUserTags);
-//        userTagRepository.saveAll(newUserTags);
-//
-//        return UserTagUpdateResponse.of(user.getUserTags());
-//    }
 
     public Set<UserTag> getUserTags(Long userId) {
         return userTagRepository.findByUserId(userId);

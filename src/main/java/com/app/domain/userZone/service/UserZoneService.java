@@ -4,19 +4,17 @@ import com.app.domain.user.User;
 import com.app.domain.user.repository.UserRepository;
 import com.app.domain.userZone.UserZone;
 import com.app.domain.userZone.dto.UserZoneResponse;
+import com.app.domain.userZone.dto.UserZoneUpdateResponse;
 import com.app.domain.userZone.dto.UserZoneUpdateRequest;
 import com.app.domain.userZone.repository.UserZoneRepository;
 import com.app.domain.zone.Zone;
 import com.app.domain.zone.repository.ZoneRepository;
 import com.app.domain.zone.service.ZoneService;
-import com.app.global.error.ErrorCode;
 import com.app.global.error.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -36,12 +34,12 @@ public class UserZoneService {
                 .collect(Collectors.toSet());
     }
 
-    public Set<UserZoneResponse> updateUserZones(Long userId, Set<UserZoneUpdateRequest> request) {
+    public Set<UserZoneUpdateResponse> updateUserZones(Long userId, Set<UserZoneUpdateRequest> request) {
         User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
 
         zoneService.validate(request);
 
-        List<UserZone> userZones = request.stream()
+        Set<UserZone> userZones = request.stream()
                 .map(zoneRequest -> {
                     Zone savedZone = zoneRepository.findByCityAndLocalNameAndProvince(
                                     zoneRequest.getCity(),
@@ -59,13 +57,14 @@ public class UserZoneService {
                             .zone(savedZone)
                             .build();
                 })
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
 
         userZoneRepository.deleteAllByUserId(userId);
-        user.setUserZones(new HashSet<>(userZones));
+        user.setUserZones(userZones);
         userZoneRepository.saveAll(userZones);
+
         return userZones.stream()
-                .map(UserZoneResponse::of)
+                .map(UserZoneUpdateResponse::of)
                 .collect(Collectors.toSet());
     }
 }
