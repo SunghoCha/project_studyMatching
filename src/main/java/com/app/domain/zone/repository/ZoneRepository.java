@@ -11,4 +11,6 @@ import java.util.Set;
 public interface ZoneRepository extends JpaRepository<Zone, Long> {
 
     Optional<Zone> findByCityAndLocalNameAndProvince(String city, String localName, String province);
+
+    List<Zone> findByIdIn(Set<Long> zoneIds);
 }

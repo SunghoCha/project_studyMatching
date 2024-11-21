@@ -57,4 +57,8 @@ public class TagService {
     public Tag findByTitle(String title) {
         return tagRepository.findByTitle(title).orElseThrow(InvalidTagException::new);
     }
+
+    public List<Tag> findAll() {
+        return tagRepository.findAll();
+    }
 }

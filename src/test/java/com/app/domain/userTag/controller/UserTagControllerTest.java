@@ -16,6 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
@@ -23,7 +24,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
-
+@ActiveProfiles("test")
 @SpringBootTest
 @Transactional
 @AutoConfigureMockMvc
@@ -40,10 +41,13 @@ class UserTagControllerTest {
 
     @BeforeEach
     void setup() {
+        tagRepository.deleteAll();
         tagRepository.save(new Tag("SPRING"));
         tagRepository.save(new Tag("JAVA"));
         tagRepository.save(new Tag("VUE"));
     }
+
+
 
     @Test
     @WithAccount()
@@ -62,7 +66,7 @@ class UserTagControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$[*].tag", Matchers.containsInAnyOrder("SPRING","JAVA")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.userTags", Matchers.containsInAnyOrder("SPRING","JAVA")))
                 .andDo(MockMvcResultHandlers.print());
     }
 

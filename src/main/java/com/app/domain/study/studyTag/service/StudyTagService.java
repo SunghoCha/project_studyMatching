@@ -8,15 +8,17 @@ import com.app.domain.study.studyTag.dto.StudyTagCreateResponse;
 import com.app.domain.study.studyTag.repository.StudyTagRepository;
 import com.app.domain.tag.Tag;
 import com.app.domain.tag.service.TagService;
-import com.app.domain.user.User;
-import com.app.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class StudyTagService {
 
@@ -24,7 +26,7 @@ public class StudyTagService {
     private final StudyService studyService;
     private final TagService tagService;
 
-    public StudyTagCreateResponse addStudyTags(Long userId, String path, StudyTagCreateRequest request) {
+    public StudyTagCreateResponse createStudyTags(Long userId, String path, StudyTagCreateRequest request) {
         Study study = studyService.findAuthorizedStudy(userId, path);
         Set<StudyTag> studyTags = request.getTags().stream()
                 .map(tagTitle -> {
@@ -35,10 +37,10 @@ public class StudyTagService {
                             .build();
                 })
                 .collect(Collectors.toSet());
-        studyTagRepository.saveAll(studyTags);
-        study.setStudyTags(studyTags);
+        List<StudyTag> savedTags = studyTagRepository.saveAll(studyTags);
 
+        study.addStudyTags(new HashSet<>(savedTags));
 
-        return StudyTagCreateResponse.of(studyTags);
+        return StudyTagCreateResponse.of(new HashSet<>(savedTags));
     }
 }

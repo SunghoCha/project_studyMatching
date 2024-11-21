@@ -3,10 +3,7 @@ package com.app.domain.study.studyZone;
 import com.app.domain.study.Study;
 import com.app.domain.zone.Zone;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
@@ -25,4 +22,10 @@ public class StudyZone {
     @ManyToOne
     @JoinColumn(name = "zone_id")
     private Zone zone;
+
+    @Builder
+    public StudyZone(Study study, Zone zone) {
+        this.study = study;
+        this.zone = zone;
+    }
 }

@@ -1,96 +1,134 @@
 package com.app.domain.study.repository;
 
+import com.app.domain.common.dto.PagedResponse;
 import com.app.domain.study.QStudy;
 import com.app.domain.study.Study;
+import com.app.domain.study.dto.QStudyQueryResponse;
 import com.app.domain.study.dto.StudyQueryResponse;
 import com.app.domain.study.dto.StudySearchCond;
 import com.app.domain.study.studyTag.QStudyTag;
 import com.app.domain.study.studyZone.QStudyZone;
 import com.app.domain.tag.QTag;
+import com.app.domain.tag.dto.QTagResponse;
 import com.app.domain.tag.dto.TagResponse;
 import com.app.domain.zone.QZone;
+import com.querydsl.core.group.GroupBy;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Hibernate;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import static com.querydsl.core.group.GroupBy.groupBy;
-import static java.util.Collections.list;
 
+@Slf4j
 @Repository
 @RequiredArgsConstructor
 public class StudyQueryRepository {
 
     private final JPAQueryFactory queryFactory;
 
-
-    public List<Study> findAllStudies(Pageable pageable) {
+    public PagedResponse<StudyQueryResponse> findAllStudies(Pageable pageable) {
         QStudy study = QStudy.study;
 
+        // 총 데이터 수
+        Long totalCount = queryFactory
+                .select(study.count())
+                .from(study)
+                .fetchOne();
+
+        // 현재 페이지 데이터
+        log.info("===============스터디 페이징 시작");
         List<Study> studies = queryFactory
                 .select(study)
                 .from(study)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
+        log.info("===============스터디 페이징 완료");
 
         //  지연로딩 초기화 + batch size
+        log.info("===============지연로딩 초기화 시작");
         studies.forEach(s -> {
             Hibernate.initialize(s.getStudyTags());
             Hibernate.initialize(s.getStudyZones());
             Hibernate.initialize(s.getStudyMembers());
         });
+        log.info("===============지연로딩 초기화 완료");
 
-        return studies;
+        // study <-> dto 변환
+        List<StudyQueryResponse> studyQueryResponses = studies.stream()
+                .map(StudyQueryResponse::of)
+                .toList();
+
+        // 총 페이지
+        int totalPages = (int) Math.ceil((double) (totalCount != null ? totalCount : 0) / pageable.getPageSize());
+
+        return PagedResponse.<StudyQueryResponse>builder()
+                .content(studyQueryResponses)
+                .currentPage(pageable.getPageNumber() + 1)
+                .totalPages(totalPages)
+                .totalCount(totalCount != null ? totalCount : 0)
+                .size(pageable.getPageSize())
+                .build();
     }
-//    public List<StudyQueryResponse> searchStudies(StudySearchCond searchCond, Pageable pageable) {
-//        QStudy study = QStudy.study;
-//        QStudyTag studyTag = QStudyTag.studyTag;
-//        QTag tag = QTag.tag;
-//
-//        // Step 1: 일대다 데이터에서 조건절로 추린 후, id 값에 distinct() 적용하여 중복 제거 및 페이징 처리
-//        List<Long> studyIds = queryFactory
-//                .select(study.id)
-//                .distinct()
-//                .from(study)
-//                .leftJoin(study.studyTags, studyTag)
-//                .leftJoin(studyTag.tag, tag)
-//                .where(
-//                        tagInCondition(searchCond.getTags())
-//                        // zone 조건 추가 가능
-//                )
-//                .offset(pageable.getOffset())
-//                .limit(pageable.getPageSize())
-//                .fetch();
-//
-//        // Step 2: transform과 groupBy를 사용해 DTO로 변환
-//        Map<Long, StudyQueryResponse> groupedResult = queryFactory
-//                .from(study)
-//                .leftJoin(study.studyTags, studyTag)
-//                .leftJoin(studyTag.tag, tag)
-//                .where(study.id.in(studyIds))
-//                .transform(
-//                        groupBy(study.id).as(
-//                                new QStudyQueryResponse(
-//                                        study.path,
-//                                        study.title,
-//                                        study.shortDescription,
-//                                        list(new QTagResponse(TagResponse.class, tag.title))
-//                                )
-//                        )
-//                );
-//
-//        // Step 3: Map에서 DTO 리스트 반환
-//        return new ArrayList<>(groupedResult.values());
-//    }
+
+    public List<StudyQueryResponse> searchStudies(StudySearchCond searchCond, Pageable pageable) {
+        QStudy study = QStudy.study;
+        QStudyTag studyTag = QStudyTag.studyTag;
+        QTag tag = QTag.tag;
+
+        List<Long> studyIds = queryFactory
+                .select(study.id)
+                .distinct()
+                .from(study)
+                .leftJoin(study.studyTags, studyTag)
+                .leftJoin(studyTag.tag, tag)
+                .where(
+                        tagInCondition(searchCond.getTags())
+                        // TODO zone 조건 추가
+                )
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+        log.info("=========ids: {}", studyIds.size());
+
+        Map<Long, StudyQueryResponse> groupedResult = queryFactory
+                .from(study)
+                .leftJoin(study.studyTags, studyTag)
+                .leftJoin(studyTag.tag, tag)
+                .where(study.id.in(studyIds))
+                .transform(
+                        groupBy(study.id).as(
+                                new QStudyQueryResponse(
+                                        study.path,
+                                        study.title,
+                                        study.shortDescription,
+                                        GroupBy.list(new QTagResponse(tag.title))
+                                )
+                        )
+                );
+        log.info("=================result: {}", groupedResult.values().toString());
+
+        List<Study> studies = queryFactory
+                .select(study)
+                .from(study)
+                .leftJoin(study.studyTags, studyTag)
+                .leftJoin(studyTag.tag, tag)
+                .where(study.id.in(studyIds))
+                .fetch();
+        log.info("=========studies: {}", studies.size());
+
+        return new ArrayList<>(groupedResult.values());
+    }
+
     public List<StudyQueryResponse> searchStudies2(StudySearchCond searchCond, Pageable pageable) {
         QStudy study = QStudy.study;
         QStudyTag studyTag = QStudyTag.studyTag;

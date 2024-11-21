@@ -5,14 +5,15 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.Set;
 
 @Getter @Setter
 public class StudyTagCreateRequest {
 
-    private List<String> tags;
+    private Set<String> tags;
 
     @Builder
-    private StudyTagCreateRequest(List<String> tags) {
+    private StudyTagCreateRequest(Set<String> tags) {
         this.tags = tags;
     }
 }

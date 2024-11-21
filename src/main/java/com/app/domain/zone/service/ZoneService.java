@@ -6,6 +6,7 @@ import com.app.domain.zone.dto.ZoneResponse;
 import com.app.domain.zone.repository.ZoneRepository;
 import com.app.global.error.ErrorCode;
 import com.app.global.error.exception.InvalidZoneException;
+import com.app.global.error.exception.ZoneNotFoundException;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
@@ -74,5 +75,17 @@ public class ZoneService {
 
                 throw new InvalidZoneException();
         }
+    }
+
+    public Zone findById(Long zoneId) {
+        return zoneRepository.findById(zoneId).orElseThrow(ZoneNotFoundException::new);
+    }
+
+    public List<Zone> findAll() {
+        return zoneRepository.findAll();
+    }
+
+    public List<Zone> findByIdIn(Set<Long> zoneIds) {
+        return zoneRepository.findByIdIn(zoneIds);
     }
 }

@@ -1,6 +1,7 @@
 package com.app.domain.tag.dto;
 
 import com.app.domain.tag.Tag;
+import com.querydsl.core.annotations.QueryProjection;
 import lombok.*;
 
 import java.util.Set;
@@ -13,6 +14,7 @@ public class TagResponse {
     private String tag;
 
     @Builder
+    @QueryProjection
     public TagResponse(String tag) {
         this.tag = tag;
     }

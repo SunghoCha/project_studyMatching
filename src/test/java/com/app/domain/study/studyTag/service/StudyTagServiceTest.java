@@ -7,11 +7,9 @@ import com.app.domain.study.studyTag.dto.StudyTagCreateRequest;
 import com.app.domain.study.studyTag.dto.StudyTagCreateResponse;
 import com.app.domain.user.User;
 import com.app.domain.user.repository.UserRepository;
-import com.app.domain.user.service.UserService;
 import com.app.global.error.exception.InvalidTagException;
 import com.app.global.error.exception.UnauthorizedAccessException;
 import com.app.global.error.exception.UserNotFoundException;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +17,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
@@ -54,10 +52,10 @@ class StudyTagServiceTest {
         studyRepository.save(study);
 
         StudyTagCreateRequest request = StudyTagCreateRequest.builder()
-                .tags(List.of("Spring", "Java"))
+                .tags(Set.of("Spring", "Java"))
                 .build();
         // when
-        StudyTagCreateResponse response = studyTagService.addStudyTags(user.getId(), path, request);
+        StudyTagCreateResponse response = studyTagService.createStudyTags(user.getId(), path, request);
         // then
         assertThat(response.getTags()).hasSize(2)
                 .containsExactlyInAnyOrder("Spring", "Java");
@@ -82,11 +80,11 @@ class StudyTagServiceTest {
         studyRepository.save(study);
 
         StudyTagCreateRequest request = StudyTagCreateRequest.builder()
-                .tags(List.of("Spring2", "Java2"))
+                .tags(Set.of("Spring2", "Java2"))
                 .build();
 
         // expected
-        assertThatThrownBy(() -> studyTagService.addStudyTags(user.getId(), path, request))
+        assertThatThrownBy(() -> studyTagService.createStudyTags(user.getId(), path, request))
                 .isInstanceOf(InvalidTagException.class);
 
     }
@@ -109,11 +107,11 @@ class StudyTagServiceTest {
         studyRepository.save(study);
 
         StudyTagCreateRequest request = StudyTagCreateRequest.builder()
-                .tags(List.of("Spring", "Java"))
+                .tags(Set.of("Spring", "Java"))
                 .build();
 
         // expected
-        assertThatThrownBy(() -> studyTagService.addStudyTags(user.getId(), path, request))
+        assertThatThrownBy(() -> studyTagService.createStudyTags(user.getId(), path, request))
                 .isInstanceOf(UnauthorizedAccessException.class);
     }
 }

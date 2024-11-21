@@ -3,11 +3,16 @@ package com.app;
 import com.app.domain.study.dto.StudyCreateRequest;
 import com.app.domain.study.dto.StudyCreateResponse;
 import com.app.domain.study.service.StudyService;
+import com.app.domain.study.studyTag.dto.StudyTagCreateRequest;
+import com.app.domain.study.studyTag.service.StudyTagService;
+import com.app.domain.study.studyZone.dto.StudyZoneCreateRequest;
+import com.app.domain.study.studyZone.service.StudyZoneService;
 import com.app.domain.tag.Tag;
 import com.app.domain.tag.service.TagService;
 import com.app.domain.user.User;
 import com.app.domain.user.constant.Role;
 import com.app.domain.user.service.UserService;
+import com.app.domain.zone.Zone;
 import com.app.domain.zone.service.ZoneService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +23,8 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -30,14 +37,16 @@ public class InitDb {
     private final StudyService studyService;
     private final TagService tagService;
     private final ZoneService zoneService;
+    private final StudyZoneService studyZoneService;
+    private final StudyTagService studyTagService;
 
     @PostConstruct
     public void init() throws IOException {
         log.info("initUser 실행");
         initTags();
+        zoneService.initZoneData();
         User user = initUser();
         initStudies(user.getId());
-        zoneService.initZoneData();
     }
 
     private User initUser() {
@@ -62,11 +71,12 @@ public class InitDb {
         tagService.saveAll(tags);
     }
 
-    private void initStudies(Long id) {
+    private void initStudies(Long userId) {
         log.info("스터디 초기화 시작");
 
-        // 태그 목록
-        List<String> tags = List.of("JavaScript", "Vue.js", "React", "Node.js", "CSS", "HTML", "Spring", "Java");
+        // 태그와 Zone 데이터
+        List<Tag> tags = tagService.findAll(); // 저장된 태그 목록 가져오기
+        List<Zone> zones = zoneService.findAll(); // 저장된 Zone 목록 가져오기
 
         // 주제 템플릿
         List<String> studyTopics = List.of(
@@ -116,12 +126,57 @@ public class InitDb {
                     .build();
 
             // 스터디 생성
-            StudyCreateResponse response = studyService.createStudy(id, request);
+            StudyCreateResponse response = studyService.createStudy(userId, request);
             log.info("스터디 생성 완료: {}", response.getPath());
-        }
 
+            // 생성된 스터디에 Zone 추가
+            addZonesToStudy(userId, path, zones);
+
+            // 생성된 스터디에 Tag 추가
+            addTagsToStudy(userId, path, title, tags);
+        }
         log.info("스터디 초기화 완료");
     }
 
+    private void addZonesToStudy(Long userId, String path, List<Zone> zones) {
+        Random random = new Random();
 
+        // 랜덤으로 2~3개의 Zone 선택
+        Set<Long> zoneIds = random.ints(0, zones.size())
+                .distinct()
+                .limit(3)
+                .mapToObj(zones::get)
+                .map(Zone::getId)
+                .collect(Collectors.toSet());
+
+        StudyZoneCreateRequest request = StudyZoneCreateRequest.builder()
+                .zoneIds(zoneIds)
+                .build();
+
+        // Zone 추가
+        studyZoneService.createStudyZone(userId, path, request);
+    }
+
+    private void addTagsToStudy(Long userId, String path, String title, List<Tag> tags) {
+        Random random = new Random();
+
+        // 제목과 관련된 태그 찾기
+        Set<String> relatedTags = tags.stream()
+                .map(Tag::getTitle)
+                .filter(title::contains) // 제목에 포함된 태그 선택
+                .collect(Collectors.toSet());
+
+        // 관련 태그가 부족하면 랜덤 태그 추가
+        while (relatedTags.size() < 2) {
+            String randomTag = tags.get(random.nextInt(tags.size())).getTitle();
+            relatedTags.add(randomTag);
+        }
+
+        StudyTagCreateRequest request = StudyTagCreateRequest.builder()
+                .tags(relatedTags)
+                .build();
+
+        // Tag 추가
+        studyTagService.createStudyTags(userId, path, request);
+    }
 }

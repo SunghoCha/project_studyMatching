@@ -6,7 +6,6 @@ import com.app.domain.study.studyMember.StudyMember;
 import com.app.domain.study.studyTag.StudyTag;
 import com.app.domain.study.studyZone.StudyZone;
 import com.app.domain.user.User;
-import com.app.global.config.auth.dto.CurrentUser;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -77,8 +76,7 @@ public class Study extends BaseTimeEntity {
         this.image = image;
     }
 
-    public void addManager(User user) {
-        StudyManager manager = StudyManager.createManager(user, this);
+    public void addManager(StudyManager manager) {
         this.studyManagers.add(manager);
     }
 
@@ -97,7 +95,11 @@ public class Study extends BaseTimeEntity {
                 && !isMember(user) && !isManager(user);
     }
 
-    public void setStudyTags(Set<StudyTag> studyTags) {
+    public void addStudyTags(Set<StudyTag> studyTags) {
         this.studyTags.addAll(studyTags);
+    }
+
+    public void addStudyZones(Set<StudyZone> studyZones) {
+        this.studyZones.addAll(studyZones);
     }
 }

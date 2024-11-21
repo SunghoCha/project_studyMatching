@@ -1,7 +1,9 @@
 package com.app.domain.study.controller;
 
+import com.app.domain.common.dto.PagedResponse;
 import com.app.domain.study.dto.StudyCreateRequest;
 import com.app.domain.study.dto.StudyCreateResponse;
+import com.app.domain.study.dto.StudyQueryResponse;
 import com.app.domain.study.dto.StudyResponse;
 import com.app.domain.study.service.StudyService;
 import com.app.global.config.auth.LoginUser;
@@ -34,12 +36,11 @@ public class StudyController {
         StudyResponse response = studyService.getStudy(currentUser.getId(), path);
 
         return ResponseEntity.ok(response);
-
     }
 
     @GetMapping("/list")
-    public ResponseEntity<List<StudyResponse>> getStudies(Pageable pageable) {
-        List<StudyResponse> response = studyService.getStudies(pageable);
+    public ResponseEntity<PagedResponse<StudyQueryResponse>> getStudies(Pageable pageable) {
+        PagedResponse<StudyQueryResponse> response = studyService.getStudies(pageable);
         log.info("response: {}", response);
 
         return ResponseEntity.ok(response);
