@@ -2,6 +2,7 @@ package com.app.api.login.test;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -45,7 +46,6 @@ public class LoginTestController {
         }
         return null;
     }
-
 
     @ResponseBody
     @GetMapping("/authenticated")

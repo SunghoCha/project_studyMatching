@@ -1,9 +1,6 @@
 package com.app.domain.study.studyZone.controller;
 
-import com.app.domain.study.studyZone.dto.StudyZoneCreateRequest;
-import com.app.domain.study.studyZone.dto.StudyZoneCreateResponse;
-import com.app.domain.study.studyZone.dto.StudyZoneResponse;
-import com.app.domain.study.studyZone.dto.StudyZoneUpdateRequest;
+import com.app.domain.study.studyZone.dto.*;
 import com.app.domain.study.studyZone.service.StudyZoneService;
 import com.app.global.config.auth.LoginUser;
 import com.app.global.config.auth.dto.CurrentUser;
@@ -13,18 +10,19 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/study-zone")
+@RequestMapping("/study-zone/{path}")
 public class StudyZoneController {
 
     private final StudyZoneService studyZoneService;
 
-    @GetMapping("/{path}")
-    public StudyZoneResponse getStudyZones() {
+    @GetMapping
+    public ResponseEntity<StudyZoneResponse> getStudyZones(@PathVariable("path") String path) {
+        StudyZoneResponse response = studyZoneService.getStudyZones(path);
 
-        return null;
+        return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/{path}")
+    @PostMapping
     public ResponseEntity<StudyZoneCreateResponse> createStudyZones(@LoginUser CurrentUser currentUser,
                                                                     @PathVariable("path") String path,
                                                                     @RequestBody StudyZoneCreateRequest request) {
@@ -33,18 +31,21 @@ public class StudyZoneController {
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/{path}")
-    public StudyZoneResponse updateStudyZones(@LoginUser CurrentUser currentUser,
+    @PatchMapping
+    public ResponseEntity<StudyZoneUpdateResponse> updateStudyZones(@LoginUser CurrentUser currentUser,
                                             @PathVariable("path") String path,
                                             @RequestBody StudyZoneUpdateRequest request) {
-        studyZoneService.updateStudyZone(currentUser.getId(), path, request);
+        StudyZoneUpdateResponse response = studyZoneService.updateStudyZone(currentUser.getId(), path, request);
 
-        return null;
+        return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/{path}")
-    public StudyZoneResponse deleteStudyZones() {
+    @DeleteMapping
+    public ResponseEntity<StudyZoneDeleteResponse> deleteStudyZones(@LoginUser CurrentUser currentUser,
+                                                              @PathVariable("path") String path,
+                                                              @RequestBody StudyZoneDeleteRequest request) {
+        StudyZoneDeleteResponse response = studyZoneService.deleteStudyZone(currentUser.getId(), path, request);
 
-        return null;
+        return ResponseEntity.ok(response);
     }
 }

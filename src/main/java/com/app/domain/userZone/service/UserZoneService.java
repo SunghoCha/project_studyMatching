@@ -28,43 +28,29 @@ public class UserZoneService {
     private final ZoneService zoneService;
     private final ZoneRepository zoneRepository;
 
-    public Set<UserZoneResponse> getUserZones(Long userId) {
-        return userZoneRepository.findAllByUserId(userId).stream()
-                .map(UserZoneResponse::of)
-                .collect(Collectors.toSet());
+    public UserZoneResponse getUserZones(Long userId) {
+        Set<UserZone> userZones = userZoneRepository.findAllByUserId(userId);
+
+        return UserZoneResponse.of(userZones);
     }
 
-    public Set<UserZoneUpdateResponse> updateUserZones(Long userId, Set<UserZoneUpdateRequest> request) {
+    public UserZoneUpdateResponse updateUserZones(Long userId, UserZoneUpdateRequest request) {
         User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
 
-        zoneService.validate(request);
-
-        Set<UserZone> userZones = request.stream()
-                .map(zoneRequest -> {
-                    Zone savedZone = zoneRepository.findByCityAndLocalNameAndProvince(
-                                    zoneRequest.getCity(),
-                                    zoneRequest.getLocalName(),
-                                    zoneRequest.getProvince())
-                            .orElseGet(() -> zoneRepository.save(Zone.builder()
-                                    .city(zoneRequest.getCity())
-                                    .localName(zoneRequest.getLocalName())
-                                    .province(zoneRequest.getProvince())
-                                    .build())
-                            );
-
+        Set<UserZone> userZones = request.getZoneIds().stream()
+                .map(zoneId -> {
+                    Zone zone = zoneService.findById(zoneId);
                     return UserZone.builder()
                             .user(user)
-                            .zone(savedZone)
+                            .zone(zone)
                             .build();
                 })
                 .collect(Collectors.toSet());
 
         userZoneRepository.deleteAllByUserId(userId);
-        user.setUserZones(userZones);
         userZoneRepository.saveAll(userZones);
+        user.setUserZones(userZones);
 
-        return userZones.stream()
-                .map(UserZoneUpdateResponse::of)
-                .collect(Collectors.toSet());
+        return UserZoneUpdateResponse.of(userZones);
     }
 }

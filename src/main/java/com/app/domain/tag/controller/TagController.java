@@ -25,6 +25,9 @@ public class TagController {
         List<TagResponse> tagResponses = tags.stream()
                 .map(TagResponse::of)
                 .toList();
+        for (TagResponse tagResponse : tagResponses) {
+            System.out.println("tagResponse.getTag(). = " + tagResponse.getTag());
+        }
 
         return ResponseEntity.ok(tagResponses);
     }

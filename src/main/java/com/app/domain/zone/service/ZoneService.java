@@ -33,6 +33,10 @@ public class ZoneService {
     private final ZoneRepository zoneRepository;
 
 
+    public Zone findByCityAndLocalNameAndProvince(String city, String localName, String province) {
+        return zoneRepository.findByCityAndLocalNameAndProvince(city, localName, province).orElseThrow(ZoneNotFoundException::new);
+    }
+
     public void initZoneData() throws IOException {
         if (zoneRepository.count() == 0) {
             Resource resource = new ClassPathResource("zones_kr.csv");
@@ -56,26 +60,26 @@ public class ZoneService {
                 .collect(Collectors.toSet());
     }
 
-    public void validate(Set<UserZoneUpdateRequest> zoneRequests) {
-        Set<Long> idList = zoneRequests.stream()
-                .map(UserZoneUpdateRequest::getId)
-                .collect(Collectors.toSet());
-
-        List<Zone> findZones = zoneRepository.findAllById(idList);
-        Map<Long, Zone> zoneMap = findZones.stream()
-                .collect(Collectors.toMap(Zone::getId, Function.identity()));
-
-        for (UserZoneUpdateRequest userZone : zoneRequests) {
-
-            Zone matchingZone = zoneMap.get(userZone.getId());
-            if (matchingZone == null
-                    || !matchingZone.getCity().equals(userZone.getCity())
-                    || !matchingZone.getLocalName().equals(userZone.getLocalName())
-                    || !matchingZone.getProvince().equals(userZone.getProvince()))
-
-                throw new InvalidZoneException();
-        }
-    }
+//    public void validate(Set<UserZoneUpdateRequest> zoneRequests) {
+//        Set<Long> idList = zoneRequests.stream()
+//                .map(UserZoneUpdateRequest::getId)
+//                .collect(Collectors.toSet());
+//
+//        List<Zone> findZones = zoneRepository.findAllById(idList);
+//        Map<Long, Zone> zoneMap = findZones.stream()
+//                .collect(Collectors.toMap(Zone::getId, Function.identity()));
+//
+//        for (UserZoneUpdateRequest userZone : zoneRequests) {
+//
+//            Zone matchingZone = zoneMap.get(userZone.getId());
+//            if (matchingZone == null
+//                    || !matchingZone.getCity().equals(userZone.getCity())
+//                    || !matchingZone.getLocalName().equals(userZone.getLocalName())
+//                    || !matchingZone.getProvince().equals(userZone.getProvince()))
+//
+//                throw new InvalidZoneException();
+//        }
+//    }
 
     public Zone findById(Long zoneId) {
         return zoneRepository.findById(zoneId).orElseThrow(ZoneNotFoundException::new);

@@ -1,30 +1,32 @@
 package com.app.domain.userZone.dto;
 
+import com.app.domain.study.studyZone.StudyZone;
+import com.app.domain.study.studyZone.dto.StudyZoneCreateResponse;
 import com.app.domain.userZone.UserZone;
 import lombok.*;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @Getter @Setter
-@EqualsAndHashCode(of = {"city", "localName", "province"})
 @NoArgsConstructor
 public class UserZoneUpdateResponse {
 
-    private String city;
-    private String localName;
-    private String province;
+    private Set<Long> zoneIds;
 
     @Builder
-    public UserZoneUpdateResponse(String city, String localName, String province) {
-        this.city = city;
-        this.localName = localName;
-        this.province = province;
+    public UserZoneUpdateResponse(Set<Long> zoneIds) {
+        this.zoneIds = zoneIds;
     }
 
-    public static UserZoneUpdateResponse of(UserZone userZone) {
-        // TODO 쿼리 최적화
+    public static UserZoneUpdateResponse of(Set<UserZone> userZones) {
+        Set<Long> zoneIds = userZones.stream()
+                .map(userZone -> userZone.getZone().getId())
+                .collect(Collectors.toSet());
+
         return UserZoneUpdateResponse.builder()
-                .city(userZone.getZone().getCity())
-                .localName(userZone.getZone().getLocalName())
-                .province(userZone.getZone().getProvince())
+                .zoneIds(zoneIds)
                 .build();
     }
+
 }

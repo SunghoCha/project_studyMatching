@@ -35,9 +35,9 @@ class StudyControllerTest {
         // given
         StudyCreateRequest request = StudyCreateRequest.builder()
                 .path("test1")
-                .title("테스트 스터디")
-                .shortDescription("짧은 글 설명")
-                .fullDescription("긴 글 설명")
+                .title("테스트 스터디1")
+                .shortDescription("짧은 글 설명1")
+                .fullDescription("긴 글 설명1")
                 .build();
 
         String json = objectMapper.writeValueAsString(request);

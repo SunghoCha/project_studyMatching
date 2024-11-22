@@ -102,4 +102,8 @@ public class Study extends BaseTimeEntity {
     public void addStudyZones(Set<StudyZone> studyZones) {
         this.studyZones.addAll(studyZones);
     }
+
+    public void removeStudyZones(Set<StudyZone> studyZones) {
+        this.studyZones.removeAll(studyZones);
+    }
 }

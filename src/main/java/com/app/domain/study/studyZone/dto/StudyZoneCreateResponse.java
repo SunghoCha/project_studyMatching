@@ -19,12 +19,12 @@ public class StudyZoneCreateResponse {
     }
 
     public static StudyZoneCreateResponse of(Set<StudyZone> studyZones) {
-        Set<Long> zoneIds = studyZones.stream()
+        Set<Long> studyZoneIds = studyZones.stream()
                 .map(studyZone -> studyZone.getZone().getId())
                 .collect(Collectors.toSet());
 
         return StudyZoneCreateResponse.builder()
-                .zoneIds(zoneIds)
+                .zoneIds(studyZoneIds)
                 .build();
     }
 }

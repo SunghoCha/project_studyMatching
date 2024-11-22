@@ -1,5 +1,6 @@
 package com.app.domain.userZone.dto;
 
+import com.app.domain.study.studyZone.dto.StudyZoneCreateResponse;
 import com.app.domain.userZone.UserZone;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,21 +12,21 @@ import java.util.stream.Collectors;
 
 @Getter @Setter
 @NoArgsConstructor
-public class UserZoneResponse {
+public class UserZoneCreateResponse {
 
     private Set<Long> zoneIds;
 
     @Builder
-    public UserZoneResponse(Set<Long> zoneIds) {
+    public UserZoneCreateResponse(Set<Long> zoneIds) {
         this.zoneIds = zoneIds;
     }
 
-    public static UserZoneResponse of(Set<UserZone> userZones) {
+    public static UserZoneCreateResponse of(Set<UserZone> userZones) {
         Set<Long> zoneIds = userZones.stream()
                 .map(userZone -> userZone.getZone().getId())
                 .collect(Collectors.toSet());
 
-        return UserZoneResponse.builder()
+        return UserZoneCreateResponse.builder()
                 .zoneIds(zoneIds)
                 .build();
     }

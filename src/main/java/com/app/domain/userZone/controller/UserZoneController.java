@@ -4,6 +4,8 @@ import com.app.domain.userZone.dto.UserZoneResponse;
 import com.app.domain.userZone.dto.UserZoneUpdateRequest;
 import com.app.domain.userZone.dto.UserZoneUpdateResponse;
 import com.app.domain.userZone.service.UserZoneService;
+import com.app.global.config.auth.LoginUser;
+import com.app.global.config.auth.dto.CurrentUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,18 +19,17 @@ public class UserZoneController {
 
     private final UserZoneService userZoneService;
 
-
-    @GetMapping("/{userId}")
-    public ResponseEntity<Set<UserZoneResponse>> getUserZones(@PathVariable(name = "userId") Long userId) {
-       Set<UserZoneResponse> userZones = userZoneService.getUserZones(userId);
+    @GetMapping
+    public ResponseEntity<UserZoneResponse> getUserZones(@LoginUser CurrentUser currentUser) {
+        UserZoneResponse userZones = userZoneService.getUserZones(currentUser.getId());
 
         return ResponseEntity.ok(userZones);
     }
 
-    @PatchMapping("/{userId}")
-    public ResponseEntity<Set<UserZoneUpdateResponse>> editUserZones(@PathVariable(name = "userId") Long userId,
-                                                                              @RequestBody Set<UserZoneUpdateRequest> request) {
-        Set<UserZoneUpdateResponse> response = userZoneService.updateUserZones(userId, request);
+    @PatchMapping
+    public ResponseEntity<UserZoneUpdateResponse> editUserZones(@LoginUser CurrentUser currentUser,
+                                                                @RequestBody UserZoneUpdateRequest request) {
+        UserZoneUpdateResponse response = userZoneService.updateUserZones(currentUser.getId(), request);
 
         return ResponseEntity.ok(response);
     }

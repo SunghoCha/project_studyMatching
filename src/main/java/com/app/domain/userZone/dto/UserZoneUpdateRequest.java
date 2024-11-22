@@ -2,22 +2,17 @@ package com.app.domain.userZone.dto;
 
 import lombok.*;
 
+import java.util.List;
 import java.util.Set;
 
 @Getter @Setter
 @NoArgsConstructor
 public class UserZoneUpdateRequest {
 
-    private Long id;
-    private String city;
-    private String localName;
-    private String province;
+    private Set<Long> zoneIds;
 
     @Builder
-    public UserZoneUpdateRequest(Long id, String city, String localName, String province) {
-        this.id = id;
-        this.city = city;
-        this.localName = localName;
-        this.province = province;
+    public UserZoneUpdateRequest(Set<Long> zoneIds) {
+        this.zoneIds = zoneIds;
     }
 }

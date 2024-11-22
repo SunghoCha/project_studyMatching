@@ -4,15 +4,15 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
+import java.util.Set;
 
 @Getter @Setter
 public class StudyZoneUpdateRequest {
 
-    List<Long> zoneIds;
+    private Set<Long> zoneIds;
 
     @Builder
-    public StudyZoneUpdateRequest(List<Long> zoneIds) {
+    public StudyZoneUpdateRequest(Set<Long> zoneIds) {
         this.zoneIds = zoneIds;
     }
 }

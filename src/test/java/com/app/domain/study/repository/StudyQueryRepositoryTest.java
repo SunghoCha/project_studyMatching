@@ -177,17 +177,17 @@ class StudyQueryRepositoryTest {
         // then
     }
 
-    @Test
-    @DisplayName("")
-    void test3() {
-        // given
-        // TODO 미완성 로직
-        PageRequest pageRequest = PageRequest.of(1, 10);
-
-        List<Study> allStudies = queryRepository.findAllStudies(pageRequest);
-        // when
-
-        // then
-    }
+//    @Test
+//    @DisplayName("")
+//    void test3() {
+//        // given
+//        // TODO 미완성 로직
+//        PageRequest pageRequest = PageRequest.of(1, 10);
+//
+//        List<Study> allStudies = queryRepository.findAllStudies(pageRequest);
+//        // when
+//
+//        // then
+//    }
 
 }

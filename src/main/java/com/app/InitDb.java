@@ -154,6 +154,7 @@ public class InitDb {
                 .build();
 
         // Zone 추가
+        System.out.println(" ========================== init ========================");
         studyZoneService.createStudyZone(userId, path, request);
     }
 

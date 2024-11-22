@@ -7,12 +7,12 @@ import lombok.Setter;
 import java.util.Set;
 
 @Getter @Setter
-public class StudyZoneCreateRequest {
+public class StudyZoneDeleteRequest {
 
-    Set<Long> zoneIds;
+    private Set<Long> zoneIds;
 
     @Builder
-    public StudyZoneCreateRequest(Set<Long> zoneIds) {
+    public StudyZoneDeleteRequest(Set<Long> zoneIds) {
         this.zoneIds = zoneIds;
     }
 }

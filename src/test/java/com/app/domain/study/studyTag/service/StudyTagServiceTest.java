@@ -3,6 +3,8 @@ package com.app.domain.study.studyTag.service;
 import com.app.WithAccount;
 import com.app.domain.study.Study;
 import com.app.domain.study.repository.StudyRepository;
+import com.app.domain.study.studyManager.StudyManager;
+import com.app.domain.study.studyManager.repository.StudyManagerRepository;
 import com.app.domain.study.studyTag.dto.StudyTagCreateRequest;
 import com.app.domain.study.studyTag.dto.StudyTagCreateResponse;
 import com.app.domain.user.User;
@@ -34,6 +36,9 @@ class StudyTagServiceTest {
     @Autowired
     StudyRepository studyRepository;
 
+    @Autowired
+    StudyManagerRepository studyManagerRepository;
+
     @Test
     @WithAccount
     @DisplayName("StudyTag 추가 성공 테스트")
@@ -48,7 +53,9 @@ class StudyTagServiceTest {
                 .shortDescription("short1")
                 .fullDescription("full1")
                 .build();
-        study.addManager(user);
+        StudyManager manager = StudyManager.createManager(user, study);
+        studyManagerRepository.save(manager);
+        study.addManager(manager);
         studyRepository.save(study);
 
         StudyTagCreateRequest request = StudyTagCreateRequest.builder()
@@ -76,7 +83,9 @@ class StudyTagServiceTest {
                 .shortDescription("short1")
                 .fullDescription("full1")
                 .build();
-        study.addManager(user);
+        StudyManager manager = StudyManager.createManager(user, study);
+        studyManagerRepository.save(manager);
+        study.addManager(manager);
         studyRepository.save(study);
 
         StudyTagCreateRequest request = StudyTagCreateRequest.builder()

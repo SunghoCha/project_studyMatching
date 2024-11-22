@@ -7,7 +7,7 @@ import lombok.*;
 
 @Entity
 @Getter
-@EqualsAndHashCode(of = "id")
+@EqualsAndHashCode(of = {"study", "zone"})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class StudyZone {
 

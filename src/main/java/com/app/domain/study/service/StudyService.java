@@ -11,13 +11,10 @@ import com.app.domain.study.repository.StudyRepository;
 import com.app.domain.study.studyManager.StudyManager;
 import com.app.domain.study.studyManager.repository.StudyManagerRepository;
 import com.app.domain.user.User;
-import com.app.domain.user.repository.UserRepository;
 import com.app.domain.user.service.UserService;
-import com.app.global.config.auth.dto.CurrentUser;
 import com.app.global.error.exception.StudyNotFoundException;
 import com.app.global.error.exception.StudyPathAlreadyExistException;
 import com.app.global.error.exception.UnauthorizedAccessException;
-import com.app.global.error.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -25,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional

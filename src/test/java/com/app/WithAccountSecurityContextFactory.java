@@ -2,21 +2,20 @@ package com.app;
 
 
 import com.app.domain.user.User;
-import com.app.domain.user.constant.Role;
-import com.app.domain.user.repository.UserRepository;
 import com.app.domain.user.service.UserService;
 import com.app.global.config.auth.dto.OAuthAttributes;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.test.context.support.WithSecurityContextFactory;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 public class WithAccountSecurityContextFactory implements WithSecurityContextFactory<WithAccount> {

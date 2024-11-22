@@ -4,19 +4,15 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Set;
+
 @Getter @Setter
 public class StudyZoneRequest {
 
-    private Long id;
-    private String city;
-    private String localName;
-    private String province;
+    private Set<Long> zoneIds;
 
     @Builder
-    public StudyZoneRequest(Long id, String city, String localName, String province) {
-        this.id = id;
-        this.city = city;
-        this.localName = localName;
-        this.province = province;
+    public StudyZoneRequest(Set<Long> zoneIds) {
+        this.zoneIds = zoneIds;
     }
 }
