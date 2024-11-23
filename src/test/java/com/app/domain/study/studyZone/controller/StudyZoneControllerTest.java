@@ -20,6 +20,7 @@ import com.app.global.error.exception.UserNotFoundException;
 import com.app.global.error.exception.ZoneNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.List;
@@ -39,6 +41,7 @@ import java.util.stream.Collectors;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@Transactional
 class StudyZoneControllerTest {
 
     @Autowired

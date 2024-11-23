@@ -43,7 +43,7 @@ public class InitDb {
     @PostConstruct
     public void init() throws IOException {
         log.info("initUser 실행");
-        initTags();
+        tagService.initTagData();
         zoneService.initZoneData();
         User user = initUser();
         initStudies(user.getId());
@@ -59,17 +59,17 @@ public class InitDb {
         return userService.save(user);
     }
 
-    private void initTags() {
-        List<Tag> tags = List.of(new Tag("JavaScript"),
-                new Tag("Vue.js"),
-                new Tag("React"),
-                new Tag("Node.js"),
-                new Tag("CSS"),
-                new Tag("HTML"),
-                new Tag("Spring"),
-                new Tag("Java"));
-        tagService.saveAll(tags);
-    }
+//    private void initTags() {
+//        List<Tag> tags = List.of(new Tag("JavaScript"),
+//                new Tag("Vue.js"),
+//                new Tag("React"),
+//                new Tag("Node.js"),
+//                new Tag("CSS"),
+//                new Tag("HTML"),
+//                new Tag("Spring"),
+//                new Tag("Java"));
+//        tagService.saveAll(tags);
+//    }
 
     private void initStudies(Long userId) {
         log.info("스터디 초기화 시작");

@@ -5,6 +5,7 @@ import com.app.domain.tag.dto.TagResponse;
 import com.app.domain.user.User;
 import com.app.domain.user.dto.UserResponse;
 import com.app.domain.zone.dto.ZoneResponse;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,8 +26,14 @@ public class StudyResponse {
     private List<ZoneResponse> zones;
     private List<UserResponse> members;
     private List<UserResponse> managers;
+
+    @JsonProperty("isJoinable")
     private boolean isJoinable;
+
+    @JsonProperty("isMember")
     private boolean isMember;
+
+    @JsonProperty("isManager")
     private boolean isManager;
 
     @Builder
@@ -68,6 +75,9 @@ public class StudyResponse {
                         .toList())
                 .members(study.getStudyMembers().stream()
                         .map(studyMember -> UserResponse.of(studyMember.getUser()))
+                        .toList())
+                .managers(study.getStudyManagers().stream()
+                        .map(studyManager -> UserResponse.of(studyManager.getUser()))
                         .toList())
                 .isJoinable(study.isJoinable(user))
                 .isMember(study.isMember(user))

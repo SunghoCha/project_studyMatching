@@ -47,8 +47,6 @@ class UserTagControllerTest {
         tagRepository.save(new Tag("VUE"));
     }
 
-
-
     @Test
     @WithAccount()
     @DisplayName("제대로 된 수정 태그로 요청 보내면 수정 후 태그 set 반환")

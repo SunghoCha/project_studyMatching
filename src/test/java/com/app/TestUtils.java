@@ -16,15 +16,6 @@ public class TestUtils {
         return zones;
     }
 
-    public static List<Zone> createZonesByRange(int from, int to) {
-        List<Zone> zones = new ArrayList<>();
-        for (int i = from; i <= to; i++ ) {
-            Zone zone = createZone("city" + i, "local" + i, "province" + i);
-            zones.add(zone);
-        }
-        return zones;
-    }
-
     private static Zone createZone(String city, String localName, String province) {
         return Zone.builder()
                 .city(city)
@@ -32,4 +23,6 @@ public class TestUtils {
                 .province(province)
                 .build();
     }
+
+
 }

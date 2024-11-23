@@ -27,10 +27,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-@ActiveProfiles("test")
 @SpringBootTest
 @Transactional
-@Rollback(value = false)
 class StudyQueryRepositoryTest {
 
     @Autowired

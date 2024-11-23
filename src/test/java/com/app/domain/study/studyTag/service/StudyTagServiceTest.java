@@ -7,11 +7,14 @@ import com.app.domain.study.studyManager.StudyManager;
 import com.app.domain.study.studyManager.repository.StudyManagerRepository;
 import com.app.domain.study.studyTag.dto.StudyTagCreateRequest;
 import com.app.domain.study.studyTag.dto.StudyTagCreateResponse;
+import com.app.domain.tag.service.TagService;
 import com.app.domain.user.User;
 import com.app.domain.user.repository.UserRepository;
 import com.app.global.error.exception.InvalidTagException;
 import com.app.global.error.exception.UnauthorizedAccessException;
 import com.app.global.error.exception.UserNotFoundException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +31,9 @@ import static org.assertj.core.api.Assertions.*;
 class StudyTagServiceTest {
 
     @Autowired
+    TagService tagService;
+
+    @Autowired
     StudyTagService studyTagService;
 
     @Autowired
@@ -38,6 +44,11 @@ class StudyTagServiceTest {
 
     @Autowired
     StudyManagerRepository studyManagerRepository;
+
+    @BeforeEach
+    void setup() {
+        tagService.initTagData();
+    }
 
     @Test
     @WithAccount

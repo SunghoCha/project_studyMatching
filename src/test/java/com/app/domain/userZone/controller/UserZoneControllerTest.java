@@ -22,6 +22,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -34,6 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@Transactional
 class UserZoneControllerTest {
 
     @Autowired

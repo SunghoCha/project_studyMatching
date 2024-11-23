@@ -22,6 +22,18 @@ public class TagService {
     private final TagRepository tagRepository;
     private final UserRepository userRepository;
 
+    public void initTagData() {
+        List<Tag> tags = List.of(new Tag("JavaScript"),
+                new Tag("Vue.js"),
+                new Tag("React"),
+                new Tag("Node.js"),
+                new Tag("CSS"),
+                new Tag("HTML"),
+                new Tag("Spring"),
+                new Tag("Java"));
+        tagRepository.saveAll(tags);
+    }
+
     public void updateTags(Long userId, TagRequest request) {
         User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
     }

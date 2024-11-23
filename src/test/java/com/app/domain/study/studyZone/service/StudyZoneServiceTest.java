@@ -60,6 +60,7 @@ class StudyZoneServiceTest {
                 .shortDescription("짧은 글 설명1")
                 .fullDescription("긴 글 설명1")
                 .build();
+
         StudyManager manager = StudyManager.createManager(user, study);
         studyManagerRepository.save(manager);
         study.addManager(manager);
