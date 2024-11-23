@@ -11,20 +11,20 @@ import java.util.stream.Collectors;
 @Getter @Setter
 public class StudyZoneDeleteResponse {
 
-    private Set<Long> studyZoneIds;
+    private Set<Long> zoneIds;
 
     @Builder
-    public StudyZoneDeleteResponse(Set<Long> studyZoneIds) {
-        this.studyZoneIds = studyZoneIds;
+    public StudyZoneDeleteResponse(Set<Long> zoneIds) {
+        this.zoneIds = zoneIds;
     }
 
     public static StudyZoneDeleteResponse of(Set<StudyZone> studyZones) {
-        Set<Long> studyZoneIds = studyZones.stream()
+        Set<Long> zoneIds = studyZones.stream()
                 .map(studyZone -> studyZone.getZone().getId())
                 .collect(Collectors.toSet());
 
         return StudyZoneDeleteResponse.builder()
-                .studyZoneIds(studyZoneIds)
+                .zoneIds(zoneIds)
                 .build();
     }
 }

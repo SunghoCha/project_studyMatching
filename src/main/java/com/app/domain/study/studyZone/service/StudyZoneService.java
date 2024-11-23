@@ -68,7 +68,7 @@ public class StudyZoneService {
     }
 
     public StudyZoneDeleteResponse deleteStudyZone(Long id, String path, StudyZoneDeleteRequest request) {
-        Study study = studyService.findByPath(path);
+        Study study = studyService.findAuthorizedStudy(id, path);
         List<StudyZone> studyZones = studyZoneRepository.findByStudyAndZoneIds(study.getId(), request.getZoneIds());
         HashSet<StudyZone> zoneHashSet = new HashSet<>(studyZones);
 

@@ -1,9 +1,8 @@
 package com.app.domain.study.studyZone.service;
 
+import com.app.TestUtils;
 import com.app.WithAccount;
-import com.app.domain.AbstractSettingTest;
 import com.app.domain.study.Study;
-import com.app.domain.study.dto.StudyCreateRequest;
 import com.app.domain.study.repository.StudyRepository;
 import com.app.domain.study.studyManager.StudyManager;
 import com.app.domain.study.studyManager.repository.StudyManagerRepository;
@@ -15,12 +14,10 @@ import com.app.domain.zone.Zone;
 import com.app.domain.zone.repository.ZoneRepository;
 import com.app.global.error.exception.UserNotFoundException;
 import com.app.global.error.exception.ZoneNotFoundException;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -29,11 +26,10 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
-class StudyZoneServiceTest extends AbstractSettingTest {
+class StudyZoneServiceTest {
 
     @Autowired
     UserRepository userRepository;
@@ -70,7 +66,7 @@ class StudyZoneServiceTest extends AbstractSettingTest {
         Study savedStudy = studyRepository.save(study);
 
         // zone 세팅
-        List<Zone> zones = createZones(10);
+        List<Zone> zones = TestUtils.createZones(10);
         Set<Long> zoneIds = zoneRepository.saveAll(zones).stream()
                 .map(Zone::getId)
                 .collect(Collectors.toSet());
@@ -106,7 +102,7 @@ class StudyZoneServiceTest extends AbstractSettingTest {
         Study savedStudy = studyRepository.save(study);
 
         // zone 세팅
-        List<Zone> zones = createZones(10);
+        List<Zone> zones = TestUtils.createZones(10);
         Set<Long> zoneIds = zoneRepository.saveAll(zones).stream()
                 .map(Zone::getId)
                 .collect(Collectors.toSet());

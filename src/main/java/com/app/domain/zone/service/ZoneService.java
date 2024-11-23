@@ -32,7 +32,6 @@ public class ZoneService {
 
     private final ZoneRepository zoneRepository;
 
-
     public Zone findByCityAndLocalNameAndProvince(String city, String localName, String province) {
         return zoneRepository.findByCityAndLocalNameAndProvince(city, localName, province).orElseThrow(ZoneNotFoundException::new);
     }

@@ -4,7 +4,6 @@ import com.app.domain.user.User;
 import com.app.domain.user.service.UserService;
 import com.app.global.config.auth.dto.OAuthAttributes;
 import com.app.global.config.auth.dto.CurrentUser;
-import com.app.global.error.JsonSerializationException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpSession;
@@ -56,13 +55,4 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
                 attributes.getNameAttributeKey());
     }
 
-    private String convertToJson(CurrentUser currentUser) {
-        String userJson;
-        try {
-            userJson = objectMapper.writeValueAsString(currentUser);
-        } catch (JsonProcessingException e) {
-            throw new JsonSerializationException("JSON 직렬화 실패");
-        }
-        return userJson;
-    }
 }

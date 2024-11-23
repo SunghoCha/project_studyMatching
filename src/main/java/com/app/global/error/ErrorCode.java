@@ -22,7 +22,7 @@ public enum ErrorCode {
 
     // Zone
     ZONE_NOT_EXISTS(HttpStatus.BAD_REQUEST, "Z-001", "해당 지역은 존재하지 않습니다."),
-    INVALID_ZONE(HttpStatus.BAD_REQUEST, "T-002", "잘못된 지역명 입니다."),
+    INVALID_ZONE(HttpStatus.BAD_REQUEST, "Z-002", "잘못된 지역명 입니다."),
 
     // Study
     STUDY_PATH_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "S-001", "이미 존재하는 스터디경로입니다."),

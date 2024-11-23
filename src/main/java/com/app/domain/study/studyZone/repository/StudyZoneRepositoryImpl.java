@@ -2,6 +2,8 @@ package com.app.domain.study.studyZone.repository;
 
 import com.app.domain.study.studyZone.QStudyZone;
 import com.app.domain.study.studyZone.StudyZone;
+import com.app.global.error.exception.InvalidZoneException;
+import com.app.global.error.exception.ZoneNotFoundException;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -20,7 +22,7 @@ public class StudyZoneRepositoryImpl implements StudyZoneRepositoryCustom {
     public List<StudyZone> findByStudyAndZoneIds(Long studyId, Set<Long> zoneIds) {
         QStudyZone studyZone = QStudyZone.studyZone;
 
-        return queryFactory
+        List<StudyZone> studyZones = queryFactory
                 .select(studyZone)
                 .from(studyZone)
                 .where(
@@ -28,6 +30,12 @@ public class StudyZoneRepositoryImpl implements StudyZoneRepositoryCustom {
                         studyZone.zone.id.in(zoneIds)
                 )
                 .fetch();
+
+        if (studyZones.size() != zoneIds.size()) {
+            throw new ZoneNotFoundException();
+        }
+
+        return studyZones;
     }
 
     @Override
