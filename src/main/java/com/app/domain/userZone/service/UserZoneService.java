@@ -15,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -29,7 +31,7 @@ public class UserZoneService {
     private final ZoneRepository zoneRepository;
 
     public UserZoneResponse getUserZones(Long userId) {
-        Set<UserZone> userZones = userZoneRepository.findAllByUserId(userId);
+        List<UserZone> userZones = userZoneRepository.findAllByUserId(userId);
 
         return UserZoneResponse.of(userZones);
     }
@@ -37,7 +39,7 @@ public class UserZoneService {
     public UserZoneUpdateResponse updateUserZones(Long userId, UserZoneUpdateRequest request) {
         User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
 
-        Set<UserZone> userZones = request.getZoneIds().stream()
+        List<UserZone> userZones = request.getZoneIds().stream()
                 .map(zoneId -> {
                     Zone zone = zoneService.findById(zoneId);
                     return UserZone.builder()
@@ -45,11 +47,11 @@ public class UserZoneService {
                             .zone(zone)
                             .build();
                 })
-                .collect(Collectors.toSet());
+                .toList();
 
         userZoneRepository.deleteAllByUserId(userId);
         userZoneRepository.saveAll(userZones);
-        user.setUserZones(userZones);
+        user.setUserZones(new HashSet<>(userZones));
 
         return UserZoneUpdateResponse.of(userZones);
     }

@@ -5,23 +5,24 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Getter @Setter
 public class StudyZoneDeleteResponse {
 
-    private Set<Long> zoneIds;
+    private List<Long> zoneIds;
 
     @Builder
-    public StudyZoneDeleteResponse(Set<Long> zoneIds) {
+    public StudyZoneDeleteResponse(List<Long> zoneIds) {
         this.zoneIds = zoneIds;
     }
 
-    public static StudyZoneDeleteResponse of(Set<StudyZone> studyZones) {
-        Set<Long> zoneIds = studyZones.stream()
+    public static StudyZoneDeleteResponse of(List<StudyZone> studyZones) {
+        List<Long> zoneIds = studyZones.stream()
                 .map(studyZone -> studyZone.getZone().getId())
-                .collect(Collectors.toSet());
+                .toList();
 
         return StudyZoneDeleteResponse.builder()
                 .zoneIds(zoneIds)

@@ -1,10 +1,7 @@
 package com.app.domain.study.controller;
 
 import com.app.domain.common.dto.PagedResponse;
-import com.app.domain.study.dto.StudyCreateRequest;
-import com.app.domain.study.dto.StudyCreateResponse;
-import com.app.domain.study.dto.StudyQueryResponse;
-import com.app.domain.study.dto.StudyResponse;
+import com.app.domain.study.dto.*;
 import com.app.domain.study.service.StudyService;
 import com.app.global.config.auth.LoginUser;
 import com.app.global.config.auth.dto.CurrentUser;
@@ -45,5 +42,14 @@ public class StudyController {
         log.info("response: {}", response);
 
         return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{path}")
+    public ResponseEntity<StudyUpdateResponse> updateStudy(@LoginUser CurrentUser currentUser,
+                                                           @PathVariable("path") String path,
+                                                           @RequestBody StudyUpdateRequest request) {
+
+        StudyUpdateResponse response = studyService.updateStudy(currentUser.getId(), path, request);
+        return null;
     }
 }

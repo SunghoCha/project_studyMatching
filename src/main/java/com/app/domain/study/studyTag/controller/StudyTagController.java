@@ -1,8 +1,6 @@
 package com.app.domain.study.studyTag.controller;
 
-import com.app.domain.study.studyTag.dto.StudyTagCreateRequest;
-import com.app.domain.study.studyTag.dto.StudyTagCreateResponse;
-import com.app.domain.study.studyTag.dto.StudyTagUpdateRequest;
+import com.app.domain.study.studyTag.dto.*;
 import com.app.domain.study.studyTag.service.StudyTagService;
 import com.app.global.config.auth.LoginUser;
 import com.app.global.config.auth.dto.CurrentUser;
@@ -12,12 +10,19 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/study-tag")
+@RequestMapping("/study-tag/{path}")
 public class StudyTagController {
 
     private final StudyTagService studyTagService;
 
-    @PostMapping("/{path}")
+    @GetMapping
+    public ResponseEntity<StudyTagResponse> getStudyTags(@PathVariable("path") String path) {
+        StudyTagResponse response = studyTagService.getStudyTags(path);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping
     public ResponseEntity<StudyTagCreateResponse> createStudyTags(@LoginUser CurrentUser currentUser, @PathVariable("path") String path,
                                                                  @RequestBody StudyTagCreateRequest request) {
         StudyTagCreateResponse response = studyTagService.createStudyTags(currentUser.getId(), path, request);
@@ -25,15 +30,20 @@ public class StudyTagController {
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/{path}")
-    public void editStudyTags(@LoginUser CurrentUser currentUser, @PathVariable("path") String path,
-                              @RequestBody StudyTagUpdateRequest request) {
-        // TODO: 태그 수정 로직
+    @PatchMapping
+    public ResponseEntity<StudyTagUpdateResponse> updateStudyTags(@LoginUser CurrentUser currentUser, @PathVariable("path") String path,
+                                                                  @RequestBody StudyTagUpdateRequest request) {
+        StudyTagUpdateResponse response = studyTagService.updateStudyTags(currentUser.getId(), path, request);
+
+        return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/{path}")
-    public void deleteStudyTags(@LoginUser CurrentUser currentUser, @PathVariable("path") String path) {
+    @DeleteMapping
+    public ResponseEntity<Long> deleteStudyTags(@LoginUser CurrentUser currentUser, @PathVariable("path") String path) {
         // TODO: 태그 전체 삭제 로직
+        Long deletedCount = studyTagService.deleteAll(currentUser.getId(), path);
+
+        return ResponseEntity.ok(deletedCount);
     }
 
 

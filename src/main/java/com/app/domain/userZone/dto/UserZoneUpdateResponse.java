@@ -1,28 +1,28 @@
 package com.app.domain.userZone.dto;
 
-import com.app.domain.study.studyZone.StudyZone;
-import com.app.domain.study.studyZone.dto.StudyZoneCreateResponse;
 import com.app.domain.userZone.UserZone;
-import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.List;
 
 @Getter @Setter
 @NoArgsConstructor
 public class UserZoneUpdateResponse {
 
-    private Set<Long> zoneIds;
+    private List<Long> zoneIds;
 
     @Builder
-    public UserZoneUpdateResponse(Set<Long> zoneIds) {
+    public UserZoneUpdateResponse(List<Long> zoneIds) {
         this.zoneIds = zoneIds;
     }
 
-    public static UserZoneUpdateResponse of(Set<UserZone> userZones) {
-        Set<Long> zoneIds = userZones.stream()
+    public static UserZoneUpdateResponse of(List<UserZone> userZones) {
+        List<Long> zoneIds = userZones.stream()
                 .map(userZone -> userZone.getZone().getId())
-                .collect(Collectors.toSet());
+                .toList();
 
         return UserZoneUpdateResponse.builder()
                 .zoneIds(zoneIds)

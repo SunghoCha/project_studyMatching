@@ -89,6 +89,11 @@ public class ZoneService {
     }
 
     public List<Zone> findByIdIn(Set<Long> zoneIds) {
-        return zoneRepository.findByIdIn(zoneIds);
+        List<Zone> zones = zoneRepository.findByIdIn(zoneIds);
+
+        if (zoneIds.size() != zones.size()) {
+            throw new ZoneNotFoundException();
+        }
+        return zones;
     }
 }

@@ -2,10 +2,7 @@ package com.app.domain.study.service;
 
 import com.app.domain.common.dto.PagedResponse;
 import com.app.domain.study.Study;
-import com.app.domain.study.dto.StudyCreateRequest;
-import com.app.domain.study.dto.StudyCreateResponse;
-import com.app.domain.study.dto.StudyQueryResponse;
-import com.app.domain.study.dto.StudyResponse;
+import com.app.domain.study.dto.*;
 import com.app.domain.study.repository.StudyQueryRepository;
 import com.app.domain.study.repository.StudyRepository;
 import com.app.domain.study.studyManager.StudyManager;
@@ -78,5 +75,10 @@ public class StudyService {
             throw new UnauthorizedAccessException();
         }
         return study;
+    }
+
+    public StudyUpdateResponse updateStudy(Long userId, String path, StudyUpdateRequest request) {
+        Study study = findAuthorizedStudy(userId, path);
+        
     }
 }

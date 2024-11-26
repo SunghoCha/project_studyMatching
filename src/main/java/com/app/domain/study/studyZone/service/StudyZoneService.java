@@ -28,7 +28,7 @@ public class StudyZoneService {
 
     public StudyZoneResponse getStudyZones(String path) {
         Study study = studyService.findByPath(path);
-        Set<StudyZone> studyZones = studyZoneRepository.findAllByStudy(study);
+        List<StudyZone> studyZones = studyZoneRepository.findAllByStudy(study);
 
         return StudyZoneResponse.of(studyZones);
     }
@@ -36,7 +36,7 @@ public class StudyZoneService {
     public StudyZoneCreateResponse createStudyZone(Long userId, String path, StudyZoneCreateRequest request) {
         Study study = studyService.findAuthorizedStudy(userId, path);
 
-        Set<StudyZone> studyZones = request.getZoneIds().stream()
+        List<StudyZone> studyZones = request.getZoneIds().stream()
                 .map(zoneId -> {
                     Zone zone = zoneService.findById(zoneId);
                     return StudyZone.builder()
@@ -44,37 +44,48 @@ public class StudyZoneService {
                             .zone(zone)
                             .build();
                 })
-                .collect(Collectors.toSet());
+                .toList();
         studyZoneRepository.saveAll(studyZones);
-        study.addStudyZones(studyZones);
+        study.addStudyZones(new HashSet<>(studyZones));
+
         return StudyZoneCreateResponse.of(studyZones);
     }
 
-    public StudyZoneUpdateResponse updateStudyZone(Long id, String path, StudyZoneUpdateRequest request) {
-        Study study = studyService.findAuthorizedStudy(id, path);
-        Set<StudyZone> studyZones = request.getZoneIds().stream()
-                .map(zoneId -> {
-                    Zone zone = zoneService.findById(zoneId);
-                    return StudyZone.builder()
-                            .study(study)
-                            .zone(zone)
-                            .build();
-                })
-                .collect(Collectors.toSet());
-        studyZoneRepository.saveAll(studyZones);
-        study.addStudyZones(studyZones);
+    public StudyZoneUpdateResponse updateStudyZone(Long userId, String path, StudyZoneUpdateRequest request) {
+        Study study = studyService.findAuthorizedStudy(userId, path);
+        // TODO :  한방쿼리로 수정 가능성 체크 , 이중루프 개선
+        List<Zone> requestedZones = zoneService.findByIdIn(request.getZoneIds());
+        Set<StudyZone> currentStudyZones = study.getStudyZones();
 
-        return StudyZoneUpdateResponse.of(studyZones);
+        // 기존 studyZone과 비교해서 추가, 삭제 대상목록 처리
+        Set<StudyZone> studyZonesToRemove = currentStudyZones.stream()
+                .filter(studyZone -> !requestedZones.contains(studyZone.getZone()))
+                .collect(Collectors.toSet());
+
+        Set<StudyZone> studyZonesToAdd = requestedZones.stream()
+                .filter(zone -> currentStudyZones.stream().noneMatch(studyZone -> studyZone.getZone().equals(zone)))
+                .map(zone -> StudyZone.builder()
+                        .study(study)
+                        .zone(zone)
+                        .build())
+                .collect(Collectors.toSet());
+
+        studyZoneRepository.deleteAll(studyZonesToRemove);
+        study.removeStudyZones(studyZonesToRemove);
+
+        List<StudyZone> studyZones = studyZoneRepository.saveAll(studyZonesToAdd);
+        study.addStudyZones(new HashSet<>(studyZones));
+
+        return StudyZoneUpdateResponse.of(study.getStudyZones());
     }
 
-    public StudyZoneDeleteResponse deleteStudyZone(Long id, String path, StudyZoneDeleteRequest request) {
-        Study study = studyService.findAuthorizedStudy(id, path);
+    public StudyZoneDeleteResponse deleteStudyZone(Long userId, String path, StudyZoneDeleteRequest request) {
+        Study study = studyService.findAuthorizedStudy(userId, path);
         List<StudyZone> studyZones = studyZoneRepository.findByStudyAndZoneIds(study.getId(), request.getZoneIds());
-        HashSet<StudyZone> zoneHashSet = new HashSet<>(studyZones);
 
-        study.removeStudyZones(zoneHashSet);
+        study.removeStudyZones(new HashSet<>(studyZones));
         studyZoneRepository.deleteAll(studyZones);
 
-        return StudyZoneDeleteResponse.of(zoneHashSet);
+        return StudyZoneDeleteResponse.of(studyZones);
     }
 }

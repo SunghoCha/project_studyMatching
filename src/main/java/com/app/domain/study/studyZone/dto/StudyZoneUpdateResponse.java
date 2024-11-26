@@ -5,27 +5,29 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Comparator;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Getter @Setter
 public class StudyZoneUpdateResponse {
 
-    private Set<Long> zoneIds;
+    private List<Long> zoneIds;
 
     @Builder
-    public StudyZoneUpdateResponse(Set<Long> zoneIds) {
+    public StudyZoneUpdateResponse(List<Long> zoneIds) {
         this.zoneIds = zoneIds;
     }
 
     public static StudyZoneUpdateResponse of(Set<StudyZone> studyZones) {
-        Set<Long> zoneIds = studyZones.stream()
+        List<Long> zoneIds = studyZones.stream()
+                .sorted(Comparator.comparing(studyZone -> studyZone.getZone().getId()))
                 .map(studyZone -> studyZone.getZone().getId())
-                .collect(Collectors.toSet());
+                .toList();
 
         return StudyZoneUpdateResponse.builder()
                 .zoneIds(zoneIds)
                 .build();
     }
-
 }

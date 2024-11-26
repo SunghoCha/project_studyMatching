@@ -18,7 +18,7 @@ public class ZoneController {
 
     private final ZoneService zoneService;
 
-    @GetMapping
+    @GetMapping("/allZones")
     public ResponseEntity<Set<ZoneResponse>> getAllZones() {
         Set<ZoneResponse> allZones = zoneService.getAllZones();
 
