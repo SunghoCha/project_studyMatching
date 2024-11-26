@@ -100,13 +100,14 @@ class StudyZoneControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.zoneIds").value(Matchers.containsInAnyOrder(zoneIds.stream().map(Long::intValue).toArray())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.zoneIds")
+                        .value(Matchers.containsInAnyOrder(zoneIds.stream().map(Long::intValue).toArray())))
                 .andDo(MockMvcResultHandlers.print());
     }
 
     @Test
     @WithAccount
-    @DisplayName("잘못된 zoneId 요청으로 보내면 예외 발생")
+    @DisplayName("잘못된 zoneId로 studyZone 생성 요청으로 보내면 예외 발생")
     void create_studyZone_with_wrong_input() throws Exception {
         // given
         String path = "test";
@@ -193,7 +194,7 @@ class StudyZoneControllerTest {
 
     @Test
     @WithAccount
-    @DisplayName("잘못된 path 요청시 예외 발생")
+    @DisplayName("잘못된 path로 studyZone 조회 요청시 예외 발생")
     void get_studyZone_with_wrong_input() throws Exception {
         // given
         String path = "test";
@@ -295,7 +296,7 @@ class StudyZoneControllerTest {
 
     @Test
     @WithAccount
-    @DisplayName("잘못된 path 요청시 예외 발생")
+    @DisplayName("잘못된 path로 studyZone 수정 요청시 예외 발생")
     void update_studyZone_with_wrong_path() throws Exception {
         // given
         String path = "test";
@@ -353,7 +354,7 @@ class StudyZoneControllerTest {
 
     @Test
     @WithAccount
-    @DisplayName("잘못된 zone Id로 요청시 예외 발생")
+    @DisplayName("잘못된 zone Id로 studyZone 수정 요청시 예외 발생")
     void update_studyZone_with_wrong_zoneId() throws Exception {
         // given
         String path = "test";
@@ -466,7 +467,7 @@ class StudyZoneControllerTest {
 
     @Test
     @WithAccount
-    @DisplayName("잘못된 path 요청시 예외 발생")
+    @DisplayName("잘못된 path로 studyZone 삭제 요청시 예외 발생")
     void delete_studyZone_with_wrong_path() throws Exception {
         // given
         String path = "test";
@@ -524,7 +525,7 @@ class StudyZoneControllerTest {
 
     @Test
     @WithAccount
-    @DisplayName("잘못된 zone Id로 요청시 예외 발생")
+    @DisplayName("잘못된 zone Id로 studyZone 삭제 요청시 예외 발생")
     void delete_studyZone_with_wrong_zoneId() throws Exception {
         // given
         String path = "test";

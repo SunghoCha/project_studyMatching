@@ -49,7 +49,7 @@ class UserTagControllerTest {
 
     @Test
     @WithAccount()
-    @DisplayName("제대로 된 수정 태그로 요청 보내면 수정 후 태그 set 반환")
+    @DisplayName("userTag 수정 성공 테스트")
     void tag_edit_with_correct_input() throws Exception {
         // given
         OAuth2User oAuth2User = (DefaultOAuth2User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -70,7 +70,7 @@ class UserTagControllerTest {
 
     @Test
     @WithAccount()
-    @DisplayName("잘못된 태그로 수정 요청을 보내면 예외 발생")
+    @DisplayName("잘못된 tag로 userTag 수정 요청시 보내면 예외 발생")
     void tag_edit_with_wrong_input() throws Exception {
         // given
         OAuth2User oAuth2User = (DefaultOAuth2User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();

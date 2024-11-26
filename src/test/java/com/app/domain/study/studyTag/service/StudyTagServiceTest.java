@@ -111,7 +111,7 @@ class StudyTagServiceTest {
 
     @Test
     @WithAccount
-    @DisplayName("수정권한없이 추가 요청하면 예외 발생")
+    @DisplayName("수정권한없이 studyTag 추가 요청하면 예외 발생")
     void add_studyTags_without_authorization() {
         // given
         String path = "path1";

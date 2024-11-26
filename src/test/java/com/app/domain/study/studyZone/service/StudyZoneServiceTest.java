@@ -85,7 +85,7 @@ class StudyZoneServiceTest {
 
     @Test
     @WithAccount
-    @DisplayName("잘못된 Zone id 전달하면 예외 발생")
+    @DisplayName("잘못된 Zone id로 studyZone 생성 요청시 예외 발생")
     void create_StudyZone_with_wrong_input() {
         // given
         // study 세팅
