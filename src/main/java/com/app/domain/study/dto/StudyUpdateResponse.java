@@ -11,12 +11,14 @@ public class StudyUpdateResponse {
     private String path;
     private String title;
     private String shortDescription;
+    private String fullDescription;
 
     @Builder
-    public StudyUpdateResponse(String path, String title, String shortDescription) {
+    public StudyUpdateResponse(String path, String title, String shortDescription, String fullDescription) {
         this.path = path;
         this.title = title;
         this.shortDescription = shortDescription;
+        this.fullDescription = fullDescription;
     }
 
     public static StudyUpdateResponse of(Study study) {
@@ -25,6 +27,7 @@ public class StudyUpdateResponse {
                 .path(study.getPath())
                 .title(study.getTitle())
                 .shortDescription(study.getShortDescription())
+                .fullDescription(study.getFullDescription())
                 .build();
     }
 }

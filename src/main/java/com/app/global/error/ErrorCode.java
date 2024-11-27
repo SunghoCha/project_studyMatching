@@ -28,6 +28,12 @@ public enum ErrorCode {
     STUDY_PATH_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "S-001", "이미 존재하는 스터디경로입니다."),
     STUDY_NOT_EXISTS(HttpStatus.BAD_REQUEST, "S-001", "해당 스터디는 존재하지 않습니다."),
     UNAUTHORIZED_ACCESS_EXCEPTION(HttpStatus.UNAUTHORIZED, "S-002", "스터디 수정 권한이 없습니다"),
+
+    // Event
+    INVALID_END_ENROLLMENT_DATE_TIME(HttpStatus.BAD_REQUEST, "E-001", "유효하지 않은 모임 접수 종료 날짜입니다."),
+    INVALID_END_DATE_TIME(HttpStatus.BAD_REQUEST, "E-002", "유효하지 않은 모임 종료 날짜입니다."),
+    INVALID_START_DATE_TIME(HttpStatus.BAD_REQUEST, "E-003", "유효하지 않은 모임 시작 날짜입니다."),
+    EVENT_NOT_EXISTS(HttpStatus.BAD_REQUEST, "E-004", "해당 이벤트는 존재하지 않습니다.")
     ;
 
     ErrorCode(HttpStatus httpStatus, String errorCode, String message) {

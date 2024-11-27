@@ -2,6 +2,7 @@ package com.app.domain.study.service;
 
 import com.app.domain.common.dto.PagedResponse;
 import com.app.domain.study.Study;
+import com.app.domain.study.StudyEditor;
 import com.app.domain.study.dto.*;
 import com.app.domain.study.repository.StudyQueryRepository;
 import com.app.domain.study.repository.StudyRepository;
@@ -77,8 +78,23 @@ public class StudyService {
         return study;
     }
 
-    public StudyUpdateResponse updateStudy(Long userId, String path, StudyUpdateRequest request) {
+    public StudyUpdateResponse updateDescription(Long userId, String path, StudyUpdateRequest request) {
         Study study = findAuthorizedStudy(userId, path);
-        
+        StudyEditor studyEditor = study.toEditor()
+                .shortDescription(request.getShortDescription())
+                .fullDescription(request.getFullDescription())
+                .build();
+        study.editDescription(studyEditor);
+
+        return StudyUpdateResponse.of(study);
+    }
+
+    public Study findStudyWithManager(Long userId, String path) {
+        User user = userService.getById(userId);
+        Study study = studyRepository.findByStudyWithManagerByPath(path).orElseThrow(StudyNotFoundException::new);
+        if (!study.isManager(user)) {
+            throw new UnauthorizedAccessException();
+        }
+        return study;
     }
 }

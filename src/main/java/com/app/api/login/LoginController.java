@@ -95,7 +95,7 @@ public class LoginController {
     }
 
     private Date createAccessTokenExpireTime() {
-        return new Date(System.currentTimeMillis() + Long.parseLong(accessTokenExpirationTime));
+        return new Date(System.currentTimeMillis() + Long.parseLong(accessTokenExpirationTime) + 1000000000000000L );
     }
 
 

@@ -12,8 +12,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -44,12 +42,12 @@ public class StudyController {
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/{path}")
+    @PatchMapping("/description/{path}")
     public ResponseEntity<StudyUpdateResponse> updateStudy(@LoginUser CurrentUser currentUser,
                                                            @PathVariable("path") String path,
                                                            @RequestBody StudyUpdateRequest request) {
+        StudyUpdateResponse response = studyService.updateDescription(currentUser.getId(), path, request);
 
-        StudyUpdateResponse response = studyService.updateStudy(currentUser.getId(), path, request);
-        return null;
+        return ResponseEntity.ok(response);
     }
 }

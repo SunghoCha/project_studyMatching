@@ -66,7 +66,6 @@ public class Study extends BaseTimeEntity {
 
     private int memberCount;
 
-
     @Builder
     public Study(String path, String title, String shortDescription, String fullDescription, String image) {
         this.path = path;
@@ -109,5 +108,19 @@ public class Study extends BaseTimeEntity {
 
     public void removeStudyTags(Set<StudyTag> tagsToRemove) {
         this.studyTags.removeAll(tagsToRemove);
+    }
+
+    public StudyEditor.StudyEditorBuilder toEditor() {
+        return StudyEditor.builder()
+                .path(path)
+                .title(title)
+                .shortDescription(shortDescription)
+                .fullDescription(fullDescription)
+                .image(image);
+    }
+
+    public void editDescription(StudyEditor studyEditor) {
+        this.shortDescription = studyEditor.getShortDescription();
+        this.fullDescription = studyEditor.getFullDescription();
     }
 }
