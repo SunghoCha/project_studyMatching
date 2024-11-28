@@ -24,7 +24,6 @@ public class StudyEditor {
         return new StudyEditorBuilder();
     }
 
-    @NoArgsConstructor
     public static class StudyEditorBuilder {
         private String path;
         private String title;

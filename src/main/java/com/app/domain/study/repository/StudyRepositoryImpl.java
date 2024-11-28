@@ -1,5 +1,6 @@
 package com.app.domain.study.repository;
 
+import com.app.domain.event.QEvent;
 import com.app.domain.study.QStudy;
 import com.app.domain.study.Study;
 import com.app.domain.study.studyManager.QStudyManager;
@@ -27,4 +28,6 @@ public class StudyRepositoryImpl implements StudyRepositoryCustom {
 
         return Optional.ofNullable(result);
     }
+
+
 }

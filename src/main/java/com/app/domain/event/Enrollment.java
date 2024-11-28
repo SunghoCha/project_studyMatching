@@ -2,10 +2,7 @@ package com.app.domain.event;
 
 import com.app.domain.user.User;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -35,4 +32,12 @@ public class Enrollment {
         return this.user.equals(user);
     }
 
+    @Builder
+    public Enrollment(Event event, User user, LocalDateTime enrolledAt, boolean accepted, boolean attended) {
+        this.event = event;
+        this.user = user;
+        this.enrolledAt = enrolledAt;
+        this.accepted = accepted;
+        this.attended = attended;
+    }
 }

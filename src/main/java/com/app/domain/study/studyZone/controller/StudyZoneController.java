@@ -41,11 +41,11 @@ public class StudyZoneController {
     }
 
     @DeleteMapping
-    public ResponseEntity<StudyZoneDeleteResponse> deleteStudyZones(@LoginUser CurrentUser currentUser,
+    public ResponseEntity<Void> deleteStudyZones(@LoginUser CurrentUser currentUser,
                                                               @PathVariable("path") String path,
                                                               @RequestBody StudyZoneDeleteRequest request) {
-        StudyZoneDeleteResponse response = studyZoneService.deleteStudyZone(currentUser.getId(), path, request);
+         studyZoneService.deleteStudyZone(currentUser.getId(), path, request);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.noContent().build();
     }
 }

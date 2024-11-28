@@ -133,4 +133,25 @@ public class Event {
         return this.limitOfEnrollments > this.getNumberOfAcceptedEnrollments();
     }
 
+    public EventEditor.EventEditorBuilder toEditor() {
+        return EventEditor.builder()
+                .title(title)
+                .description(description)
+                .endErollmentDateTime(endEnrollmentDateTime)
+                .startDateTime(startDateTime)
+                .endDateTime(endDateTime);
+    }
+
+    public void editEvent(EventEditor eventEditor) {
+        this.title = eventEditor.getTitle();
+        this.description = eventEditor.getDescription();
+        this.endEnrollmentDateTime = eventEditor.getEndEnrollmentDateTime();
+        this.startDateTime = eventEditor.getStartDateTime();
+        this.endDateTime = eventEditor.getEndDateTime();
+        this.limitOfEnrollments = eventEditor.getLimitOfEnrollments();
+    }
+
+    public boolean isAbleToAccept() {
+        return this.limitOfEnrollments > this.getNumberOfAcceptedEnrollments();
+    }
 }

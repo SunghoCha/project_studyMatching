@@ -79,13 +79,11 @@ public class StudyZoneService {
         return StudyZoneUpdateResponse.of(study.getStudyZones());
     }
 
-    public StudyZoneDeleteResponse deleteStudyZone(Long userId, String path, StudyZoneDeleteRequest request) {
+    public void deleteStudyZone(Long userId, String path, StudyZoneDeleteRequest request) {
         Study study = studyService.findAuthorizedStudy(userId, path);
         List<StudyZone> studyZones = studyZoneRepository.findByStudyAndZoneIds(study.getId(), request.getZoneIds());
 
         study.removeStudyZones(new HashSet<>(studyZones));
         studyZoneRepository.deleteAll(studyZones);
-
-        return StudyZoneDeleteResponse.of(studyZones);
     }
 }

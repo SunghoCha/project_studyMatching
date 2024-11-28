@@ -33,7 +33,9 @@ public enum ErrorCode {
     INVALID_END_ENROLLMENT_DATE_TIME(HttpStatus.BAD_REQUEST, "E-001", "유효하지 않은 모임 접수 종료 날짜입니다."),
     INVALID_END_DATE_TIME(HttpStatus.BAD_REQUEST, "E-002", "유효하지 않은 모임 종료 날짜입니다."),
     INVALID_START_DATE_TIME(HttpStatus.BAD_REQUEST, "E-003", "유효하지 않은 모임 시작 날짜입니다."),
-    EVENT_NOT_EXISTS(HttpStatus.BAD_REQUEST, "E-004", "해당 이벤트는 존재하지 않습니다.")
+    EVENT_NOT_EXISTS(HttpStatus.BAD_REQUEST, "E-004", "해당 이벤트는 존재하지 않습니다."),
+    ENROLLMENT_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "E-005", "이미 존재하는 등록입니다."),
+    INVALID_ENROLLMENT(HttpStatus.BAD_REQUEST, "E-006", "존재하지 않는 등록입니다.")
     ;
 
     ErrorCode(HttpStatus httpStatus, String errorCode, String message) {
