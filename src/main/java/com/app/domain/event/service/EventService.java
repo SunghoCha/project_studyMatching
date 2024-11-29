@@ -24,7 +24,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class EventService {
-
+    // TODO : event 발행
     private final EventRepository eventRepository;
     private final StudyService studyService;
     private final ApplicationEventPublisher eventPublisher;
@@ -129,6 +129,38 @@ public class EventService {
             event.removeEnrollment(enrollment);
             enrollmentRepository.delete(enrollment);
         }
+    }
+
+    public EnrollmentResponse acceptEnrollment(Long userId, Long eventId, Long enrollmentId, String path) {
+        Event event = eventRepository.findEventByIdIfAuthorized(userId, eventId, path).orElseThrow(EventNotFoundException::new);
+        Enrollment enrollment = enrollmentRepository.findById(enrollmentId).orElseThrow(InvalidEnrollmentException::new);
+        event.accept(enrollment);
+
+        return EnrollmentResponse.of(enrollment);
+    }
+
+    public EnrollmentResponse rejectEnrollment(Long userId, Long eventId, Long enrollmentId, String path) {
+        Event event = eventRepository.findEventByIdIfAuthorized(userId, eventId, path).orElseThrow(EventNotFoundException::new);
+        Enrollment enrollment = enrollmentRepository.findById(enrollmentId).orElseThrow(InvalidEnrollmentException::new);
+        event.reject(enrollment);
+
+        return EnrollmentResponse.of(enrollment);
+    }
+
+    public EnrollmentResponse checkInEnrollment(Long userId, Long eventId, Long enrollmentId, String path) {
+        Event event = eventRepository.findEventByIdIfAuthorized(userId, eventId, path).orElseThrow(EventNotFoundException::new);
+        Enrollment enrollment = enrollmentRepository.findById(enrollmentId).orElseThrow(InvalidEnrollmentException::new);
+        enrollment.setAttended(true);
+
+        return EnrollmentResponse.of(enrollment);
+    }
+
+    public EnrollmentResponse cancelCheckInEnrollment(Long userId, Long eventId, Long enrollmentId, String path) {
+        Event event = eventRepository.findEventByIdIfAuthorized(userId, eventId, path).orElseThrow(EventNotFoundException::new);
+        Enrollment enrollment = enrollmentRepository.findById(enrollmentId).orElseThrow(InvalidEnrollmentException::new);
+        enrollment.setAttended(false);
+
+        return EnrollmentResponse.of(enrollment);
     }
 }
 

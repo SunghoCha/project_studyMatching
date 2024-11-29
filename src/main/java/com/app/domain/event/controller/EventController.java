@@ -13,13 +13,13 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/study/{path}")
+@RequestMapping("/study/{path}/events")
 public class EventController {
 
     private final EventCreateValidator eventCreateValidator;
     private final EventService eventService;
 
-    @PostMapping("/new-event")
+    @PostMapping("/new")
     public ResponseEntity<EventCreateResponse> createEvent(@LoginUser CurrentUser currentUser,
                                                            @PathVariable("path") String path,
                                                            @Valid @RequestBody EventCreateRequest request,
@@ -30,52 +30,90 @@ public class EventController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/events/{id}")
-    public ResponseEntity<EventResponse> getEvent(@PathVariable("path") String path, @PathVariable("id") Long id) {
-        EventResponse response = eventService.getEvent(id);
+    @GetMapping("/{eventId}")
+    public ResponseEntity<EventResponse> getEvent(@PathVariable("path") String path, @PathVariable("eventId") Long eventId) {
+        EventResponse response = eventService.getEvent(eventId);
 
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/events")
+    @GetMapping
     public ResponseEntity<EventsResponse> getEvents(@PathVariable("path") String path) {
         EventsResponse response = eventService.getEvents(path);
 
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/events/{id}")
+    @PatchMapping("/{eventId}")
     public ResponseEntity<EventUpdateResponse> updateEvent(@LoginUser CurrentUser currentUser,
                                                            @PathVariable("path") String path,
-                                                           @PathVariable("id") Long eventId,
+                                                           @PathVariable("eventId") Long eventId,
                                                            @RequestBody EventUpdateRequest request) {
         EventUpdateResponse response = eventService.updateEvent(currentUser.getId(), eventId, path, request);
 
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/events/{id}")
+    @DeleteMapping("/{eventId}")
     public ResponseEntity<Void> deleteEvent(@LoginUser CurrentUser currentUser,
                                             @PathVariable("path") String path,
-                                            @PathVariable("id") Long eventId) {
+                                            @PathVariable("eventId") Long eventId) {
         eventService.deleteEvent(currentUser.getId(), eventId, path);
 
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/events/{id}/enroll")
-    public ResponseEntity<EnrollmentCreateResponse> newEnrollment(@LoginUser CurrentUser currentUser, @PathVariable("path") String path, @PathVariable("id") Long eventId) {
+    @PostMapping("/{eventId}/enroll")
+    public ResponseEntity<EnrollmentCreateResponse> newEnrollment(@LoginUser CurrentUser currentUser, @PathVariable("path") String path, @PathVariable("eventId") Long eventId) {
         EnrollmentCreateResponse response = eventService.createEnrollment(currentUser.getId(), eventId);
 
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/events/{id}/disenroll")
-    public ResponseEntity<Void> cancelEnrollment(@LoginUser CurrentUser currentUser, @PathVariable("path") String path, @PathVariable("id") Long eventId) {
+    @PostMapping("/{eventId}/disenroll")
+    public ResponseEntity<Void> cancelEnrollment(@LoginUser CurrentUser currentUser, @PathVariable("path") String path, @PathVariable("eventId") Long eventId) {
         eventService.cancelEnrollment(currentUser.getId(), eventId);
 
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/{eventId}/enrollments/{enrollmentId}/accept")
+    public ResponseEntity<EnrollmentResponse> acceptEnrollment(@LoginUser CurrentUser currentUser,
+                                                               @PathVariable("eventId") Long eventId,
+                                                               @PathVariable("enrollmentId") Long enrollmentId,
+                                                               @PathVariable("path") String path) {
+        EnrollmentResponse response = eventService.acceptEnrollment(currentUser.getId(), eventId, enrollmentId, path);
 
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{eventId}/enrollments/{enrollmentId}/reject")
+    public ResponseEntity<EnrollmentResponse> rejectEnrollment(@LoginUser CurrentUser currentUser,
+                                                               @PathVariable("eventId") Long eventId,
+                                                               @PathVariable("enrollmentId") Long enrollmentId,
+                                                               @PathVariable("path") String path) {
+        EnrollmentResponse response = eventService.rejectEnrollment(currentUser.getId(), eventId, enrollmentId, path);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{eventId}/enrollments/{enrollmentId}/check-in")
+    public ResponseEntity<EnrollmentResponse> checkInEnrollment(@LoginUser CurrentUser currentUser,
+                                                                @PathVariable("eventId") Long eventId,
+                                                                @PathVariable("enrollmentId") Long enrollmentId,
+                                                                @PathVariable("path") String path) {
+        EnrollmentResponse response = eventService.checkInEnrollment(currentUser.getId(), eventId, enrollmentId, path);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{eventId}/enrollments/{enrollmentId}/cancel-check-in")
+    public ResponseEntity<EnrollmentResponse> cancelCheckInEnrollment(@LoginUser CurrentUser currentUser,
+                                                                      @PathVariable("eventId") Long eventId,
+                                                                      @PathVariable("enrollmentId") Long enrollmentId,
+                                                                      @PathVariable("path") String path) {
+        EnrollmentResponse response = eventService.cancelCheckInEnrollment(currentUser.getId(), eventId, enrollmentId, path);
+
+        return ResponseEntity.ok(response);
+    }
 }

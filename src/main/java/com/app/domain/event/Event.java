@@ -154,4 +154,5 @@ public class Event {
     public boolean isAbleToAccept() {
         return this.limitOfEnrollments > this.getNumberOfAcceptedEnrollments();
     }
+
 }
