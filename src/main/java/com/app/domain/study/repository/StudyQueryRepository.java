@@ -13,8 +13,11 @@ import com.app.domain.tag.dto.QTagResponse;
 import com.app.domain.tag.dto.TagResponse;
 import com.app.domain.zone.QZone;
 import com.querydsl.core.group.GroupBy;
+import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,20 +38,44 @@ public class StudyQueryRepository {
 
     private final JPAQueryFactory queryFactory;
 
-    public PagedResponse<StudyQueryResponse> findAllStudies(Pageable pageable) {
+    public PagedResponse<StudyQueryResponse> findStudiesWithCond(Predicate whereClause, Pageable pageable) {
         QStudy study = QStudy.study;
+
+        BooleanExpression finalCondition = whereClause != null ? (BooleanExpression) whereClause : Expressions.asBoolean(true).isTrue();
+        log.info("Final condition: {}", finalCondition != null ? finalCondition.toString() : "No condition applied");
 
         // 총 데이터 수
         Long totalCount = queryFactory
                 .select(study.count())
                 .from(study)
+                .where(finalCondition)
                 .fetchOne();
+
+        //
+        log.info("Sort orders: {}", pageable.getSort());
+        List<OrderSpecifier<?>> orderSpecifiers = pageable.getSort()
+                .stream()
+                .map(order ->
+                        switch (order.getProperty()) {
+                            case "title" -> (OrderSpecifier<?>) (order.isAscending()
+                                    ? study.title.asc()
+                                    : study.title.desc());
+                            case "publishedDateTime" -> (OrderSpecifier<?>) (order.isAscending()
+                                    ? study.publishedDateTime.asc()
+                                    : study.publishedDateTime.desc()).nullsLast();
+                            default ->
+                                    throw new IllegalArgumentException("Invalid sort property: " + order.getProperty());
+                        })
+                .toList();
+
 
         // 현재 페이지 데이터
         log.info("===============스터디 페이징 시작");
         List<Study> studies = queryFactory
                 .select(study)
                 .from(study)
+                .where(finalCondition)
+                .orderBy(orderSpecifiers.toArray(new OrderSpecifier[0]))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -57,19 +84,16 @@ public class StudyQueryRepository {
         //  지연로딩 초기화 + batch size
         log.info("===============지연로딩 초기화 시작");
         studies.forEach(s -> {
-            Hibernate.initialize(s.getStudyTags());
-            Hibernate.initialize(s.getStudyZones());
-            Hibernate.initialize(s.getStudyMembers());
+            s.getStudyTags().forEach(studyTag -> Hibernate.initialize(studyTag.getTag()));
+            s.getStudyZones().forEach(studyZone -> Hibernate.initialize(studyZone.getZone()));
         });
         log.info("===============지연로딩 초기화 완료");
 
         // study <-> dto 변환
-        List<StudyQueryResponse> studyQueryResponses = studies.stream()
-                .map(StudyQueryResponse::of)
-                .toList();
+        List<StudyQueryResponse> studyQueryResponses = convertToQueryResponses(studies);
 
         // 총 페이지
-        int totalPages = (int) Math.ceil((double) (totalCount != null ? totalCount : 0) / pageable.getPageSize());
+        int totalPages = getTotalPages(pageable, totalCount);
 
         return PagedResponse.<StudyQueryResponse>builder()
                 .content(studyQueryResponses)
@@ -78,6 +102,61 @@ public class StudyQueryRepository {
                 .totalCount(totalCount != null ? totalCount : 0)
                 .size(pageable.getPageSize())
                 .build();
+    }
+    public PagedResponse<StudyQueryResponse> findAllStudies(StudySearchCond searchCond, Pageable pageable ) {
+        BooleanExpression expression = searchCond != null
+                ? titlesLike(QStudy.study, searchCond.getTitles())
+                : Expressions.asBoolean(true).isTrue();
+
+        return findStudiesWithCond(expression, pageable);
+    }
+
+    public PagedResponse<StudyQueryResponse> findMyManagedStudies(Long userId, Pageable pageable) {
+        BooleanExpression expression = QStudy.study.studyManagers.any().user.id.eq(userId);
+
+        return findStudiesWithCond(expression, pageable);
+    }
+
+    public PagedResponse<StudyQueryResponse> findMyJoinedStudies(Long userId, Pageable pageable) {
+        BooleanExpression expression = QStudy.study.studyMembers.any().user.id.eq(userId);
+
+        return findStudiesWithCond(expression, pageable);
+    }
+
+    private static List<StudyQueryResponse> convertToQueryResponses(List<Study> studies) {
+
+        return studies.stream()
+                .map(StudyQueryResponse::of)
+                .toList();
+    }
+    private static int getTotalPages(Pageable pageable, Long totalCount) {
+        return (int) Math.ceil((double) (totalCount != null ? totalCount : 0) / pageable.getPageSize());
+    }
+
+
+    private BooleanExpression titlesLike(QStudy study, List<String> titles) {
+        if (titles == null || titles.isEmpty()) {
+            return null;
+        }
+        BooleanExpression condition = study.title.containsIgnoreCase(titles.get(0));
+        for (int i = 1; i < titles.size(); i++) {
+            condition = condition.or(study.title.containsIgnoreCase(titles.get(i)));
+        }
+        return condition;
+    }
+
+    private BooleanExpression tagsIn(QStudy study, List<String> tags) {
+        if (tags == null || tags.isEmpty()) {
+            return null;
+        }
+        return study.studyTags.any().tag.title.in(tags);
+    }
+
+    private BooleanExpression zoneIdsIn(QStudy study, List<Long> zoneIds) {
+        if (zoneIds == null || zoneIds.isEmpty()) {
+            return null;
+        }
+        return study.studyZones.any().zone.id.in(zoneIds);
     }
 
     public List<StudyQueryResponse> searchStudies(StudySearchCond searchCond, Pageable pageable) {
@@ -145,8 +224,8 @@ public class StudyQueryRepository {
                 .leftJoin(study.studyTags, studyTag)
                 .leftJoin(studyTag.tag, tag)
                 .where(
-                        tagInCondition(searchCond.getTags()),
-                        zoneInCondition(searchCond.getZones())
+                        tagInCondition(searchCond.getTags())
+                        //zoneInCondition(searchCond.getZoneIds())
                 )
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -216,6 +295,4 @@ public class StudyQueryRepository {
         QZone zone = QZone.zone;
         return zone.localName.in(zones);
     }
-
-
 }

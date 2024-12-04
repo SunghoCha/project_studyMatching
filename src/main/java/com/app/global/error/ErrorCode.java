@@ -27,7 +27,13 @@ public enum ErrorCode {
     // Study
     STUDY_PATH_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "S-001", "이미 존재하는 스터디경로입니다."),
     STUDY_NOT_EXISTS(HttpStatus.BAD_REQUEST, "S-001", "해당 스터디는 존재하지 않습니다."),
-    UNAUTHORIZED_ACCESS_EXCEPTION(HttpStatus.UNAUTHORIZED, "S-002", "스터디 수정 권한이 없습니다"),
+    UNAUTHORIZED_ACCESS(HttpStatus.UNAUTHORIZED, "S-002", "스터디 수정 권한이 없습니다"),
+    INVALID_STUDY_PUBLISH_STATE(HttpStatus.BAD_REQUEST, "S-003", "스터디를 공개할 수 없는 상태입니다."),
+    INVALID_STUDY_CLOSE_STATE(HttpStatus.BAD_REQUEST, "S-004", "스터디를 종료할 수 없는 상태입니다."),
+    INVALID_SORT_PROPERTY(HttpStatus.BAD_REQUEST, "S-005", "정렬 조건이 올바르지 않습니다."),
+
+    // StudyMember
+    STUDY_MEMBER_NOT_EXISTS(HttpStatus.BAD_REQUEST, "SM-001", "해당 스터디멤버는 존재하지 않습니다."),
 
     // Event
     INVALID_END_ENROLLMENT_DATE_TIME(HttpStatus.BAD_REQUEST, "E-001", "유효하지 않은 모임 접수 종료 날짜입니다."),
@@ -35,7 +41,8 @@ public enum ErrorCode {
     INVALID_START_DATE_TIME(HttpStatus.BAD_REQUEST, "E-003", "유효하지 않은 모임 시작 날짜입니다."),
     EVENT_NOT_EXISTS(HttpStatus.BAD_REQUEST, "E-004", "해당 이벤트는 존재하지 않습니다."),
     ENROLLMENT_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "E-005", "이미 존재하는 등록입니다."),
-    INVALID_ENROLLMENT(HttpStatus.BAD_REQUEST, "E-006", "존재하지 않는 등록입니다.")
+    INVALID_ENROLLMENT(HttpStatus.BAD_REQUEST, "E-006", "존재하지 않는 등록입니다."),
+    INVALID_RECRUITMENT_STATE(HttpStatus.BAD_REQUEST, "E-007", "인원 모집 설정에 실패하였습니다. 스터디를 공개하거나 한 시간 뒤 다시 시도하세요.")
     ;
 
     ErrorCode(HttpStatus httpStatus, String errorCode, String message) {

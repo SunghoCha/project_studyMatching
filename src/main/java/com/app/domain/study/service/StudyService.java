@@ -4,16 +4,22 @@ import com.app.domain.common.dto.PagedResponse;
 import com.app.domain.study.Study;
 import com.app.domain.study.StudyEditor;
 import com.app.domain.study.dto.*;
+import com.app.domain.study.dto.studySetting.StudyPathUpdateRequest;
+import com.app.domain.study.dto.studySetting.StudyTitleUpdateRequest;
 import com.app.domain.study.repository.StudyQueryRepository;
 import com.app.domain.study.repository.StudyRepository;
 import com.app.domain.study.studyManager.StudyManager;
 import com.app.domain.study.studyManager.repository.StudyManagerRepository;
+import com.app.domain.study.studyMember.StudyMember;
+import com.app.domain.study.studyMember.repository.StudyMemberRepository;
 import com.app.domain.user.User;
 import com.app.domain.user.service.UserService;
+import com.app.global.error.exception.StudyMemberNotFoundException;
 import com.app.global.error.exception.StudyNotFoundException;
 import com.app.global.error.exception.StudyPathAlreadyExistException;
 import com.app.global.error.exception.UnauthorizedAccessException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,15 +27,17 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class StudyService {
-
+    // TODO: 이벤트 알림 기능
     private final StudyRepository studyRepository;
     private final UserService userService;
     private final StudyQueryRepository studyQueryRepository;
     private final StudyManagerRepository studyManagerRepository;
+    private final StudyMemberRepository studyMemberRepository;
 
     public StudyCreateResponse createStudy(Long userId, StudyCreateRequest request) {
         Optional<Study> existingStudy = studyRepository.findByPath(request.getPath());
@@ -54,8 +62,16 @@ public class StudyService {
         return StudyResponse.of(user, study);
     }
 
-    public PagedResponse<StudyQueryResponse> getStudies(Pageable pageable) {
-        return studyQueryRepository.findAllStudies(pageable);
+    public PagedResponse<StudyQueryResponse> getStudies(StudySearchCond searchCond, Pageable pageable) {
+        return studyQueryRepository.findAllStudies(searchCond, pageable);
+    }
+
+    public PagedResponse<StudyQueryResponse> getMyManagedStudies(Long userId, Pageable pageable) {
+        return studyQueryRepository.findMyManagedStudies(userId, pageable);
+    }
+
+    public PagedResponse<StudyQueryResponse> getMyJoinedStudies(Long userId, Pageable pageable) {
+        return studyQueryRepository.findMyJoinedStudies(userId, pageable);
     }
 
     // TODO 성능 비교 후 삭제 예정
@@ -84,7 +100,7 @@ public class StudyService {
                 .shortDescription(request.getShortDescription())
                 .fullDescription(request.getFullDescription())
                 .build();
-        study.editDescription(studyEditor);
+        study.edit(studyEditor);
 
         return StudyUpdateResponse.of(study);
     }
@@ -96,5 +112,75 @@ public class StudyService {
             throw new UnauthorizedAccessException();
         }
         return study;
+    }
+
+    public StudyResponse joinStudy(Long userId, String path) {
+        User user = userService.getById(userId);
+        Study study = studyRepository.findByStudyWithAllByPath(path).orElseThrow(StudyNotFoundException::new);
+
+        StudyMember member = StudyMember.createMember(user, study);
+        StudyMember saveMember = studyMemberRepository.save(member);
+        study.addMember(saveMember);
+
+        return StudyResponse.of(user, study);
+    }
+
+    public StudyResponse leaveStudy(Long userId, String path) {
+        User user = userService.getById(userId);
+        Study study = studyRepository.findByStudyWithAllByPath(path).orElseThrow(StudyNotFoundException::new);
+
+        StudyMember member = studyMemberRepository.findByStudyAndUser(study, user).orElseThrow(StudyMemberNotFoundException::new);
+        study.removeMember(member);
+        studyMemberRepository.delete(member);
+
+        return StudyResponse.of(user, study);
+    }
+
+    public Boolean publishStudy(Long userId, String path) {
+        Study study = findAuthorizedStudy(userId, path);
+        study.publish();
+
+        return study.isPublished();
+    }
+
+    public Boolean closeStudy(Long userId, String path) {
+        Study study = findAuthorizedStudy(userId, path);
+        study.close();
+
+        return study.isClosed();
+    }
+
+    public Boolean startRecruit(Long userId, String path) {
+        Study study = findAuthorizedStudy(userId, path);
+        study.startRecruit();
+
+        return study.isRecruiting();
+    }
+
+    public Boolean stopRecruit(Long userId, String path) {
+        Study study = findAuthorizedStudy(userId, path);
+        study.stopRecruit();
+
+        return study.isRecruiting();
+    }
+
+    public String updateStudyPath(Long userId, String path, StudyPathUpdateRequest request) {
+        Study study = findAuthorizedStudy(userId, path);
+        StudyEditor studyEditor = study.toEditor()
+                .path(request.getPath())
+                .build();
+        study.edit(studyEditor);
+
+        return study.getPath();
+    }
+
+    public String updateStudyTitle(Long userId, String path, StudyTitleUpdateRequest request) {
+        Study study = findAuthorizedStudy(userId, path);
+        StudyEditor studyEditor = study.toEditor()
+                .title(request.getTitle())
+                .build();
+        study.edit(studyEditor);
+
+        return study.getTitle();
     }
 }

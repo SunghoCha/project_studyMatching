@@ -10,4 +10,5 @@ public interface EventRepositoryCustom {
 
     List<Event> findAllByPath(String path);
     Optional<Event> findEventByIdIfAuthorized(Long userId, Long eventId, String path);
+    Optional<Event> findEventWithEnrollmentById(Long eventId);
 }

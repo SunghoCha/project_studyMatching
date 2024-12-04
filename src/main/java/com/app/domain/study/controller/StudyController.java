@@ -35,9 +35,22 @@ public class StudyController {
     }
 
     @GetMapping("/list")
-    public ResponseEntity<PagedResponse<StudyQueryResponse>> getStudies(Pageable pageable) {
-        PagedResponse<StudyQueryResponse> response = studyService.getStudies(pageable);
-        log.info("response: {}", response);
+    public ResponseEntity<PagedResponse<StudyQueryResponse>> getStudies(StudySearchCond searchCond, Pageable pageable) {
+        PagedResponse<StudyQueryResponse> response = studyService.getStudies(searchCond,pageable);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/my-managed-study-list")
+    public ResponseEntity<PagedResponse<StudyQueryResponse>> getMyManagedStudies(@LoginUser CurrentUser currentUser, Pageable pageable) {
+        PagedResponse<StudyQueryResponse> response = studyService.getMyManagedStudies(currentUser.getId(), pageable);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/my-joined-study-list")
+    public ResponseEntity<PagedResponse<StudyQueryResponse>> getMyJoinedStudies(@LoginUser CurrentUser currentUser, Pageable pageable) {
+        PagedResponse<StudyQueryResponse> response = studyService.getMyJoinedStudies(currentUser.getId(), pageable);
 
         return ResponseEntity.ok(response);
     }
@@ -47,6 +60,22 @@ public class StudyController {
                                                            @PathVariable("path") String path,
                                                            @RequestBody StudyUpdateRequest request) {
         StudyUpdateResponse response = studyService.updateDescription(currentUser.getId(), path, request);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{path}/join")
+    public ResponseEntity<StudyResponse> joinStudy(@LoginUser CurrentUser currentUser,
+                                                   @PathVariable("path") String path) {
+        StudyResponse response = studyService.joinStudy(currentUser.getId(), path);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{path}/leave")
+    public ResponseEntity<StudyResponse> leaveStudy(@LoginUser CurrentUser currentUser,
+                                                    @PathVariable("path") String path) {
+        StudyResponse response = studyService.leaveStudy(currentUser.getId(), path);
 
         return ResponseEntity.ok(response);
     }

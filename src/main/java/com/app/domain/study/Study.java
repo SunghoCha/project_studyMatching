@@ -6,6 +6,9 @@ import com.app.domain.study.studyMember.StudyMember;
 import com.app.domain.study.studyTag.StudyTag;
 import com.app.domain.study.studyZone.StudyZone;
 import com.app.domain.user.User;
+import com.app.global.error.exception.InvalidRecruitmentStateException;
+import com.app.global.error.exception.InvalidStudyPublishStateException;
+import com.app.global.error.exception.StudyCloseException;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -75,8 +78,30 @@ public class Study extends BaseTimeEntity {
         this.image = image;
     }
 
+    public void publish() {
+        if (!this.closed && !this.published) {
+            this.published = true;
+            this.publishedDateTime = LocalDateTime.now();
+        } else {
+            throw new InvalidStudyPublishStateException();
+        }
+    }
+
+    public void close() {
+        if (this.published && !this.closed) {
+            this.closed = true;
+            this.closedDateTime = LocalDateTime.now();
+        } else {
+            throw new StudyCloseException();
+        }
+    }
+
     public void addManager(StudyManager manager) {
         this.studyManagers.add(manager);
+    }
+
+    public void addMember(StudyMember member) {
+        this.studyMembers.add(member);
     }
 
     public boolean isMember(User user) {
@@ -94,20 +119,22 @@ public class Study extends BaseTimeEntity {
                 && !isMember(user) && !isManager(user);
     }
 
-    public void addStudyTags(Set<StudyTag> studyTags) {
-        this.studyTags.addAll(studyTags);
+    public void addStudyTags(Set<StudyTag> tagsToAdd) {
+        this.studyTags.addAll(tagsToAdd);
     }
 
-    public void addStudyZones(Set<StudyZone> studyZones) {
-        this.studyZones.addAll(studyZones);
-    }
-
-    public void removeStudyZones(Set<StudyZone> studyZones) {
-        this.studyZones.removeAll(studyZones);
+    public void addStudyZones(Set<StudyZone> zonesToAdd) {
+        this.studyZones.addAll(zonesToAdd);
     }
 
     public void removeStudyTags(Set<StudyTag> tagsToRemove) {
         this.studyTags.removeAll(tagsToRemove);
+        tagsToRemove.forEach(StudyTag::disconnectStudy);
+    }
+
+    public void removeStudyZones(Set<StudyZone> zonesToRemove) {
+        this.studyZones.removeAll(zonesToRemove);
+        zonesToRemove.forEach(StudyZone::disconnectStudy);
     }
 
     public StudyEditor.StudyEditorBuilder toEditor() {
@@ -119,8 +146,38 @@ public class Study extends BaseTimeEntity {
                 .image(image);
     }
 
-    public void editDescription(StudyEditor studyEditor) {
+    public void edit(StudyEditor studyEditor) {
+        this.path = studyEditor.getPath();
+        this.title = studyEditor.getTitle();
         this.shortDescription = studyEditor.getShortDescription();
         this.fullDescription = studyEditor.getFullDescription();
+        this.image = studyEditor.getImage();
+    }
+
+    public void removeMember(StudyMember member) {
+        this.studyMembers.remove(member);
+        member.disconnectStudy();
+    }
+
+    public void startRecruit() {
+        if (canUpdateRecruiting()) {
+            this.recruiting = true;
+            this.recruitingUpdatedDateTime = LocalDateTime.now();
+        } else {
+            throw new InvalidRecruitmentStateException();
+        }
+    }
+
+    public void stopRecruit() {
+        if (canUpdateRecruiting()) {
+            this.recruiting = false;
+            this.recruitingUpdatedDateTime = LocalDateTime.now();
+        } else {
+            throw new InvalidRecruitmentStateException();
+        }
+    }
+
+    private boolean canUpdateRecruiting() {
+        return this.published && this.recruitingUpdatedDateTime == null || this.recruitingUpdatedDateTime.isBefore(LocalDateTime.now().minusHours(1));
     }
 }

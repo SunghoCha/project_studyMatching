@@ -3,11 +3,13 @@ package com.app.domain.event.controller;
 import com.app.domain.event.dto.*;
 import com.app.domain.event.service.EventService;
 import com.app.domain.event.util.EventCreateValidator;
+import com.app.domain.event.util.EventUpdateValidator;
 import com.app.global.config.auth.LoginUser;
 import com.app.global.config.auth.dto.CurrentUser;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,14 +19,18 @@ import org.springframework.web.bind.annotation.*;
 public class EventController {
 
     private final EventCreateValidator eventCreateValidator;
+    private final EventUpdateValidator eventUpdateValidator;
     private final EventService eventService;
 
     @PostMapping("/new")
     public ResponseEntity<EventCreateResponse> createEvent(@LoginUser CurrentUser currentUser,
                                                            @PathVariable("path") String path,
                                                            @Valid @RequestBody EventCreateRequest request,
-                                                           BindingResult bindingResult) {
+                                                           BindingResult bindingResult) throws BindException {
         eventCreateValidator.validate(request, bindingResult);
+        if (bindingResult.hasErrors()) {
+            throw new BindException(bindingResult);
+        }
         EventCreateResponse response = eventService.createEvent(currentUser.getId(), path, request);
 
         return ResponseEntity.ok(response);
@@ -48,7 +54,12 @@ public class EventController {
     public ResponseEntity<EventUpdateResponse> updateEvent(@LoginUser CurrentUser currentUser,
                                                            @PathVariable("path") String path,
                                                            @PathVariable("eventId") Long eventId,
-                                                           @RequestBody EventUpdateRequest request) {
+                                                           @RequestBody EventUpdateRequest request,
+                                                           BindingResult bindingResult) throws BindException {
+        eventUpdateValidator.validate(request, bindingResult);
+        if (bindingResult.hasErrors()) {
+            throw new BindException(bindingResult);
+        }
         EventUpdateResponse response = eventService.updateEvent(currentUser.getId(), eventId, path, request);
 
         return ResponseEntity.ok(response);
@@ -70,7 +81,7 @@ public class EventController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/{eventId}/disenroll")
+    @DeleteMapping("/{eventId}/disenroll")
     public ResponseEntity<Void> cancelEnrollment(@LoginUser CurrentUser currentUser, @PathVariable("path") String path, @PathVariable("eventId") Long eventId) {
         eventService.cancelEnrollment(currentUser.getId(), eventId);
 

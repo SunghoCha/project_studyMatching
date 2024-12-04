@@ -16,11 +16,11 @@ public class StudyTag extends BaseTimeEntity {
     @Column(name = "study_tag_id")
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "study_id")
     private Study study;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tag_id")
     private Tag tag;
 
@@ -28,5 +28,9 @@ public class StudyTag extends BaseTimeEntity {
     private StudyTag(Study study, Tag tag) {
         this.study = study;
         this.tag = tag;
+    }
+
+    public void disconnectStudy() {
+        this.study = null;
     }
 }

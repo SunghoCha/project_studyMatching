@@ -12,11 +12,13 @@ import java.util.List;
 public class StudySearchCond {
 
     private List<String> tags;
-    private List<String> zones;
+    private List<Long> zoneIds;
+    private List<String> titles;
 
     @Builder
-    public StudySearchCond(List<String> tags, List<String> zones) {
+    public StudySearchCond(List<String> tags, List<Long> zoneIds, List<String> titles) {
         this.tags = tags;
-        this.zones = zones;
+        this.zoneIds = zoneIds;
+        this.titles = titles;
     }
 }

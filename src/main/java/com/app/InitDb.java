@@ -1,7 +1,9 @@
 package com.app;
 
+import com.app.domain.study.Study;
 import com.app.domain.study.dto.StudyCreateRequest;
 import com.app.domain.study.dto.StudyCreateResponse;
+import com.app.domain.study.repository.StudyRepository;
 import com.app.domain.study.service.StudyService;
 import com.app.domain.study.studyTag.dto.StudyTagCreateRequest;
 import com.app.domain.study.studyTag.service.StudyTagService;
@@ -14,11 +16,15 @@ import com.app.domain.user.constant.Role;
 import com.app.domain.user.service.UserService;
 import com.app.domain.zone.Zone;
 import com.app.domain.zone.service.ZoneService;
+import com.app.global.error.exception.StudyNotFoundException;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.List;
@@ -31,7 +37,7 @@ import java.util.stream.Collectors;
 @Profile("local")
 @Component
 @RequiredArgsConstructor
-public class InitDb {
+public class InitDb implements ApplicationRunner {
 
     private final UserService userService;
     private final StudyService studyService;
@@ -39,14 +45,22 @@ public class InitDb {
     private final ZoneService zoneService;
     private final StudyZoneService studyZoneService;
     private final StudyTagService studyTagService;
+    private final StudyRepository studyRepository;
 
-    @PostConstruct
-    public void init() throws IOException {
-        log.info("initUser 실행");
-        tagService.initTagData();
-        zoneService.initZoneData();
-        User user = initUser();
-        initStudies(user.getId());
+    @Override
+    @Transactional
+    public void run(ApplicationArguments args) throws Exception {
+        log.info("초기 데이터 세팅 시작");
+        try {
+            tagService.initTagData();
+            zoneService.initZoneData();
+            User user = initUser();
+            initStudies(user.getId());
+            log.info("초기 데이터 세팅 완료");
+        } catch (Exception e) {
+            log.error("초기화 작업 중 오류 발생: {}", e.getMessage(), e);
+            throw e;
+        }
     }
 
     private User initUser() {
@@ -57,18 +71,6 @@ public class InitDb {
                 .build();
 
         return userService.save(user);
-    }
-
-    private void initTags() {
-        List<Tag> tags = List.of(new Tag("JavaScript"),
-                new Tag("Vue.js"),
-                new Tag("React"),
-                new Tag("Node.js"),
-                new Tag("CSS"),
-                new Tag("HTML"),
-                new Tag("Spring"),
-                new Tag("Java"));
-        tagService.saveAll(tags);
     }
 
     private void initStudies(Long userId) {
@@ -127,7 +129,11 @@ public class InitDb {
 
             // 스터디 생성
             StudyCreateResponse response = studyService.createStudy(userId, request);
-            log.info("스터디 생성 완료: {}", response.getPath());
+            log.info("스터디 생성: Path = {}, Title = {}", response.getPath(), title);
+
+            Study study = studyRepository.findByPath(path).orElseThrow(StudyNotFoundException::new);
+            study.publish();
+            study.startRecruit();
 
             // 생성된 스터디에 Zone 추가
             addZonesToStudy(userId, path, zones);

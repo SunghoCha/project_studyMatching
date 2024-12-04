@@ -4,8 +4,11 @@ import com.app.domain.event.QEvent;
 import com.app.domain.study.QStudy;
 import com.app.domain.study.Study;
 import com.app.domain.study.studyManager.QStudyManager;
+import com.app.domain.study.studyTag.QStudyTag;
+import com.app.domain.study.studyZone.QStudyZone;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -25,6 +28,26 @@ public class StudyRepositoryImpl implements StudyRepositoryCustom {
                 .leftJoin(study.studyManagers, studyManager)
                 .where(study.path.eq(path))
                 .fetchOne();
+
+        return Optional.ofNullable(result);
+    }
+
+    @Override
+    public Optional<Study> findByStudyWithAllByPath(String path) {
+        QStudy study = QStudy.study;
+
+        Study result = queryFactory
+                .select(study)
+                .from(study)
+                .where(study.path.eq(path))
+                .fetchOne();
+
+        if (result != null) {
+            result.getStudyTags().forEach(studyTag -> Hibernate.initialize(studyTag.getTag()));
+            result.getStudyZones().forEach(studyZone -> Hibernate.initialize(studyZone.getZone()));
+            result.getStudyMembers().forEach(studyMember -> Hibernate.initialize(studyMember.getUser()));
+            result.getStudyManagers().forEach(studyManager -> Hibernate.initialize(studyManager.getUser()));
+        }
 
         return Optional.ofNullable(result);
     }

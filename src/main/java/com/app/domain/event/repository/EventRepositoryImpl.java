@@ -1,6 +1,7 @@
 package com.app.domain.event.repository;
 
 import com.app.domain.event.Event;
+import com.app.domain.event.QEnrollment;
 import com.app.domain.event.QEvent;
 import com.app.domain.study.QStudy;
 import com.app.domain.study.studyManager.QStudyManager;
@@ -46,6 +47,22 @@ public class EventRepositoryImpl implements EventRepositoryCustom {
                         event.id.eq(eventId),
                         studyManager.user.id.eq(userId)
                 )
+                .fetchOne();
+
+        return Optional.ofNullable(result);
+    }
+
+    @Override
+    public Optional<Event> findEventWithEnrollmentById(Long eventId) {
+        QEvent event = QEvent.event;
+        QEnrollment enrollment = QEnrollment.enrollment;
+
+        Event result = queryFactory
+                .select(event)
+                .from(event)
+                .leftJoin(event.enrollments, enrollment).fetchJoin()
+                .where(
+                        event.id.eq(eventId))
                 .fetchOne();
 
         return Optional.ofNullable(result);

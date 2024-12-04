@@ -53,7 +53,7 @@ public class EventService {
     }
 
     public EventResponse getEvent(Long eventId) {
-        Event event = eventRepository.findById(eventId).orElseThrow(EventNotFoundException::new);
+        Event event = eventRepository.findEventWithEnrollmentById(eventId).orElseThrow(EventNotFoundException::new);
 
         return EventResponse.of(event);
     }
@@ -103,7 +103,7 @@ public class EventService {
 
     public EnrollmentCreateResponse createEnrollment(Long userId, Long eventId) {
         User user = userService.getById(userId);
-        Event event = eventRepository.findById(eventId).orElseThrow(EventNotFoundException::new);
+        Event event = eventRepository.findEventWithEnrollmentById(eventId).orElseThrow(EventNotFoundException::new);
 
         if (enrollmentRepository.existsByEventAndUser(event, user)) {
             throw new EnrollmentAlreadyExistException();
@@ -121,7 +121,7 @@ public class EventService {
 
     public void cancelEnrollment(Long userId, Long eventId) {
         User user = userService.getById(userId);
-        Event event = eventRepository.findById(eventId).orElseThrow(EventNotFoundException::new);
+        Event event = eventRepository.findEventWithEnrollmentById(eventId).orElseThrow(EventNotFoundException::new);
 
         Enrollment enrollment = enrollmentRepository.findByEventAndUser(event, user).orElseThrow(InvalidEnrollmentException::new);
 

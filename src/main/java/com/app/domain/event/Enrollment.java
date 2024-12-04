@@ -16,10 +16,10 @@ public class Enrollment {
     @Column(name = "enrollment_id")
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Event event;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
     private LocalDateTime enrolledAt;

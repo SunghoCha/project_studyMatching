@@ -160,7 +160,7 @@ class StudyServiceTest {
                 studyRepository.save(study);
             }
             // when
-            PagedResponse<StudyQueryResponse> response = studyService.getStudies(PageRequest.of(0, 9));
+            PagedResponse<StudyQueryResponse> response = studyService.getStudies(null, PageRequest.of(0, 9));
             // then
             assertThat(response.getCurrentPage()).isEqualTo(1);
             assertThat(response.getSize()).isEqualTo(9);
