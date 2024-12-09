@@ -1,23 +1,23 @@
 package com.app.domain.userTag.service;
 
 import com.app.domain.tag.Tag;
-import com.app.domain.tag.repository.TagRepository;
 import com.app.domain.tag.service.TagService;
 import com.app.domain.user.User;
 import com.app.domain.user.repository.UserRepository;
 import com.app.domain.userTag.UserTag;
+import com.app.domain.userTag.dto.UserTagResponse;
 import com.app.domain.userTag.dto.UserTagUpdateRequest;
 import com.app.domain.userTag.dto.UserTagUpdateResponse;
 import com.app.domain.userTag.repository.UserTagRepository;
-import com.app.global.error.ErrorCode;
-import com.app.global.error.exception.InvalidTagException;
 import com.app.global.error.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -51,7 +51,19 @@ public class UserTagService {
         return UserTagUpdateResponse.of(userTags);
     }
 
-    public Set<UserTag> getUserTags(Long userId) {
+    public UserTagResponse findUserTags(Long userId) {
+
+        List<String> userTags = Optional.ofNullable(userTagRepository.findByUserId(userId))
+                .orElse(Collections.emptyList()) // 사용자가 태그설정 처음이면 null일수도 있음
+                .stream()
+                .map(userTag -> userTag.getTag().getTitle())
+                .toList();
+
+        return UserTagResponse.of(userTags);
+    }
+
+    public List<UserTag> getUserTags(Long userId) {
+
         return userTagRepository.findByUserId(userId);
     }
 }

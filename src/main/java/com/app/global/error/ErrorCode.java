@@ -41,8 +41,8 @@ public enum ErrorCode {
     INVALID_START_DATE_TIME(HttpStatus.BAD_REQUEST, "E-003", "유효하지 않은 모임 시작 날짜입니다."),
     EVENT_NOT_EXISTS(HttpStatus.BAD_REQUEST, "E-004", "해당 이벤트는 존재하지 않습니다."),
     ENROLLMENT_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "E-005", "이미 존재하는 등록입니다."),
-    INVALID_ENROLLMENT(HttpStatus.BAD_REQUEST, "E-006", "존재하지 않는 등록입니다."),
-    INVALID_RECRUITMENT_STATE(HttpStatus.BAD_REQUEST, "E-007", "인원 모집 설정에 실패하였습니다. 스터디를 공개하거나 한 시간 뒤 다시 시도하세요.")
+    INVALID_ENROLLMENT(HttpStatus.BAD_REQUEST, "E-006", "유효하지 않는 등록입니다."),
+    INVALID_RECRUITMENT_STATE(HttpStatus.BAD_REQUEST, "E-007", "인원 모집 설정에 실패하였습니다.")
     ;
 
     ErrorCode(HttpStatus httpStatus, String errorCode, String message) {

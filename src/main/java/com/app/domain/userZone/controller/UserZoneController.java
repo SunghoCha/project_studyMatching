@@ -7,11 +7,11 @@ import com.app.domain.userZone.service.UserZoneService;
 import com.app.global.config.auth.LoginUser;
 import com.app.global.config.auth.dto.CurrentUser;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Set;
-
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/user-zone")
@@ -21,7 +21,9 @@ public class UserZoneController {
 
     @GetMapping
     public ResponseEntity<UserZoneResponse> getUserZones(@LoginUser CurrentUser currentUser) {
-        UserZoneResponse userZones = userZoneService.getUserZones(currentUser.getId());
+        UserZoneResponse userZones = userZoneService.findUserZones(currentUser.getId());
+
+
 
         return ResponseEntity.ok(userZones);
     }

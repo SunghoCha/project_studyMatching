@@ -14,6 +14,10 @@ import com.app.domain.study.studyMember.StudyMember;
 import com.app.domain.study.studyMember.repository.StudyMemberRepository;
 import com.app.domain.user.User;
 import com.app.domain.user.service.UserService;
+import com.app.domain.userTag.UserTag;
+import com.app.domain.userTag.service.UserTagService;
+import com.app.domain.userZone.UserZone;
+import com.app.domain.userZone.service.UserZoneService;
 import com.app.global.error.exception.StudyMemberNotFoundException;
 import com.app.global.error.exception.StudyNotFoundException;
 import com.app.global.error.exception.StudyPathAlreadyExistException;
@@ -24,8 +28,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -38,6 +45,9 @@ public class StudyService {
     private final StudyQueryRepository studyQueryRepository;
     private final StudyManagerRepository studyManagerRepository;
     private final StudyMemberRepository studyMemberRepository;
+    private final UserTagService userTagService;
+    private final UserZoneService userZoneService;
+    private final Clock clock;
 
     public StudyCreateResponse createStudy(Long userId, StudyCreateRequest request) {
         Optional<Study> existingStudy = studyRepository.findByPath(request.getPath());
@@ -152,22 +162,28 @@ public class StudyService {
 
     public Boolean startRecruit(Long userId, String path) {
         Study study = findAuthorizedStudy(userId, path);
-        study.startRecruit();
+        study.startRecruit(LocalDateTime.now(clock));
 
         return study.isRecruiting();
     }
 
     public Boolean stopRecruit(Long userId, String path) {
         Study study = findAuthorizedStudy(userId, path);
-        study.stopRecruit();
+        study.stopRecruit(LocalDateTime.now(clock));
 
         return study.isRecruiting();
     }
 
     public String updateStudyPath(Long userId, String path, StudyPathUpdateRequest request) {
         Study study = findAuthorizedStudy(userId, path);
+        String newPath = request.getPath();
+
+        if (!study.getPath().equals(newPath) && studyRepository.findByPath(newPath).isPresent()) {
+            throw new StudyPathAlreadyExistException();
+        }
+
         StudyEditor studyEditor = study.toEditor()
-                .path(request.getPath())
+                .path(newPath)
                 .build();
         study.edit(studyEditor);
 
@@ -182,5 +198,19 @@ public class StudyService {
         study.edit(studyEditor);
 
         return study.getTitle();
+    }
+
+    public PagedResponse<StudyQueryResponse> getStudyWishlist(Long userId, Pageable pageable) {
+        List<UserTag> userTags = userTagService.getUserTags(userId);
+        List<String> tags = userTags.stream()
+                .map(userTag -> userTag.getTag().getTitle())
+                .toList();
+
+        List<UserZone> userZones = userZoneService.getUserZones(userId);
+        List<Long> zoneIds = userZones.stream()
+                .map(userZone -> userZone.getZone().getId())
+                .toList();
+
+        return studyQueryRepository.findStudyWishList(tags, zoneIds, pageable);
     }
 }

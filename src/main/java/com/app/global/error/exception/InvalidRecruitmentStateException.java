@@ -4,7 +4,7 @@ import com.app.global.error.ErrorCode;
 
 public class InvalidRecruitmentStateException extends BusinessException {
 
-    private static final ErrorCode errorCode = ErrorCode.INVALID_ENROLLMENT;
+    private static final ErrorCode errorCode = ErrorCode.INVALID_RECRUITMENT_STATE;
 
     public InvalidRecruitmentStateException() {
         super(errorCode);

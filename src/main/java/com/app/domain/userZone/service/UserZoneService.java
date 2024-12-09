@@ -17,8 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -30,10 +28,14 @@ public class UserZoneService {
     private final ZoneService zoneService;
     private final ZoneRepository zoneRepository;
 
-    public UserZoneResponse getUserZones(Long userId) {
+    public UserZoneResponse findUserZones(Long userId) {
         List<UserZone> userZones = userZoneRepository.findAllByUserId(userId);
 
         return UserZoneResponse.of(userZones);
+    }
+
+    public List<UserZone> getUserZones(Long userId) {
+        return userZoneRepository.findAllByUserId(userId);
     }
 
     public UserZoneUpdateResponse updateUserZones(Long userId, UserZoneUpdateRequest request) {

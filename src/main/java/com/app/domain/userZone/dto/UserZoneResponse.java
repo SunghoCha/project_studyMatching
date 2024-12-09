@@ -12,20 +12,20 @@ import java.util.List;
 @NoArgsConstructor
 public class UserZoneResponse {
 
-    private List<Long> zoneIds;
+    private List<ZoneDetailResponse> zones;
 
     @Builder
-    public UserZoneResponse(List<Long> zoneIds) {
-        this.zoneIds = zoneIds;
+    public UserZoneResponse(List<ZoneDetailResponse> zones) {
+        this.zones = zones;
     }
 
     public static UserZoneResponse of(List<UserZone> userZones) {
-        List<Long> zoneIds = userZones.stream()
-                .map(userZone -> userZone.getZone().getId())
+        List<ZoneDetailResponse> zones = userZones.stream()
+                .map(userZone -> ZoneDetailResponse.of(userZone.getZone()))
                 .toList();
 
         return UserZoneResponse.builder()
-                .zoneIds(zoneIds)
+                .zones(zones)
                 .build();
     }
 

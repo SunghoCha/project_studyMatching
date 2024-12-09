@@ -55,6 +55,13 @@ public class StudyController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/my-study-wishlist")
+    public ResponseEntity<PagedResponse<StudyQueryResponse>> getStudyWishlist(@LoginUser CurrentUser currentUser, Pageable pageable) {
+        PagedResponse<StudyQueryResponse> response = studyService.getStudyWishlist(currentUser.getId(), pageable);
+
+        return ResponseEntity.ok(response);
+    }
+
     @PatchMapping("/description/{path}")
     public ResponseEntity<StudyUpdateResponse> updateStudy(@LoginUser CurrentUser currentUser,
                                                            @PathVariable("path") String path,

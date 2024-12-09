@@ -7,26 +7,25 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
-import java.util.Set;
 
 @Getter @Setter
 @NoArgsConstructor
 public class UserZoneCreateResponse {
 
-    private List<Long> zoneIds;
+    private List<ZoneDetailResponse> zones;
 
     @Builder
-    public UserZoneCreateResponse(List<Long> zoneIds) {
-        this.zoneIds = zoneIds;
+    public UserZoneCreateResponse(List<ZoneDetailResponse> zones) {
+        this.zones = zones;
     }
 
-    public static UserZoneCreateResponse of(Set<UserZone> userZones) {
-        List<Long> zoneIds = userZones.stream()
-                .map(userZone -> userZone.getZone().getId())
+    public static UserZoneCreateResponse of(List<UserZone> userZones) {
+        List<ZoneDetailResponse> zones = userZones.stream()
+                .map(userZone -> ZoneDetailResponse.of(userZone.getZone()))
                 .toList();
 
         return UserZoneCreateResponse.builder()
-                .zoneIds(zoneIds)
+                .zones(zones)
                 .build();
     }
 

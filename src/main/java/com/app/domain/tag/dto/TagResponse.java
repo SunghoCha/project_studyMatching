@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 @Getter @Setter
 @NoArgsConstructor
+@EqualsAndHashCode
 public class TagResponse {
     // TODO 필드값 List 형태로 변환
     private String tag;

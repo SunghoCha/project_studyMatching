@@ -459,9 +459,7 @@ class StudyZoneControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.delete("/study-zone/{path}", path)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.zoneIds")
-                        .value(Matchers.containsInAnyOrder(firstHalfZoneIds.stream().map(Long::intValue).toArray())))
+                .andExpect(MockMvcResultMatchers.status().isNoContent())
                 .andDo(MockMvcResultHandlers.print());
     }
 

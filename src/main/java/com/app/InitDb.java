@@ -27,6 +27,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -133,7 +134,7 @@ public class InitDb implements ApplicationRunner {
 
             Study study = studyRepository.findByPath(path).orElseThrow(StudyNotFoundException::new);
             study.publish();
-            study.startRecruit();
+            study.startRecruit(LocalDateTime.now());
 
             // 생성된 스터디에 Zone 추가
             addZonesToStudy(userId, path, zones);

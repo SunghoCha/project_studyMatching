@@ -159,25 +159,35 @@ public class Study extends BaseTimeEntity {
         member.disconnectStudy();
     }
 
-    public void startRecruit() {
-        if (canUpdateRecruiting()) {
+    public void startRecruit(LocalDateTime currentTime) {
+        if (this.recruiting) {
+            throw new InvalidRecruitmentStateException();
+        }
+
+        if (canUpdateRecruiting(currentTime)) {
             this.recruiting = true;
-            this.recruitingUpdatedDateTime = LocalDateTime.now();
+            this.recruitingUpdatedDateTime = currentTime;
         } else {
             throw new InvalidRecruitmentStateException();
         }
     }
 
-    public void stopRecruit() {
-        if (canUpdateRecruiting()) {
+    public void stopRecruit(LocalDateTime currentTime) {
+        if (!this.recruiting) {
+            throw new InvalidRecruitmentStateException();
+        }
+
+        if (canUpdateRecruiting(currentTime)) {
             this.recruiting = false;
-            this.recruitingUpdatedDateTime = LocalDateTime.now();
+            this.recruitingUpdatedDateTime = currentTime;
         } else {
             throw new InvalidRecruitmentStateException();
         }
     }
 
-    private boolean canUpdateRecruiting() {
-        return this.published && this.recruitingUpdatedDateTime == null || this.recruitingUpdatedDateTime.isBefore(LocalDateTime.now().minusHours(1));
+    private boolean canUpdateRecruiting(LocalDateTime currentTime) {
+        return this.published &&
+                !this.closed &&
+                (this.recruitingUpdatedDateTime == null || this.recruitingUpdatedDateTime.isBefore(currentTime.minusHours(1)));
     }
 }

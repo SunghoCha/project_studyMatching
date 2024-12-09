@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter @Setter
 @NoArgsConstructor
@@ -19,10 +20,11 @@ public class EventResponse {
     private LocalDateTime startDateTime;
     private LocalDateTime endDateTime;
     private Integer limitOfEnrollments;
+    private List<EnrollmentResponse> enrollments;
 
     @Builder
     public EventResponse(Long eventId, String title, String description, LocalDateTime endEnrollmentDateTime,
-                         LocalDateTime startDateTime, LocalDateTime endDateTime, Integer limitOfEnrollments) {
+                         LocalDateTime startDateTime, LocalDateTime endDateTime, Integer limitOfEnrollments, List<EnrollmentResponse> enrollments) {
         this.eventId = eventId;
         this.title = title;
         this.description = description;
@@ -30,9 +32,11 @@ public class EventResponse {
         this.startDateTime = startDateTime;
         this.endDateTime = endDateTime;
         this.limitOfEnrollments = limitOfEnrollments;
+        this.enrollments = enrollments;
     }
 
     public static EventResponse of(Event event) {
+        // TODO: event-enrollment 쿼리 최적화
         return EventResponse.builder()
                 .eventId(event.getId())
                 .title(event.getTitle())
@@ -41,6 +45,9 @@ public class EventResponse {
                 .startDateTime(event.getStartDateTime())
                 .endDateTime(event.getEndDateTime())
                 .limitOfEnrollments(event.getLimitOfEnrollments())
+                .enrollments(event.getEnrollments().stream()
+                        .map(EnrollmentResponse::of)
+                        .toList())
                 .build();
     }
 }

@@ -7,13 +7,18 @@ import com.app.domain.study.dto.StudyCreateRequest;
 import com.app.domain.study.dto.StudyQueryResponse;
 import com.app.domain.study.dto.StudyResponse;
 import com.app.domain.study.repository.StudyRepository;
+import com.app.domain.study.service.StudyService;
 import com.app.domain.study.studyManager.StudyManager;
 import com.app.domain.study.studyManager.repository.StudyManagerRepository;
+import com.app.domain.study.studyMember.StudyMember;
+import com.app.domain.study.studyMember.repository.StudyMemberRepository;
 import com.app.domain.user.User;
+import com.app.domain.user.constant.Role;
 import com.app.domain.user.repository.UserRepository;
 import com.app.global.config.auth.LoginUser;
 import com.app.global.config.auth.dto.CurrentUser;
 import com.app.global.error.ErrorCode;
+import com.app.global.error.exception.StudyNotFoundException;
 import com.app.global.error.exception.UserNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.Assert;
@@ -34,6 +39,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -57,6 +65,9 @@ class StudyControllerTest {
 
     @Autowired
     StudyManagerRepository studyManagerRepository;
+    private StudyService studyService;
+    @Autowired
+    private StudyMemberRepository studyMemberRepository;
 
     @Test
     @WithAccount
@@ -130,13 +141,6 @@ class StudyControllerTest {
                         .value("400 BAD_REQUEST"))
                 .andDo(MockMvcResultHandlers.print());
     }
-
-//    @GetMapping("/{path}")
-//    public ResponseEntity<StudyResponse> getStudy(@LoginUser CurrentUser currentUser, @PathVariable("path") String path) {
-//        StudyResponse response = studyService.getStudy(currentUser.getId(), path);
-//
-//        return ResponseEntity.ok(response);
-//    }
 
     @Test
     @WithAccount
@@ -229,6 +233,60 @@ class StudyControllerTest {
 
         // expected
         mockMvc.perform(MockMvcRequestBuilders.get("/study/list"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(9))
+                .andExpect(jsonPath("$.currentPage").value(1))
+                .andExpect(jsonPath("$.totalPages").value(3))
+                .andExpect(jsonPath("$.totalCount").value(20))
+                .andExpect(jsonPath("$.size").value(9))
+                .andExpect(jsonPath("$.content[0].path").value("path1"))
+                .andExpect(jsonPath("$.content[0].title").value("테스트 스터디1"))
+                .andExpect(jsonPath("$.content[0].shortDescription").value("짧은 글 설명1"))
+                .andExpect(jsonPath("$.content[8].path").value("path9"))
+                .andExpect(jsonPath("$.content[8].title").value("테스트 스터디9"))
+                .andExpect(jsonPath("$.content[8].shortDescription").value("짧은 글 설명9"))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    @WithAccount
+    @DisplayName("가입 스터디 목록 조회 성공 테스트")
+    void get_joined_studies_with_correct_input() throws Exception {
+        // given
+        // 스터디 세팅
+        User user = userRepository.findByEmail("test@gmail.com").orElseThrow(UserNotFoundException::new);
+        for (int i = 1; i <= 20; i++ ) {
+            Study study = Study.builder()
+                    .path("path" + i)
+                    .title("테스트 스터디" + i)
+                    .shortDescription("짧은 글 설명" + i)
+                    .fullDescription("긴 글 설명" + i)
+                    .build();
+            StudyManager manager = StudyManager.createManager(user, study);
+            studyManagerRepository.save(manager);
+            study.addManager(manager);
+            studyRepository.save(study);
+        }
+
+        User member = User.builder()
+                .name("멤버1")
+                .email("member@example.com")
+                .role(Role.GUEST)
+                .build();
+        User savedMember = userRepository.save(member);
+
+        // 스터디 가입 세팅
+        for (int i = 1; i <= 3; i++) {
+            Study study = studyRepository.findByPath("path" + i).orElseThrow(StudyNotFoundException::new);
+            StudyMember studyMember = StudyMember.createMember(member, study);
+
+            StudyMember savedStudyMember = studyMemberRepository.save(studyMember);
+            study.addMember(savedStudyMember);
+        }
+
+
+        // expected
+        mockMvc.perform(MockMvcRequestBuilders.get("/study/my-joined-study-list"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()").value(9))
                 .andExpect(jsonPath("$.currentPage").value(1))

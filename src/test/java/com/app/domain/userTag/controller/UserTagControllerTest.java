@@ -50,7 +50,7 @@ class UserTagControllerTest {
     @Test
     @WithAccount()
     @DisplayName("userTag 수정 성공 테스트")
-    void tag_edit_with_correct_input() throws Exception {
+    void tag_edit_UserTags_with_correct_input() throws Exception {
         // given
         OAuth2User oAuth2User = (DefaultOAuth2User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long id = (Long) oAuth2User.getAttributes().get("id");
@@ -60,7 +60,7 @@ class UserTagControllerTest {
                 .build();
 
         // expected
-        mockMvc.perform(MockMvcRequestBuilders.patch("/user-tag/{userId}", id)
+        mockMvc.perform(MockMvcRequestBuilders.patch("/user-tag", id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -71,7 +71,7 @@ class UserTagControllerTest {
     @Test
     @WithAccount()
     @DisplayName("잘못된 tag로 userTag 수정 요청시 보내면 예외 발생")
-    void tag_edit_with_wrong_input() throws Exception {
+    void tag_edit_UserTags_with_wrong_input() throws Exception {
         // given
         OAuth2User oAuth2User = (DefaultOAuth2User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long id = (Long) oAuth2User.getAttributes().get("id");
@@ -81,7 +81,7 @@ class UserTagControllerTest {
                 .build();
 
         // expected
-        mockMvc.perform(MockMvcRequestBuilders.patch("/user-tag/{userId}", id)
+        mockMvc.perform(MockMvcRequestBuilders.patch("/user-tag", id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())

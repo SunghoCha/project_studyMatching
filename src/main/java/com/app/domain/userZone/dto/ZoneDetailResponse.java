@@ -1,4 +1,4 @@
-package com.app.domain.zone.dto;
+package com.app.domain.userZone.dto;
 
 import com.app.domain.zone.Zone;
 import com.querydsl.core.annotations.QueryProjection;
@@ -9,7 +9,7 @@ import lombok.Setter;
 
 @Getter @Setter
 @EqualsAndHashCode
-public class ZoneResponse {
+public class ZoneDetailResponse {
 
     private Long id;
     private String city;
@@ -18,15 +18,15 @@ public class ZoneResponse {
 
     @Builder
     @QueryProjection
-    public ZoneResponse(Long id, String city, String localName, String province) {
+    public ZoneDetailResponse(Long id, String city, String localName, String province) {
         this.id = id;
         this.city = city;
         this.localName = localName;
         this.province = province;
     }
 
-    public static ZoneResponse of(Zone zone) {
-        return ZoneResponse.builder()
+    public static ZoneDetailResponse of(Zone zone) {
+        return ZoneDetailResponse.builder()
                 .id(zone.getId())
                 .city(zone.getCity())
                 .localName(zone.getLocalName())
