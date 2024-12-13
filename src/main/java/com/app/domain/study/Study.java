@@ -7,6 +7,7 @@ import com.app.domain.study.studyTag.StudyTag;
 import com.app.domain.study.studyZone.StudyZone;
 import com.app.domain.user.User;
 import com.app.global.error.exception.InvalidRecruitmentStateException;
+import com.app.global.error.exception.InvalidStudyJoinConditionException;
 import com.app.global.error.exception.InvalidStudyPublishStateException;
 import com.app.global.error.exception.StudyCloseException;
 import jakarta.persistence.*;
@@ -65,8 +66,6 @@ public class Study extends BaseTimeEntity {
 
     private boolean closed;
 
-    private boolean useBanner;
-
     private int memberCount;
 
     @Builder
@@ -101,7 +100,17 @@ public class Study extends BaseTimeEntity {
     }
 
     public void addMember(StudyMember member) {
-        this.studyMembers.add(member);
+        if (!isJoinable(member.getUser())) {
+            throw new InvalidStudyJoinConditionException();
+        }
+            this.studyMembers.add(member);
+            this.memberCount++;
+    }
+
+    public void removeMember(StudyMember member) {
+        this.studyMembers.remove(member);
+        this.memberCount--;
+        member.disconnectStudy();
     }
 
     public boolean isMember(User user) {
@@ -115,8 +124,7 @@ public class Study extends BaseTimeEntity {
     }
 
     public boolean isJoinable(User user) {
-        return this.isPublished() && this.isRecruiting()
-                && !isMember(user) && !isManager(user);
+        return this.isPublished() && !isMember(user) && !isManager(user);
     }
 
     public void addStudyTags(Set<StudyTag> tagsToAdd) {
@@ -152,11 +160,6 @@ public class Study extends BaseTimeEntity {
         this.shortDescription = studyEditor.getShortDescription();
         this.fullDescription = studyEditor.getFullDescription();
         this.image = studyEditor.getImage();
-    }
-
-    public void removeMember(StudyMember member) {
-        this.studyMembers.remove(member);
-        member.disconnectStudy();
     }
 
     public void startRecruit(LocalDateTime currentTime) {

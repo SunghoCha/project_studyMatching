@@ -31,6 +31,7 @@ public enum ErrorCode {
     INVALID_STUDY_PUBLISH_STATE(HttpStatus.BAD_REQUEST, "S-003", "스터디를 공개할 수 없는 상태입니다."),
     INVALID_STUDY_CLOSE_STATE(HttpStatus.BAD_REQUEST, "S-004", "스터디를 종료할 수 없는 상태입니다."),
     INVALID_SORT_PROPERTY(HttpStatus.BAD_REQUEST, "S-005", "정렬 조건이 올바르지 않습니다."),
+    INVALID_STUDY_JOIN_CONDITION(HttpStatus.BAD_REQUEST, "S-006", "스터디에 가입할 수 있는 조건을 만족하지 않습니다."),
 
     // StudyMember
     STUDY_MEMBER_NOT_EXISTS(HttpStatus.BAD_REQUEST, "SM-001", "해당 스터디멤버는 존재하지 않습니다."),

@@ -13,6 +13,6 @@ public @interface WithAccount {
 
     String name() default "testName";
     String email() default "test@gmail.com";
-    String role() default "ROLE_GUEST";
+    String role() default "ROLE_ADMIN";
 
 }

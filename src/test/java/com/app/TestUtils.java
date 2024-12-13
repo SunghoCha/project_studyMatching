@@ -17,7 +17,7 @@ public class TestUtils {
         return zones;
     }
 
-    private static Zone createZone(String city, String localName, String province) {
+    public static Zone createZone(String city, String localName, String province) {
         return Zone.builder()
                 .city(city)
                 .localName(localName)
