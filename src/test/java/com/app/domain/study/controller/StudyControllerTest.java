@@ -298,9 +298,9 @@ class StudyControllerTest {
         // 스터디 가입 세팅
         for (int i = 1; i <= 3; i++) {
             Study study = studyRepository.findByPath("path" + i).orElseThrow(StudyNotFoundException::new);
-            StudyMember studyMember = StudyMember.createMember(findMember, study);
+            study.publish();
 
-            StudyMember savedStudyMember = studyMemberRepository.save(studyMember);
+            StudyMember savedStudyMember = studyMemberRepository.save(StudyMember.createMember(findMember, study));
             study.addMember(savedStudyMember);
         }
 
@@ -483,14 +483,14 @@ class StudyControllerTest {
                 .shortDescription("짧은 글 설명1")
                 .fullDescription("긴 글 설명1")
                 .build();
-        StudyManager manager = StudyManager.createManager(user, study);
-        studyManagerRepository.save(manager);
-        study.addManager(manager);
         Study savedStudy = studyRepository.save(study);
+
+        StudyManager savedManager = studyManagerRepository.save(StudyManager.createManager(user, study));
+        study.addManager(savedManager);
 
         StudyUpdateRequest request = StudyUpdateRequest.builder()
                 .shortDescription("수정된 짧은 글1")
-                .fullDescription("수정된 긴 글 1")
+                .fullDescription("수정된 긴 글1")
                 .build();
 
         String json = objectMapper.writeValueAsString(request);

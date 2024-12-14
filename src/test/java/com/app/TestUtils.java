@@ -2,11 +2,21 @@ package com.app;
 
 import com.app.domain.tag.Tag;
 import com.app.domain.zone.Zone;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class TestUtils {
+
+    public static String getAuthenticatedEmail() {
+        OAuth2AuthenticationToken authentication =
+                (OAuth2AuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+
+        return (String) authentication.getPrincipal()
+                .getAttribute("email");
+    }
 
     public static List<Zone> createZones(int size) {
         List<Zone> zones = new ArrayList<>();

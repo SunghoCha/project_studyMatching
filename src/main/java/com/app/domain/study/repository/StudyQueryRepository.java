@@ -99,7 +99,7 @@ public class StudyQueryRepository {
 
         return PagedResponse.<StudyQueryResponse>builder()
                 .content(studyQueryResponses)
-                .currentPage(pageable.getPageNumber() + 1)
+                .currentPage(pageable.getPageNumber() + 1) // 페이지는 0이 아닌 1페이지부터
                 .totalPages(totalPages)
                 .totalCount(totalCount != null ? totalCount : 0)
                 .size(pageable.getPageSize())
@@ -134,7 +134,9 @@ public class StudyQueryRepository {
     }
 
     private static int getTotalPages(Pageable pageable, Long totalCount) {
-        return (int) Math.ceil((double) (totalCount != null ? totalCount : 0) / pageable.getPageSize());
+        int totalPages = (int) Math.ceil((double) (totalCount != null ? totalCount : 0) / pageable.getPageSize());
+
+        return Math.max(totalPages, 1);
     }
 
     private BooleanExpression titlesLike(QStudy study, List<String> titles) {
