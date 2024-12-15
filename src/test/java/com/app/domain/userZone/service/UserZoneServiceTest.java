@@ -1,26 +1,17 @@
 package com.app.domain.userZone.service;
 
-import com.app.WithAccount;
 import com.app.domain.user.User;
 import com.app.domain.user.repository.UserRepository;
-import com.app.domain.userZone.UserZone;
-import com.app.domain.userZone.dto.UserZoneUpdateResponse;
-import com.app.domain.userZone.dto.UserZoneUpdateRequest;
-import com.app.domain.userZone.repository.UserZoneRepository;
+import com.app.domain.user.userZone.UserZone;
+import com.app.domain.user.userZone.repository.UserZoneRepository;
+import com.app.domain.user.userZone.service.UserZoneService;
 import com.app.domain.zone.Zone;
 import com.app.domain.zone.repository.ZoneRepository;
-import org.assertj.core.groups.Tuple;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 

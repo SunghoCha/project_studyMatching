@@ -3,7 +3,7 @@ package com.app.domain.userTag.controller;
 import com.app.WithAccount;
 import com.app.domain.tag.Tag;
 import com.app.domain.tag.repository.TagRepository;
-import com.app.domain.userTag.dto.UserTagUpdateRequest;
+import com.app.domain.user.userTag.dto.UserTagUpdateRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;

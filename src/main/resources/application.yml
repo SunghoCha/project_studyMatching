@@ -3,6 +3,9 @@ server:
   servlet:
     context-path: /
 
+app:
+  host: http://localhost:80
+
 spring:
   profiles:
     active: local

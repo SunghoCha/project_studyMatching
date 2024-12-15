@@ -10,4 +10,5 @@ public interface StudyRepository extends JpaRepository<Study, Long>, StudyReposi
     Optional<Study> findByPath(String path);
 
     List<Study> findByPathIn(List<String> pathList);
+
 }

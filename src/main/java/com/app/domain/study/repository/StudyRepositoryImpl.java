@@ -6,6 +6,9 @@ import com.app.domain.study.Study;
 import com.app.domain.study.studyManager.QStudyManager;
 import com.app.domain.study.studyTag.QStudyTag;
 import com.app.domain.study.studyZone.QStudyZone;
+import com.app.domain.study.studyZone.StudyZone;
+import com.app.domain.tag.QTag;
+import com.app.domain.zone.QZone;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
@@ -20,7 +23,7 @@ public class StudyRepositoryImpl implements StudyRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Optional<Study> findByStudyWithManagerByPath(String path) {
+    public Optional<Study> findStudyWithManagerByPath(String path) {
         QStudy study = QStudy.study;
         QStudyManager studyManager = QStudyManager.studyManager;
         Study result = queryFactory.select(study)
@@ -33,7 +36,7 @@ public class StudyRepositoryImpl implements StudyRepositoryCustom {
     }
 
     @Override
-    public Optional<Study> findByStudyWithAllByPath(String path) {
+    public Optional<Study> findStudyWithAllByPath(String path) {
         QStudy study = QStudy.study;
 
         Study result = queryFactory
@@ -50,6 +53,25 @@ public class StudyRepositoryImpl implements StudyRepositoryCustom {
         }
 
         return Optional.ofNullable(result);
+    }
+
+    @Override
+    public Optional<Study> findStudyWithTagsAndZonesById(Long studyId) {
+        QStudy study = QStudy.study;
+        QStudyTag studyTag = QStudyTag.studyTag;
+        QTag tag = QTag.tag;
+        QStudyZone studyZone = QStudyZone.studyZone;
+        QZone zone = QZone.zone;
+
+        return Optional.ofNullable(queryFactory
+                .select(study)
+                .from(study)
+                .leftJoin(study.studyTags, studyTag).fetchJoin()
+                .leftJoin(studyTag.tag, tag).fetchJoin()
+                .leftJoin(study.studyZones, studyZone).fetchJoin()
+                .leftJoin(studyZone.zone, zone).fetchJoin()
+                .where(study.id.eq(studyId))
+                .fetchOne());
     }
 
 

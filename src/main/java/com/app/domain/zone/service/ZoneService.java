@@ -1,15 +1,10 @@
 package com.app.domain.zone.service;
 
-import com.app.domain.userZone.dto.UserZoneUpdateRequest;
 import com.app.domain.zone.Zone;
 import com.app.domain.zone.dto.ZoneResponse;
 import com.app.domain.zone.repository.ZoneRepository;
-import com.app.global.error.ErrorCode;
-import com.app.global.error.exception.InvalidZoneException;
 import com.app.global.error.exception.ZoneNotFoundException;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -18,9 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static java.nio.charset.StandardCharsets.UTF_8;

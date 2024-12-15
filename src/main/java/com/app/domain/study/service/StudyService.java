@@ -1,6 +1,7 @@
 package com.app.domain.study.service;
 
 import com.app.domain.common.dto.PagedResponse;
+import com.app.domain.study.event.StudyCreatedEvent;
 import com.app.domain.study.Study;
 import com.app.domain.study.StudyEditor;
 import com.app.domain.study.dto.*;
@@ -14,16 +15,17 @@ import com.app.domain.study.studyMember.StudyMember;
 import com.app.domain.study.studyMember.repository.StudyMemberRepository;
 import com.app.domain.user.User;
 import com.app.domain.user.service.UserService;
-import com.app.domain.userTag.UserTag;
-import com.app.domain.userTag.service.UserTagService;
-import com.app.domain.userZone.UserZone;
-import com.app.domain.userZone.service.UserZoneService;
+import com.app.domain.user.userTag.UserTag;
+import com.app.domain.user.userTag.service.UserTagService;
+import com.app.domain.user.userZone.UserZone;
+import com.app.domain.user.userZone.service.UserZoneService;
 import com.app.global.error.exception.StudyMemberNotFoundException;
 import com.app.global.error.exception.StudyNotFoundException;
 import com.app.global.error.exception.StudyPathAlreadyExistException;
 import com.app.global.error.exception.UnauthorizedAccessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,7 +34,6 @@ import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Slf4j
 @Service
@@ -48,6 +49,7 @@ public class StudyService {
     private final UserTagService userTagService;
     private final UserZoneService userZoneService;
     private final Clock clock;
+    private final ApplicationEventPublisher eventPublisher;
 
     public StudyCreateResponse createStudy(Long userId, StudyCreateRequest request) {
         Optional<Study> existingStudy = studyRepository.findByPath(request.getPath());
@@ -117,7 +119,7 @@ public class StudyService {
 
     public Study findStudyWithManager(Long userId, String path) {
         User user = userService.getById(userId);
-        Study study = studyRepository.findByStudyWithManagerByPath(path).orElseThrow(StudyNotFoundException::new);
+        Study study = studyRepository.findStudyWithManagerByPath(path).orElseThrow(StudyNotFoundException::new);
         if (!study.isManager(user)) {
             throw new UnauthorizedAccessException();
         }
@@ -126,7 +128,7 @@ public class StudyService {
 
     public StudyResponse joinStudy(Long userId, String path) {
         User user = userService.getById(userId);
-        Study study = studyRepository.findByStudyWithAllByPath(path).orElseThrow(StudyNotFoundException::new);
+        Study study = studyRepository.findStudyWithAllByPath(path).orElseThrow(StudyNotFoundException::new);
 
         StudyMember member = StudyMember.createMember(user, study);
         StudyMember saveMember = studyMemberRepository.save(member);
@@ -137,7 +139,7 @@ public class StudyService {
 
     public StudyResponse leaveStudy(Long userId, String path) {
         User user = userService.getById(userId);
-        Study study = studyRepository.findByStudyWithAllByPath(path).orElseThrow(StudyNotFoundException::new);
+        Study study = studyRepository.findStudyWithAllByPath(path).orElseThrow(StudyNotFoundException::new);
 
         StudyMember member = studyMemberRepository.findByStudyAndUser(study, user).orElseThrow(StudyMemberNotFoundException::new);
         study.removeMember(member);
@@ -149,6 +151,7 @@ public class StudyService {
     public Boolean publishStudy(Long userId, String path) {
         Study study = findAuthorizedStudy(userId, path);
         study.publish();
+        eventPublisher.publishEvent(new StudyCreatedEvent(study));
 
         return study.isPublished();
     }

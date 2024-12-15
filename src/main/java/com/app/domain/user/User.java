@@ -2,8 +2,8 @@ package com.app.domain.user;
 
 import com.app.domain.common.BaseTimeEntity;
 import com.app.domain.user.constant.Role;
-import com.app.domain.userTag.UserTag;
-import com.app.domain.userZone.UserZone;
+import com.app.domain.user.userTag.UserTag;
+import com.app.domain.user.userZone.UserZone;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -33,6 +33,19 @@ public class User extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
+
+    // TODO: 추후 수정로직 구현. 일단은 기본 설정 true
+    private boolean studyCreatedByEmail = true;
+
+    private boolean studyCreatedByWeb = true;
+
+    private boolean studyEnrollmentResultByEmail = true;
+
+    private boolean studyEnrollmentResultByWeb = true;
+
+    private boolean studyUpdatedByEmail = true;
+
+    private boolean studyUpdatedByWeb = true;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private final Set<UserTag> userTags = new HashSet<>();

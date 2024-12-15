@@ -1,6 +1,5 @@
 package com.app.domain.zone.repository;
 
-import com.app.domain.userZone.dto.UserZoneUpdateRequest;
 import com.app.domain.zone.Zone;
 import org.springframework.data.jpa.repository.JpaRepository;
 

@@ -13,6 +13,8 @@ import com.app.global.error.exception.StudyCloseException;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -192,5 +194,9 @@ public class Study extends BaseTimeEntity {
         return this.published &&
                 !this.closed &&
                 (this.recruitingUpdatedDateTime == null || this.recruitingUpdatedDateTime.isBefore(currentTime.minusHours(1)));
+    }
+
+    public String getEncodedPath() {
+        return URLEncoder.encode(this.path, StandardCharsets.UTF_8);
     }
 }
