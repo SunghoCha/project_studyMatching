@@ -38,4 +38,8 @@ public class Notification extends BaseTimeEntity {
         this.user = user;
         this.notificationType = notificationType;
     }
+
+    public void checked() {
+        this.checked = true;
+    }
 }

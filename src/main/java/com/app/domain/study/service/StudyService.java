@@ -7,6 +7,7 @@ import com.app.domain.study.StudyEditor;
 import com.app.domain.study.dto.*;
 import com.app.domain.study.dto.studySetting.StudyPathUpdateRequest;
 import com.app.domain.study.dto.studySetting.StudyTitleUpdateRequest;
+import com.app.domain.study.event.StudyUpdatedEvent;
 import com.app.domain.study.repository.StudyQueryRepository;
 import com.app.domain.study.repository.StudyRepository;
 import com.app.domain.study.studyManager.StudyManager;
@@ -113,6 +114,7 @@ public class StudyService {
                 .fullDescription(request.getFullDescription())
                 .build();
         study.edit(studyEditor);
+        eventPublisher.publishEvent(new StudyUpdatedEvent(study, "스터디 소개를 수정했습니다."));
 
         return StudyUpdateResponse.of(study);
     }
@@ -159,6 +161,7 @@ public class StudyService {
     public Boolean closeStudy(Long userId, String path) {
         Study study = findAuthorizedStudy(userId, path);
         study.close();
+        eventPublisher.publishEvent(new StudyUpdatedEvent(study, "스터디가 종료되었습니다."));
 
         return study.isClosed();
     }
@@ -166,6 +169,7 @@ public class StudyService {
     public Boolean startRecruit(Long userId, String path) {
         Study study = findAuthorizedStudy(userId, path);
         study.startRecruit(LocalDateTime.now(clock));
+        eventPublisher.publishEvent(new StudyUpdatedEvent(study, "팀원 모집이 시작되었습니다."));
 
         return study.isRecruiting();
     }
@@ -173,6 +177,7 @@ public class StudyService {
     public Boolean stopRecruit(Long userId, String path) {
         Study study = findAuthorizedStudy(userId, path);
         study.stopRecruit(LocalDateTime.now(clock));
+        eventPublisher.publishEvent(new StudyUpdatedEvent(study, "팀원 모집이 중단되었습니다."));
 
         return study.isRecruiting();
     }

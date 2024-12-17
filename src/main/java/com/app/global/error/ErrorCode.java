@@ -46,7 +46,11 @@ public enum ErrorCode {
     INVALID_RECRUITMENT_STATE(HttpStatus.BAD_REQUEST, "E-007", "인원 모집 설정에 실패하였습니다."),
 
     // Email
-    INVALID_EMAIL_SEND_CONDITION(HttpStatus.BAD_REQUEST, "EM-001", "이메일 전송에 실패하였습니다.");
+    INVALID_EMAIL_SEND_CONDITION(HttpStatus.BAD_REQUEST, "EM-001", "이메일 전송에 실패하였습니다."),
+
+    // Notification
+    INVALID_NOTIFICATION_TYPE(HttpStatus.BAD_REQUEST, "N-001", "유효하지 않은 알림 타입입니다."),
+    NOTIFICATION_NOT_EXIST(HttpStatus.BAD_REQUEST, "N-002", "해당 알림은 존재하지 않습니다.");
 
     ErrorCode(HttpStatus httpStatus, String errorCode, String message) {
         this.httpStatus = httpStatus;

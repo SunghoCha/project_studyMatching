@@ -49,18 +49,40 @@ public class StudyEventListener {
 
         users.forEach(user -> {
             if (user.isStudyCreatedByEmail()) {
-                sendStudyCreatedByEmail(user, study);
+                sendStudyCreatedByEmail(user, study, "새로운 스터디가 생성되었습니다.",
+                        "관심 스터디, '" + study.getTitle() + "' 가 생성되었습니다.");
             }
             if (user.isStudyCreatedByWeb()) {
-                saveStudyCreatedNotification(user, study);
+                saveStudyCreatedNotification(user, study, study.getShortDescription(), NotificationType.STUDY_CREATED);
             }
         });
 
         log.info("{} is created.", study.getTitle());
-        // TODO: 이메일 보내거나 DB에 notification 정보 전달
+
     }
 
-    private void saveStudyCreatedNotification(User user, Study study) {
+    @EventListener
+    public void handleStudyUpdateEvent(StudyUpdatedEvent studyUpdatedEvent) {
+        Study study = studyRepository.findStudyWithTagsAndZonesById(studyUpdatedEvent.getStudy().getId())
+                .orElseThrow(StudyNotFoundException::new);
+
+        List<Tag> tags = study.getStudyTags().stream().map(StudyTag::getTag).toList();
+        List<Zone> zones = study.getStudyZones().stream().map(StudyZone::getZone).toList();
+        List<User> users = userRepository.findUserByTagsAndZones(tags, zones);
+
+        users.forEach(user -> {
+            if (user.isStudyUpdatedByEmail()) {
+                sendStudyCreatedByEmail(user, study, studyUpdatedEvent.getMessage(),
+                        "관심 스터디, '" + study.getTitle() + "' 에 새 소식이 있습니다.");
+            }
+            if (user.isStudyUpdatedByWeb()) {
+                saveStudyCreatedNotification(user, study, study.getShortDescription(), NotificationType.STUDY_UPDATED);
+            }
+        });
+
+    }
+
+    private void saveStudyCreatedNotification(User user, Study study, String message, NotificationType notificationType) {
         Notification notification = Notification.builder()
                 .title(study.getTitle())
                 .link("/study/" + study.getEncodedPath())
@@ -72,17 +94,17 @@ public class StudyEventListener {
         notificationRepository.save(notification);
     }
 
-    private void sendStudyCreatedByEmail(User user, Study study) {
+    private void sendStudyCreatedByEmail(User user, Study study, String contextMessage, String emailSubject) {
         Context context = new Context();
         context.setVariable("name", user.getName());
         context.setVariable("link", "/study/" + study.getEncodedPath());
         context.setVariable("linkName", study.getTitle());
-        context.setVariable("message", "새로운 스터디가 생성되었습니다.");
+        context.setVariable("message", contextMessage);
         context.setVariable("host", appProperties.getHost());
 
         String message = templateEngine.process("mail/simple-link", context);
         EmailMessage emailMessage = EmailMessage.builder()
-                .subject("관심 스터디, '" + study.getTitle() + "' 가 생성되었습니다.")
+                .subject(emailSubject)
                 .to(user.getEmail())
                 .message(message)
                 .build();

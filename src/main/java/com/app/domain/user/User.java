@@ -68,6 +68,25 @@ public class User extends BaseTimeEntity {
         return this;
     }
 
+    public UserEditor.UserEditorBuilder toEditor() {
+        return UserEditor.builder()
+                .studyCreatedByEmail(this.studyCreatedByEmail)
+                .studyCreatedByWeb(this.studyCreatedByWeb)
+                .studyEnrollmentResultByEmail(this.studyEnrollmentResultByEmail)
+                .studyEnrollmentResultByWeb(this.studyEnrollmentResultByWeb)
+                .studyUpdatedByEmail(this.studyUpdatedByEmail)
+                .studyUpdatedByWeb(this.studyUpdatedByWeb);
+    }
+
+    public void edit(UserEditor userEditor) {
+        this.studyCreatedByEmail = userEditor.isStudyCreatedByEmail();
+        this.studyCreatedByWeb = userEditor.isStudyCreatedByWeb();
+        this.studyEnrollmentResultByEmail = userEditor.isStudyEnrollmentResultByEmail();
+        this.studyEnrollmentResultByWeb = userEditor.isStudyEnrollmentResultByWeb();
+        this.studyUpdatedByEmail = userEditor.isStudyUpdatedByEmail();
+        this.studyUpdatedByWeb = userEditor.isStudyUpdatedByWeb();
+    }
+
     public String getRoleKey() {
         return this.role.getKey();
     }
