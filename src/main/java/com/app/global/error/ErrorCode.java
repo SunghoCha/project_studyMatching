@@ -28,7 +28,7 @@ public enum ErrorCode {
     STUDY_PATH_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "S-001", "이미 존재하는 스터디경로입니다."),
     STUDY_NOT_EXISTS(HttpStatus.BAD_REQUEST, "S-001", "해당 스터디는 존재하지 않습니다."),
     UNAUTHORIZED_ACCESS(HttpStatus.UNAUTHORIZED, "S-002", "스터디 수정 권한이 없습니다"),
-    INVALID_STUDY_PUBLISH_STATE(HttpStatus.BAD_REQUEST, "S-003", "스터디를 공개할 수 없는 상태입니다."),
+    INVALID_STUDY_PUBLISH_STATE(HttpStatus.BAD_REQUEST, "S-003", "스터디 공개 상태가 올바르지 않습니다."),
     INVALID_STUDY_CLOSE_STATE(HttpStatus.BAD_REQUEST, "S-004", "스터디를 종료할 수 없는 상태입니다."),
     INVALID_SORT_PROPERTY(HttpStatus.BAD_REQUEST, "S-005", "정렬 조건이 올바르지 않습니다."),
     INVALID_STUDY_JOIN_CONDITION(HttpStatus.BAD_REQUEST, "S-006", "스터디에 가입할 수 있는 조건을 만족하지 않습니다."),
@@ -49,7 +49,6 @@ public enum ErrorCode {
     INVALID_EMAIL_SEND_CONDITION(HttpStatus.BAD_REQUEST, "EM-001", "이메일 전송에 실패하였습니다."),
 
     // Notification
-    INVALID_NOTIFICATION_TYPE(HttpStatus.BAD_REQUEST, "N-001", "유효하지 않은 알림 타입입니다."),
     NOTIFICATION_NOT_EXIST(HttpStatus.BAD_REQUEST, "N-002", "해당 알림은 존재하지 않습니다.");
 
     ErrorCode(HttpStatus httpStatus, String errorCode, String message) {

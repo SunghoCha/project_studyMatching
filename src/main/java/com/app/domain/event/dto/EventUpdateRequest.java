@@ -2,6 +2,7 @@ package com.app.domain.event.dto;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -32,4 +33,14 @@ public class EventUpdateRequest {
     @Min(2)
     private Integer limitOfEnrollments = 2;
 
+    @Builder
+    public EventUpdateRequest(String title, String description, LocalDateTime endEnrollmentDateTime,
+                              LocalDateTime startDateTime, LocalDateTime endDateTime, Integer limitOfEnrollments) {
+        this.title = title;
+        this.description = description;
+        this.endEnrollmentDateTime = endEnrollmentDateTime;
+        this.startDateTime = startDateTime;
+        this.endDateTime = endDateTime;
+        this.limitOfEnrollments = limitOfEnrollments;
+    }
 }

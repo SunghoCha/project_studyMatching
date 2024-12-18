@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.app.TestUtils.getAuthenticatedEmail;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -35,7 +36,7 @@ class NotificationServiceTest {
     @DisplayName("전체 알림 조회 성공 테스트")
     void getNotifications() {
         // given
-        User user = userRepository.findByEmail("test@gmail.com").orElseThrow(UserNotFoundException::new);
+        User user = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
 
         List<Notification> list = new ArrayList<>();
         for (int i = 1; i <= 5; i++) {
@@ -65,6 +66,8 @@ class NotificationServiceTest {
                         Tuple.tuple("읽지 않은 알림5", "읽지 않은 알림 메시지5", "읽지 않은 링크5", false, NotificationType.STUDY_CREATED)
                 );
     }
+
+
 
     @Test
     @WithAccount

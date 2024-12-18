@@ -13,6 +13,7 @@ import com.app.domain.user.service.UserService;
 import com.app.global.error.exception.EnrollmentAlreadyExistException;
 import com.app.global.error.exception.EventNotFoundException;
 import com.app.global.error.exception.InvalidEnrollmentException;
+import com.app.global.error.exception.InvalidStudyPublishStateException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,9 @@ public class EventService {
 
     public EventCreateResponse createEvent(Long userId, String path, EventCreateRequest request) {
         Study study = studyService.findStudyWithManager(userId, path);
+        if (!study.isPublished()) {
+            throw new InvalidStudyPublishStateException();
+        }
         Event event = createEvent(request, study);
         // TODO : eventPublisher 로직 구현
         Event savedEvent = eventRepository.save(event);
@@ -84,7 +88,7 @@ public class EventService {
         EventEditor eventEditor = event.toEditor()
                 .title(request.getTitle())
                 .description(request.getDescription())
-                .endErollmentDateTime(request.getEndEnrollmentDateTime())
+                .endEnrollmentDateTime(request.getEndEnrollmentDateTime())
                 .startDateTime(request.getStartDateTime())
                 .endDateTime(request.getEndDateTime())
                 .limitOfEnrollments(request.getLimitOfEnrollments())
@@ -109,6 +113,7 @@ public class EventService {
             throw new EnrollmentAlreadyExistException();
         }
         Enrollment enrollment = Enrollment.builder()
+                .event(event)
                 .enrolledAt(LocalDateTime.now())
                 .accepted(event.isAbleToAccept())
                 .user(user)

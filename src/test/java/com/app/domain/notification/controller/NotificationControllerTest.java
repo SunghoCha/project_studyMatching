@@ -1,5 +1,6 @@
 package com.app.domain.notification.controller;
 
+import com.app.TestUtils;
 import com.app.WithAccount;
 import com.app.domain.notification.Notification;
 import com.app.domain.notification.NotificationType;
@@ -19,6 +20,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
+
+import static com.app.TestUtils.*;
 
 @Transactional
 @SpringBootTest
@@ -42,7 +45,7 @@ class NotificationControllerTest {
     @DisplayName("전체 알림 조회 성공 테스트")
     void getNotifications() throws Exception {
         // given
-        User user = userRepository.findByEmail("test@gmail.com").orElseThrow(UserNotFoundException::new);
+        User user = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
 
             Notification notification1 = Notification.builder()
                     .user(user)
@@ -81,7 +84,7 @@ class NotificationControllerTest {
     @DisplayName("읽은 알림 조회 성공 테스트")
     void getOldNotifications() throws Exception {
         // given
-        User user = userRepository.findByEmail("test@gmail.com").orElseThrow(UserNotFoundException::new);
+        User user = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
 
         Notification notification1 = Notification.builder()
                 .user(user)
@@ -117,7 +120,7 @@ class NotificationControllerTest {
     @DisplayName("알림 상태 수정 테스트")
     void updateNotificationCheck() throws Exception {
         // given
-        User user = userRepository.findByEmail("test@gmail.com").orElseThrow(UserNotFoundException::new);
+        User user = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
 
         Notification notification = Notification.builder()
                 .user(user)
@@ -140,7 +143,7 @@ class NotificationControllerTest {
     @DisplayName("잘못된 알림 id값으로 요청하면 예외 발생")
     void updateNotificationCheck_with_wrong_input() throws Exception {
         // given
-        User user = userRepository.findByEmail("test@gmail.com").orElseThrow(UserNotFoundException::new);
+        User user = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
 
         Notification notification = Notification.builder()
                 .user(user)

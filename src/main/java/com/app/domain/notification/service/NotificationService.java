@@ -6,7 +6,6 @@ import com.app.domain.notification.dto.NotificationListResponse;
 import com.app.domain.notification.dto.NotificationResponse;
 import com.app.domain.notification.repository.NotificationRepository;
 import com.app.global.error.exception.InvalidNotificationException;
-import com.app.global.error.exception.InvalidNotificationTypeException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,11 +58,8 @@ public class NotificationService {
             } else if (notification.getNotificationType().equals(NotificationType.STUDY_EVENT_ENROLLMENT)) {
                 eventEnrollmentNotifications.add(NotificationResponse.of(notification));
 
-            } else if (notification.getNotificationType().equals(NotificationType.STUDY_UPDATED)) {
-                studyUpdateNotifications.add(NotificationResponse.of(notification));
-
             } else {
-                throw new InvalidNotificationTypeException();
+                studyUpdateNotifications.add(NotificationResponse.of(notification));
             }
         });
     }

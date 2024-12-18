@@ -51,7 +51,7 @@ public class EventEditor {
             return this;
         }
 
-        public EventEditorBuilder endErollmentDateTime(LocalDateTime endEnrollmentDateTime) {
+        public EventEditorBuilder endEnrollmentDateTime(LocalDateTime endEnrollmentDateTime) {
             if (endEnrollmentDateTime != null) {
                 this.endEnrollmentDateTime = endEnrollmentDateTime;
             }
@@ -80,14 +80,7 @@ public class EventEditor {
         }
 
         public EventEditor build() {
-            return EventEditor.builder()
-                    .title(title)
-                    .description(description)
-                    .endErollmentDateTime(endEnrollmentDateTime)
-                    .startDateTime(startDateTime)
-                    .endDateTime(endDateTime)
-                    .limitOfEnrollments(limitOfEnrollments)
-                    .build();
+            return new EventEditor(title, description, endEnrollmentDateTime, startDateTime, endDateTime, limitOfEnrollments);
         }
     }
 }

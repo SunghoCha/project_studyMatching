@@ -21,12 +21,21 @@ public class EventUpdateValidator implements Validator {
 
     @Override
     public void validate(Object target, Errors errors) {
-        EventCreateRequest request = (EventCreateRequest) target;
 
-        eventValidationUtils.validateEventDates(
-                request.getEndEnrollmentDateTime(),
-                request.getStartDateTime(),
-                request.getEndDateTime(),
-                errors);
+        if (target instanceof EventCreateRequest request) {
+            eventValidationUtils.validateEventDates(
+                    request.getEndEnrollmentDateTime(),
+                    request.getStartDateTime(),
+                    request.getEndDateTime(),
+                    errors);
+        } else if (target instanceof EventUpdateRequest request) {
+            eventValidationUtils.validateEventDates(
+                    request.getEndEnrollmentDateTime(),
+                    request.getStartDateTime(),
+                    request.getEndDateTime(),
+                    errors);
+        } else {
+            throw new IllegalArgumentException("이벤트 타입이 잘못되었습니다.");
+        }
     }
 }

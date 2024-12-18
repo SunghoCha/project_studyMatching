@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import static com.app.TestUtils.getAuthenticatedEmail;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -32,7 +33,7 @@ class NotificationRepositoryImplTest {
     @DisplayName("읽은 알림 조회 성공 테스트")
     void findOldNotificationByUserId() {
         // given
-        User user = userRepository.findByEmail("test@gmail.com").orElseThrow(UserNotFoundException::new);
+        User user = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
 
         Notification notification1 = Notification.builder()
                 .user(user)

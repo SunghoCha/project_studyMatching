@@ -9,13 +9,15 @@ import java.time.LocalDateTime;
 @Getter
 public class EnrollmentCreateResponse {
 
+    private Long eventId;
     private Long enrollmentId;
     private LocalDateTime enrolledAt;
     private boolean accepted;
     private boolean attended;
 
     @Builder
-    public EnrollmentCreateResponse(Long enrollmentId, LocalDateTime enrolledAt, boolean accepted, boolean attended) {
+    public EnrollmentCreateResponse(Long eventId, Long enrollmentId, LocalDateTime enrolledAt, boolean accepted, boolean attended) {
+        this.eventId = eventId;
         this.enrollmentId = enrollmentId;
         this.enrolledAt = enrolledAt;
         this.accepted = accepted;
@@ -25,6 +27,7 @@ public class EnrollmentCreateResponse {
     public static EnrollmentCreateResponse of(Enrollment enrollment) {
 
         return EnrollmentCreateResponse.builder()
+                .eventId(enrollment.getEvent().getId())
                 .enrollmentId(enrollment.getId())
                 .enrolledAt(enrollment.getEnrolledAt())
                 .accepted(enrollment.isAccepted())

@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Entity
@@ -58,7 +59,7 @@ public class Event {
         this.startDateTime = startDateTime;
         this.endDateTime = endDateTime;
         this.limitOfEnrollments = limitOfEnrollments;
-        this.enrollments = enrollments;
+        this.enrollments = enrollments != null ? enrollments : new ArrayList<>();
     }
 
     public boolean isEnrollableFor(User user) {
@@ -105,7 +106,7 @@ public class Event {
     }
 
     private long getNumberOfAcceptedEnrollments() {
-        return this.enrollments.stream().filter(Enrollment::isAccepted).count();
+        return this.enrollments != null ? this.enrollments.stream().filter(Enrollment::isAccepted).count() : 0L;
     }
 
     public void addEnrollment(Enrollment enrollment) {
@@ -137,7 +138,7 @@ public class Event {
         return EventEditor.builder()
                 .title(title)
                 .description(description)
-                .endErollmentDateTime(endEnrollmentDateTime)
+                .endEnrollmentDateTime(endEnrollmentDateTime)
                 .startDateTime(startDateTime)
                 .endDateTime(endDateTime);
     }

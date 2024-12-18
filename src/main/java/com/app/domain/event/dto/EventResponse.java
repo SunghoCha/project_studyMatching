@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 @Getter @Setter
@@ -45,9 +46,9 @@ public class EventResponse {
                 .startDateTime(event.getStartDateTime())
                 .endDateTime(event.getEndDateTime())
                 .limitOfEnrollments(event.getLimitOfEnrollments())
-                .enrollments(event.getEnrollments().stream()
+                .enrollments(event.getEnrollments() != null ? event.getEnrollments().stream()
                         .map(EnrollmentResponse::of)
-                        .toList())
+                        .toList() : Collections.emptyList())
                 .build();
     }
 }
