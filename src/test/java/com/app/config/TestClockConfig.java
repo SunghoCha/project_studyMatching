@@ -1,17 +1,16 @@
-package com.app.global.config.util;
+package com.app.config;
 
+import com.app.TestUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 
 import java.time.Clock;
 
-@Profile("!test")
 @Configuration
-public class ClockConfig {
+public class TestClockConfig {
 
     @Bean
     public Clock clock() {
-        return Clock.systemDefaultZone();
+        return TestUtils.getFixedClock();
     }
 }

@@ -43,13 +43,16 @@ public enum ErrorCode {
     EVENT_NOT_EXISTS(HttpStatus.BAD_REQUEST, "E-004", "해당 이벤트는 존재하지 않습니다."),
     ENROLLMENT_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "E-005", "이미 존재하는 등록입니다."),
     INVALID_ENROLLMENT(HttpStatus.BAD_REQUEST, "E-006", "유효하지 않는 등록입니다."),
-    INVALID_RECRUITMENT_STATE(HttpStatus.BAD_REQUEST, "E-007", "인원 모집 설정에 실패하였습니다."),
+    INVALID_RECRUITMENT_STATE(HttpStatus.BAD_REQUEST, "E-007", "유효하지 않은 모집 상태입니다."),
 
     // Email
     INVALID_EMAIL_SEND_CONDITION(HttpStatus.BAD_REQUEST, "EM-001", "이메일 전송에 실패하였습니다."),
 
     // Notification
-    NOTIFICATION_NOT_EXIST(HttpStatus.BAD_REQUEST, "N-002", "해당 알림은 존재하지 않습니다.");
+    NOTIFICATION_NOT_EXIST(HttpStatus.BAD_REQUEST, "N-002", "해당 알림은 존재하지 않습니다."),
+
+    // Enrollment
+    INVALID_ENROLLMENT_STATE(HttpStatus.BAD_REQUEST, "EN-001", "참가 조건이 유효하지 않습니다.");
 
     ErrorCode(HttpStatus httpStatus, String errorCode, String message) {
         this.httpStatus = httpStatus;

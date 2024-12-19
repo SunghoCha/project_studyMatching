@@ -2,6 +2,7 @@ package com.app.domain.event;
 
 import com.app.domain.study.Study;
 import com.app.domain.user.User;
+import com.app.global.error.exception.InvalidEnrollmentStateException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -121,12 +122,16 @@ public class Event {
     }
 
     public void accept(Enrollment enrollment) {
-        if (canAcceptMoreEnrollments()) {
-            enrollment.setAccepted(true);
+        if (!canAccept(enrollment) || !canAcceptMoreEnrollments()) {
+            throw new InvalidEnrollmentStateException();
         }
+        enrollment.setAccepted(true);
     }
 
     public void reject(Enrollment enrollment) {
+        if (!canReject(enrollment)) {
+            throw new InvalidEnrollmentStateException();
+        }
         enrollment.setAccepted(false);
     }
 

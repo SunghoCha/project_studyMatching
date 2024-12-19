@@ -9,6 +9,7 @@ import java.util.Optional;
 public interface EventRepositoryCustom {
 
     List<Event> findAllByPath(String path);
+    List<Event> findAllEventWithEnrollmentByPath(String path);
     Optional<Event> findEventByIdIfAuthorized(Long userId, Long eventId, String path);
     Optional<Event> findEventWithEnrollmentById(Long eventId);
 }

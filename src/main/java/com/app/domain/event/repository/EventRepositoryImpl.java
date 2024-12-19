@@ -32,6 +32,21 @@ public class EventRepositoryImpl implements EventRepositoryCustom {
     }
 
     @Override
+    public List<Event> findAllEventWithEnrollmentByPath(String path) {
+        QStudy study = QStudy.study;
+        QEvent event = QEvent.event;
+        QEnrollment enrollment = QEnrollment.enrollment;
+
+        return queryFactory
+                .select(event)
+                .from(event)
+                .join(event.study, study)
+                .leftJoin(event.enrollments, enrollment).fetchJoin()
+                .where(study.path.eq(path))
+                .fetch();
+    }
+
+    @Override
     public Optional<Event> findEventByIdIfAuthorized(Long userId, Long eventId, String path) {
         QEvent event = QEvent.event;
         QStudy study = QStudy.study;

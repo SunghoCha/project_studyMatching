@@ -1,0 +1,862 @@
+package com.app.domain.event.service;
+
+import com.app.config.TestClockConfig;
+import com.app.domain.event.Enrollment;
+import com.app.domain.event.Event;
+import com.app.domain.event.dto.*;
+import com.app.domain.event.repository.EnrollmentRepository;
+import com.app.domain.event.repository.EventRepository;
+import com.app.domain.study.Study;
+import com.app.domain.study.repository.StudyRepository;
+import com.app.domain.study.service.StudyService;
+import com.app.domain.study.studyManager.StudyManager;
+import com.app.domain.study.studyManager.repository.StudyManagerRepository;
+import com.app.domain.user.User;
+import com.app.domain.user.constant.Role;
+import com.app.domain.user.repository.UserRepository;
+import com.app.global.error.exception.*;
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Clock;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+@Import(TestClockConfig.class)
+@Transactional
+@SpringBootTest
+class EventServiceTest {
+
+    @Autowired
+    EventService eventService;
+
+    @Autowired
+    UserRepository userRepository;
+
+    @Autowired
+    StudyRepository studyRepository;
+
+    @Autowired
+    StudyManagerRepository studyManagerRepository;
+
+    @Autowired
+    EventRepository eventRepository;
+
+    @Autowired
+    EnrollmentRepository enrollmentRepository;
+
+    @Autowired
+    Clock clock;
+    private StudyService studyService;
+
+    @Test
+    @DisplayName("올바른 입력으로 이벤트를 생성한다")
+    void createEvent_with_correct_input() {
+        // given
+        LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
+
+        String path = "test";
+        User user = createAndSaveUser();
+        Study study = createAndSaveStudy(path, user);
+        study.publish();
+
+        EventCreateRequest request = EventCreateRequest.builder()
+                .title("이벤트1")
+                .description("설명1")
+                .endEnrollmentDateTime(now.plusMinutes(1))
+                .startDateTime(now.plusMinutes(2))
+                .endDateTime(now.plusMinutes(3))
+                .limitOfEnrollments(2)
+                .build();
+
+        // when
+        EventCreateResponse response = eventService.createEvent(user.getId(), path, request);
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.getEventId()).isNotNull();
+        assertThat(response.getTitle()).isEqualTo(request.getTitle());
+        assertThat(response.getDescription()).isEqualTo(request.getDescription());
+        assertThat(response.getEndEnrollmentDateTime()).isEqualTo(request.getEndEnrollmentDateTime());
+        assertThat(response.getStartDateTime()).isEqualTo(request.getStartDateTime());
+        assertThat(response.getEndDateTime()).isEqualTo(request.getEndDateTime());
+        assertThat(response.getLimitOfEnrollments()).isEqualTo(request.getLimitOfEnrollments());
+    }
+
+    @Test
+    @DisplayName("스터디가 활성화되지 않은 상태에서 이벤트 생성 시 예외를 발생시킨다")
+    void createEvent_with_unpublished_study() {
+        // given
+        LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
+
+        String path = "test";
+        User user = createAndSaveUser();
+        Study study = createAndSaveStudy(path, user);
+
+        EventCreateRequest request = EventCreateRequest.builder()
+                .title("이벤트1")
+                .description("설명1")
+                .endEnrollmentDateTime(now.plusMinutes(1))
+                .startDateTime(now.plusMinutes(2))
+                .endDateTime(now.plusMinutes(3))
+                .limitOfEnrollments(2)
+                .build();
+
+        // expected
+        assertThatThrownBy(() -> eventService.createEvent(user.getId(), path, request))
+                .isInstanceOf(InvalidStudyPublishStateException.class);
+    }
+
+    @Test
+    @DisplayName("스터디가 종료된 상태에서 이벤트 생성 시 예외를 발생시킨다")
+    void createEvent_with_closed_study() {
+        // given
+        LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
+
+        String path = "test";
+        User user = createAndSaveUser();
+        Study study = createAndSaveStudy(path, user);
+
+        EventCreateRequest request = EventCreateRequest.builder()
+                .title("이벤트1")
+                .description("설명1")
+                .endEnrollmentDateTime(now.plusMinutes(1))
+                .startDateTime(now.plusMinutes(2))
+                .endDateTime(now.plusMinutes(3))
+                .limitOfEnrollments(2)
+                .build();
+        study.publish();
+        study.close();
+
+        // expected
+        assertThatThrownBy(() -> eventService.createEvent(user.getId(), path, request))
+                .isInstanceOf(InvalidStudyPublishStateException.class);
+    }
+
+    @Test
+    @DisplayName("이벤트 ID로 이벤트를 조회한다")
+    void getEvent() {
+        // given
+        LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
+
+        String path = "test";
+        User user = createAndSaveUser();
+        Study study = createAndSaveStudy(path, user);
+        study.publish();
+
+        Event event = createAndSaveEvent(now, study, "이벤트");
+
+        // when
+        EventResponse response = eventService.getEvent(event.getId());
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.getEventId()).isNotNull();
+        assertThat(response.getTitle()).isEqualTo(event.getTitle());
+        assertThat(response.getDescription()).isEqualTo(event.getDescription());
+        assertThat(response.getEndEnrollmentDateTime()).isEqualTo(event.getEndEnrollmentDateTime());
+        assertThat(response.getStartDateTime()).isEqualTo(event.getStartDateTime());
+        assertThat(response.getEndDateTime()).isEqualTo(event.getEndDateTime());
+        assertThat(response.getLimitOfEnrollments()).isEqualTo(event.getLimitOfEnrollments());
+    }
+
+    @Test
+    @DisplayName("잘못된 이벤트 ID로 이벤트 조회시 예외 발생")
+    void getEvent_with_wrong_eventId() {
+        // given
+        LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
+
+        String path = "test";
+        User user = createAndSaveUser();
+        Study study = createAndSaveStudy(path, user);
+        study.publish();
+
+        Event event = createAndSaveEvent(now, study, "이벤트");
+
+        // expected
+        assertThatThrownBy(() -> eventService.getEvent(123154132L)).isInstanceOf(EventNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("스터디 경로로 이벤트 목록을 조회한다 (새 이벤트와 지난 이벤트로 분류)")
+    void getEvents() {
+        // given
+        LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
+
+        String path = "test";
+        User user = createAndSaveUser();
+        Study study = createAndSaveStudy(path, user);
+        study.publish();
+
+        for (int i = 1; i <= 3; i++) {
+            createAndSaveEvent(now, study, "이벤트" + i);
+            createAndSaveOldEvent(now, study, "지난이벤트" + i);
+        }
+
+        // when
+        EventsResponse response = eventService.getEvents(path);
+
+        // then
+        assertThat(response).isNotNull();
+
+        assertThat(response.getNewEvents()).isNotEmpty();
+        assertThat(response.getNewEvents()).hasSize(3);
+        for (int i = 0; i < 3; i++) {
+            EventResponse eventResponse = response.getNewEvents().get(i);
+            assertThat(eventResponse.getTitle()).isEqualTo("제목이벤트" + (i + 1));
+            assertThat(eventResponse.getDescription()).isEqualTo("소개이벤트" + (i + 1));
+        }
+
+        assertThat(response.getOldEvents()).isNotEmpty();
+        assertThat(response.getOldEvents()).hasSize(3);
+        for (int i = 0; i < 3; i++) {
+            EventResponse eventResponse = response.getOldEvents().get(i);
+            assertThat(eventResponse.getTitle()).isEqualTo("제목지난이벤트" + (i + 1));
+            assertThat(eventResponse.getDescription()).isEqualTo("소개지난이벤트" + (i + 1));
+        }
+    }
+
+    @Test
+    @DisplayName("잘못된 스터디 path로 조회하면 예외 발생")
+    void getEvents_with_wrong_path() {
+        // given
+        LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
+
+        String path = "test";
+        User user = createAndSaveUser();
+        Study study = createAndSaveStudy(path, user);
+        study.publish();
+
+        for (int i = 1; i <= 3; i++) {
+            createAndSaveEvent(now, study, "이벤트" + i);
+            createAndSaveOldEvent(now, study, "지난이벤트" + i);
+        }
+
+        // expected
+        assertThatThrownBy(() -> eventService.getEvents("wrong")).isInstanceOf(StudyNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("올바른 입력으로 이벤트를 수정한다. (참가날짜, 인원수..)")
+    void updateEvent() {
+        // given
+        LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
+
+        String path = "test";
+        User user = createAndSaveUser();
+        Study study = createAndSaveStudy(path, user);
+        study.publish();
+
+        Event event = createAndSaveEvent(now, study, "이벤트");
+
+        EventUpdateRequest request = EventUpdateRequest.builder()
+                .title("수정제목1")
+                .description("수정소개1")
+                .endEnrollmentDateTime(now.plusMinutes(10))
+                .startDateTime(now.plusMinutes(20))
+                .endDateTime(now.plusMinutes(30))
+                .limitOfEnrollments(5)
+                .build();
+
+        // when
+        EventUpdateResponse response = eventService.updateEvent(user.getId(), event.getId(), path, request);
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.getEventId()).isNotNull();
+        assertThat(response.getTitle()).isEqualTo("수정제목1");
+        assertThat(response.getDescription()).isEqualTo("수정소개1");
+        assertThat(response.getEndEnrollmentDateTime()).isEqualTo(now.plusMinutes(10));
+        assertThat(response.getStartDateTime()).isEqualTo(now.plusMinutes(20));
+        assertThat(response.getEndDateTime()).isEqualTo(now.plusMinutes(30));
+        assertThat(response.getLimitOfEnrollments()).isEqualTo(5);
+    }
+
+    @Test
+    @DisplayName("잘못된 이벤트 ID로 이벤트 수정 시도시 예외 발생")
+    void updateEvent_with_wrong_eventId() {
+        // given
+        LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
+
+        String path = "test";
+        User user = createAndSaveUser();
+        Study study = createAndSaveStudy(path, user);
+        study.publish();
+
+        Event event = createAndSaveEvent(now, study, "이벤트");
+
+        EventUpdateRequest request = EventUpdateRequest.builder()
+                .title("수정제목1")
+                .description("수정소개1")
+                .endEnrollmentDateTime(now.plusMinutes(10))
+                .startDateTime(now.plusMinutes(20))
+                .endDateTime(now.plusMinutes(30))
+                .limitOfEnrollments(5)
+                .build();
+
+        // expected
+        assertThatThrownBy(() -> eventService.updateEvent(user.getId(), 9861232L, path, request)).isInstanceOf(EventNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("잘못된 스터디 path로 이벤트 수정 시도시 예외 발생")
+    void updateEvent_with_wrong_path() {
+        // given
+        LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
+
+        String path = "test";
+        User user = createAndSaveUser();
+        Study study = createAndSaveStudy(path, user);
+        study.publish();
+
+        Event event = createAndSaveEvent(now, study, "이벤트");
+
+        EventUpdateRequest request = EventUpdateRequest.builder()
+                .title("수정제목1")
+                .description("수정소개1")
+                .endEnrollmentDateTime(now.plusMinutes(10))
+                .startDateTime(now.plusMinutes(20))
+                .endDateTime(now.plusMinutes(30))
+                .limitOfEnrollments(5)
+                .build();
+
+        // expected
+        assertThatThrownBy(() -> eventService.updateEvent(user.getId(), event.getId(), "wrong", request))
+                .isInstanceOf(StudyNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("잘못된 userId로 이벤트 수정 시도시 예외 발생")
+    void updateEvent_with_wrong_userId() {
+        // given
+        LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
+
+        String path = "test";
+        User user = createAndSaveUser();
+        Study study = createAndSaveStudy(path, user);
+        study.publish();
+
+        Event event = createAndSaveEvent(now, study, "이벤트");
+
+        EventUpdateRequest request = EventUpdateRequest.builder()
+                .title("수정제목1")
+                .description("수정소개1")
+                .endEnrollmentDateTime(now.plusMinutes(10))
+                .startDateTime(now.plusMinutes(20))
+                .endDateTime(now.plusMinutes(30))
+                .limitOfEnrollments(5)
+                .build();
+
+        // expected
+        assertThatThrownBy(() -> eventService.updateEvent(120398213L, event.getId(), path, request))
+                .isInstanceOf(EventNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("이벤트 삭제 요청 시 해당 이벤트가 성공적으로 삭제된다")
+    void deleteEvent() {
+        // given
+        LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
+
+        String path = "test";
+        User user = createAndSaveUser();
+        Study study = createAndSaveStudy(path, user);
+        study.publish();
+
+        Event event = createAndSaveEvent(now, study, "이벤트");
+
+        // when
+        eventService.deleteEvent(user.getId(), event.getId(), path);
+
+        // then
+        boolean eventExists = eventRepository.findById(event.getId()).isPresent();
+        Assertions.assertThat(eventExists).isFalse();
+    }
+
+    @Test
+    @DisplayName("잘못된 userId로 이벤트 삭제 요청 시 예외 발생")
+    void deleteEvent_with_wrong_userId() {
+        // given
+        LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
+
+        String path = "test";
+        User user = createAndSaveUser();
+        Study study = createAndSaveStudy(path, user);
+        study.publish();
+
+        Event event = createAndSaveEvent(now, study, "이벤트");
+
+        // expected
+        assertThatThrownBy(() -> eventService.deleteEvent(8904322L, event.getId(), path)).isInstanceOf(EventNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("잘못된 eventId로 이벤트 삭제 요청 시 예외 발생")
+    void deleteEvent_with_wrong_path() {
+        // given
+        LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
+
+        String path = "test";
+        User user = createAndSaveUser();
+        Study study = createAndSaveStudy(path, user);
+        study.publish();
+
+        Event event = createAndSaveEvent(now, study, "이벤트");
+
+        // expected
+        assertThatThrownBy(() -> eventService.deleteEvent(user.getId(), 435345908L, path))
+                .isInstanceOf(EventNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("잘못된 스터디 path로 이벤트 삭제 요청 시 예외 발생")
+    void deleteEvent_with_wrong_eventId() {
+        // given
+        LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
+
+        String path = "test";
+        User user = createAndSaveUser();
+        Study study = createAndSaveStudy(path, user);
+        study.publish();
+
+        Event event = createAndSaveEvent(now, study, "이벤트");
+
+        // expected
+        assertThatThrownBy(() -> eventService.deleteEvent(user.getId(), event.getId(), "wrong"))
+                .isInstanceOf(EventNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("모임 참가 요청 시 새로운 참가(enrollment)를 성공적으로 생성한다")
+    void createEnrollment() {
+        // given
+        LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
+
+        String path = "test";
+        User user = createAndSaveUser();
+        Study study = createAndSaveStudy(path, user);
+        study.publish();
+        study.startRecruit(now);
+
+        Event event = createAndSaveEvent(now, study, "이벤트");
+
+        // when
+        EnrollmentCreateResponse response = eventService.createEnrollment(user.getId(), event.getId(), path);
+
+        // then
+        Assertions.assertThat(response).isNotNull();
+        Assertions.assertThat(response.getEventId()).isNotNull();
+        Assertions.assertThat(response.getEnrollmentId()).isNotNull();
+        Assertions.assertThat(response.getEnrolledAt()).isEqualTo(LocalDateTime.now(clock));
+    }
+
+    @Test
+    @DisplayName("공개 안한 스터디에 모임 참가 요청 시 예외 발생")
+    void createEnrollment_with_unpublished_study() {
+        // given
+        LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
+
+        String path = "test";
+        User user = createAndSaveUser();
+        Study study = createAndSaveStudy(path, user);
+
+        Event event = createAndSaveEvent(now, study, "이벤트");
+
+        // expected
+        assertThatThrownBy(() -> eventService.createEnrollment(user.getId(), event.getId(), path))
+                .isInstanceOf(InvalidStudyPublishStateException.class);
+    }
+
+    @Test
+    @DisplayName("종료된 스터디에 모임 참가 요청 시 예외 발생")
+    void createEnrollment_with_closed_study() {
+        // given
+        LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
+
+        String path = "test";
+        User user = createAndSaveUser();
+        Study study = createAndSaveStudy(path, user);
+        study.publish();
+        study.close();
+
+        Event event = createAndSaveEvent(now, study, "이벤트");
+
+        // expected
+        assertThatThrownBy(() -> eventService.createEnrollment(user.getId(), event.getId(), path))
+                .isInstanceOf(InvalidStudyPublishStateException.class);
+    }
+
+    @Test
+    @DisplayName("스터디 모집 중 아닐때 모임 참가 요청 시 예외 발생")
+    void createEnrollment_before_recruiting() {
+        // given
+        LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
+
+        String path = "test";
+        User user = createAndSaveUser();
+        Study study = createAndSaveStudy(path, user);
+        study.publish();
+
+        Event event = createAndSaveEvent(now, study, "이벤트");
+
+        // expected
+        assertThatThrownBy(() -> eventService.createEnrollment(user.getId(), event.getId(), path))
+                .isInstanceOf(InvalidRecruitmentStateException.class);
+    }
+
+    @Test
+    @DisplayName("모임 참가 취소 요청 시 참가 정보(enrollment)가 성공적으로 삭제된다")
+    void cancelEnrollment() {
+        // given
+        LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
+
+        String path = "test";
+        User user = createAndSaveUser();
+        Study study = createAndSaveStudy(path, user);
+        study.publish();
+        study.startRecruit(now);
+
+        Event event = createAndSaveEvent(now, study, "이벤트");
+        Enrollment enrollment = Enrollment.builder()
+                .event(event)
+                .enrolledAt(now.plusMinutes(10))
+                .accepted(true)
+                .attended(false)
+                .user(user)
+                .build();
+        Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
+        event.addEnrollment(savedEnrollment);
+
+        // when
+        eventService.cancelEnrollment(user.getId(), event.getId(), path);
+
+        // then
+        boolean enrollmentExists = enrollmentRepository.findById(savedEnrollment.getId()).isPresent();
+        Assertions.assertThat(enrollmentExists).isFalse();
+    }
+
+    @Test
+    @DisplayName("accept되지 않은 모임 참가 취소 요청 시 예외 발생")
+    void cancelEnrollment_with_already_accepted() {
+        // given
+        LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
+
+        String path = "test";
+        User user = createAndSaveUser();
+        Study study = createAndSaveStudy(path, user);
+        study.publish();
+        study.startRecruit(now);
+
+        Event event = createAndSaveEvent(now, study, "이벤트");
+        Enrollment enrollment = Enrollment.builder()
+                .event(event)
+                .enrolledAt(now.plusMinutes(10))
+                .accepted(false)
+                .attended(false)
+                .user(user)
+                .build();
+        Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
+        event.addEnrollment(savedEnrollment);
+
+        // when
+        assertThatThrownBy(() -> eventService.cancelEnrollment(user.getId(), event.getId(), path))
+                .isInstanceOf(InvalidEnrollmentStateException.class);
+    }
+
+    @Test
+    @DisplayName("공개 안한 스터디에 모임 참가취소 요청 시 예외 발생")
+    void cancelEnrollment_with_unpublished_study() {
+        // given
+        LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
+
+        String path = "test";
+        User user = createAndSaveUser();
+        Study study = createAndSaveStudy(path, user);
+
+        Event event = createAndSaveEvent(now, study, "이벤트");
+        Enrollment enrollment = Enrollment.builder()
+                .event(event)
+                .enrolledAt(now.plusMinutes(10))
+                .accepted(true)
+                .attended(false)
+                .user(user)
+                .build();
+        Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
+        event.addEnrollment(savedEnrollment);
+
+        // expected
+        assertThatThrownBy(() -> eventService.cancelEnrollment(user.getId(), event.getId(), path))
+                .isInstanceOf(InvalidStudyPublishStateException.class);
+    }
+
+    @Test
+    @DisplayName("종료된 스터디에 모임 참가취소 요청 시 예외 발생")
+    void cancelEnrollment_with_closed_study() {
+        // given
+        LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
+
+        String path = "test";
+        User user = createAndSaveUser();
+        Study study = createAndSaveStudy(path, user);
+        study.publish();
+        study.close();
+
+        Event event = createAndSaveEvent(now, study, "이벤트");
+        Enrollment enrollment = Enrollment.builder()
+                .event(event)
+                .enrolledAt(now.plusMinutes(10))
+                .accepted(true)
+                .attended(false)
+                .user(user)
+                .build();
+        Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
+        event.addEnrollment(savedEnrollment);
+
+        // expected
+        assertThatThrownBy(() -> eventService.cancelEnrollment(user.getId(), event.getId(), path))
+                .isInstanceOf(InvalidStudyPublishStateException.class);
+    }
+
+    @Test
+    @DisplayName("이벤트 참석 중인 상태에서 취소 시도하면 예외 발생")
+    void cancelEnrollment_after_attending() {
+        // given
+        LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
+
+        String path = "test";
+        User user = createAndSaveUser();
+        Study study = createAndSaveStudy(path, user);
+        study.publish();
+        study.startRecruit(now);
+
+        Event event = createAndSaveEvent(now, study, "이벤트");
+        Enrollment enrollment = Enrollment.builder()
+                .event(event)
+                .enrolledAt(now.plusMinutes(10))
+                .accepted(true)
+                .attended(true)
+                .user(user)
+                .build();
+        Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
+        event.addEnrollment(savedEnrollment);
+
+        // expected
+        assertThatThrownBy(() -> eventService.cancelEnrollment(user.getId(), event.getId(), path))
+                .isInstanceOf(InvalidRecruitmentStateException.class);
+    }
+
+    @Test
+    @DisplayName("스터디 모집 중 아닐때 모임 참가취소 요청 시 예외 발생")
+    void cancelEnrollment_before_recruiting() {
+        // given
+        LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
+
+        String path = "test";
+        User user = createAndSaveUser();
+        Study study = createAndSaveStudy(path, user);
+        study.publish();
+
+        Event event = createAndSaveEvent(now, study, "이벤트");
+
+        // expected
+        assertThatThrownBy(() -> eventService.cancelEnrollment(user.getId(), event.getId(), path))
+                .isInstanceOf(InvalidRecruitmentStateException.class);
+    }
+
+    @Test
+    @DisplayName("모임 참가 승인 요청 시 참가 정보(enrollment)의 승인 상태(accepted)를 true로 변경한다")
+    void acceptEnrollment() {
+        // given
+        LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
+
+        String path = "test";
+        User user = createAndSaveUser();
+        Study study = createAndSaveStudy(path, user);
+        study.publish();
+        study.startRecruit(now);
+
+        Event event = createAndSaveEvent(now, study, "이벤트");
+        Enrollment enrollment = Enrollment.builder()
+                .event(event)
+                .enrolledAt(now.plusMinutes(10))
+                .accepted(false)
+                .attended(false)
+                .user(user)
+                .build();
+        Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
+        event.addEnrollment(savedEnrollment);
+
+        // when
+        EnrollmentResponse response = eventService.acceptEnrollment(user.getId(), event.getId(), savedEnrollment.getId(), path);
+
+        // then
+        Assertions.assertThat(response).isNotNull();
+        Assertions.assertThat(response.getEnrollmentId()).isNotNull();
+        Assertions.assertThat(response.getEnrolledAt()).isEqualTo(now.plusMinutes(10));
+        Assertions.assertThat(response.isAccepted()).isTrue();
+        Assertions.assertThat(response.isAttended()).isFalse();
+    }
+
+    @Test
+    @DisplayName("모임 참가 거절 요청 시 참가 정보(enrollment)의 승인 상태(accepted)를 false로 유지한다")
+    void rejectEnrollment() {
+        // given
+        LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
+
+        String path = "test";
+        User user = createAndSaveUser();
+        Study study = createAndSaveStudy(path, user);
+        study.publish();
+        study.startRecruit(now);
+
+        Event event = createAndSaveEvent(now, study, "이벤트");
+        Enrollment enrollment = Enrollment.builder()
+                .event(event)
+                .enrolledAt(now.plusMinutes(10))
+                .accepted(true)
+                .attended(false)
+                .user(user)
+                .build();
+        Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
+        event.addEnrollment(savedEnrollment);
+
+        // when
+        EnrollmentResponse response = eventService.rejectEnrollment(user.getId(), event.getId(), savedEnrollment.getId(), path);
+
+        // then
+        Assertions.assertThat(response).isNotNull();
+        Assertions.assertThat(response.getEnrollmentId()).isNotNull();
+        Assertions.assertThat(response.getEnrolledAt()).isEqualTo(now.plusMinutes(10));
+        Assertions.assertThat(response.isAccepted()).isFalse();
+        Assertions.assertThat(response.isAttended()).isFalse();
+    }
+
+    @Test
+    @DisplayName("모임 체크인 요청 시 참석 상태(attended)를 true로 변경한다")
+    void checkInEnrollment() {
+        // given
+        LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
+
+        String path = "test";
+        User user = createAndSaveUser();
+        Study study = createAndSaveStudy(path, user);
+        study.publish();
+        study.startRecruit(now);
+
+        Event event = createAndSaveEvent(now, study, "이벤트");
+        Enrollment enrollment = Enrollment.builder()
+                .event(event)
+                .enrolledAt(now.plusMinutes(10))
+                .accepted(true)
+                .attended(false)
+                .user(user)
+                .build();
+        Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
+        event.addEnrollment(savedEnrollment);
+
+        // when
+        EnrollmentResponse response = eventService.checkInEnrollment(user.getId(), event.getId(), savedEnrollment.getId(), path);
+
+        // then
+        Assertions.assertThat(response).isNotNull();
+        Assertions.assertThat(response.getEnrollmentId()).isNotNull();
+        Assertions.assertThat(response.getEnrolledAt()).isEqualTo(now.plusMinutes(10));
+        Assertions.assertThat(response.isAccepted()).isTrue();
+        Assertions.assertThat(response.isAttended()).isTrue();
+    }
+
+    @Test
+    @DisplayName("모임 체크인 취소 요청 시 참석 상태(attended)를 false로 변경한다")
+    void cancelCheckInEnrollment() {
+        // given
+        LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
+
+        String path = "test";
+        User user = createAndSaveUser();
+        Study study = createAndSaveStudy(path, user);
+        study.publish();
+        study.startRecruit(now);
+
+        Event event = createAndSaveEvent(now, study, "이벤트");
+        Enrollment enrollment = Enrollment.builder()
+                .event(event)
+                .enrolledAt(now.plusMinutes(10))
+                .accepted(true)
+                .attended(true)
+                .user(user)
+                .build();
+        Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
+        event.addEnrollment(savedEnrollment);
+
+        // when
+        EnrollmentResponse response = eventService.cancelCheckInEnrollment(user.getId(), event.getId(), savedEnrollment.getId(), path);
+
+        // then
+        Assertions.assertThat(response).isNotNull();
+        Assertions.assertThat(response.getEnrollmentId()).isNotNull();
+        Assertions.assertThat(response.getEnrolledAt()).isEqualTo(now.plusMinutes(10));
+        Assertions.assertThat(response.isAccepted()).isTrue();
+        Assertions.assertThat(response.isAttended()).isFalse();
+    }
+
+    private User createAndSaveUser() {
+        User user = User.builder()
+                .name("testName")
+                .email("test@gmail.com")
+                .role(Role.GUEST)
+                .build();
+        return userRepository.save(user);
+    }
+
+    private Study createAndSaveStudy(String path, User user) {
+        Study study = Study.builder()
+                .path(path)
+                .title("테스트 스터디1")
+                .shortDescription("짧은 글 설명1")
+                .fullDescription("긴 글 설명1")
+                .build();
+        Study savedStudy = studyRepository.save(study);
+
+        StudyManager manager = StudyManager.createManager(user, savedStudy);
+        StudyManager savedManager = studyManagerRepository.save(manager);
+        savedStudy.addManager(savedManager);
+
+        return savedStudy;
+    }
+
+    private Event createAndSaveEvent(LocalDateTime now, Study study, String alias) {
+        Event event = Event.builder()
+                .title("제목" + alias)
+                .description("소개" + alias)
+                .endEnrollmentDateTime(now.plusMinutes(1))
+                .startDateTime(now.plusMinutes(2))
+                .endDateTime(now.plusMinutes(3))
+                .limitOfEnrollments(2)
+                .study(study)
+                .build();
+
+        return eventRepository.save(event);
+    }
+
+    private Event createAndSaveOldEvent(LocalDateTime now, Study study, String alias) {
+        Event event = Event.builder()
+                .title("제목" + alias)
+                .description("소개" + alias)
+                .endEnrollmentDateTime(now.plusMinutes(-30))
+                .startDateTime(now.plusMinutes(-20))
+                .endDateTime(now.plusMinutes(-10))
+                .limitOfEnrollments(2)
+                .study(study)
+                .build();
+
+        return eventRepository.save(event);
+    }
+}

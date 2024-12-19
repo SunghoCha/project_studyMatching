@@ -20,10 +20,7 @@ import com.app.domain.user.userTag.UserTag;
 import com.app.domain.user.userTag.service.UserTagService;
 import com.app.domain.user.userZone.UserZone;
 import com.app.domain.user.userZone.service.UserZoneService;
-import com.app.global.error.exception.StudyMemberNotFoundException;
-import com.app.global.error.exception.StudyNotFoundException;
-import com.app.global.error.exception.StudyPathAlreadyExistException;
-import com.app.global.error.exception.UnauthorizedAccessException;
+import com.app.global.error.exception.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -220,5 +217,24 @@ public class StudyService {
                 .toList();
 
         return studyQueryRepository.findStudyWishList(tags, zoneIds, pageable);
+    }
+
+    public Study validateStudyIsActive(String path) {
+        Study study = findByPath(path);
+        if (!study.isPublished() || study.isClosed()) {
+            throw new InvalidStudyPublishStateException();
+        }
+        return study;
+    }
+
+    public Study validateStudyIsRecruiting(String path) {
+        Study study = findByPath(path);
+        if (!study.isPublished() || study.isClosed()) {
+            throw new InvalidStudyPublishStateException();
+        }
+        if (!study.isRecruiting()) {
+            throw new InvalidRecruitmentStateException();
+        }
+        return study;
     }
 }

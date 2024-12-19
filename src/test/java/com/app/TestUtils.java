@@ -39,7 +39,6 @@ public class TestUtils {
                 .build();
     }
 
-    ;
 
     public static List<Zone> createZones(int size) {
         List<Zone> zones = new ArrayList<>();

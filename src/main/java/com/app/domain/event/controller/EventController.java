@@ -76,14 +76,14 @@ public class EventController {
 
     @PostMapping("/{eventId}/enroll")
     public ResponseEntity<EnrollmentCreateResponse> newEnrollment(@LoginUser CurrentUser currentUser, @PathVariable("path") String path, @PathVariable("eventId") Long eventId) {
-        EnrollmentCreateResponse response = eventService.createEnrollment(currentUser.getId(), eventId);
+        EnrollmentCreateResponse response = eventService.createEnrollment(currentUser.getId(), eventId, path);
 
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{eventId}/disenroll")
     public ResponseEntity<Void> cancelEnrollment(@LoginUser CurrentUser currentUser, @PathVariable("path") String path, @PathVariable("eventId") Long eventId) {
-        eventService.cancelEnrollment(currentUser.getId(), eventId);
+        eventService.cancelEnrollment(currentUser.getId(), eventId, path);
 
         return ResponseEntity.noContent().build();
     }
