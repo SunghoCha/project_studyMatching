@@ -7,7 +7,7 @@ import lombok.*;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@EqualsAndHashCode(of = "id", callSuper = false)
+@EqualsAndHashCode(of = {"title"}, callSuper = false)
 public class Tag extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

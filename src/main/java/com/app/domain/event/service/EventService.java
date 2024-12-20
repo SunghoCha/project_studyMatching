@@ -160,8 +160,12 @@ public class EventService {
         Study study = studyService.validateStudyIsRecruiting(path);
         Event event = eventRepository.findEventByIdIfAuthorized(userId, eventId, path).orElseThrow(EventNotFoundException::new);
         Enrollment enrollment = enrollmentRepository.findById(enrollmentId).orElseThrow(InvalidEnrollmentException::new);
-        enrollment.setAttended(true);
 
+        if (enrollment.isAccepted() && !enrollment.isAttended()) {
+            enrollment.setAttended(true);
+        } else {
+            throw new InvalidEnrollmentStateException();
+        }
         return EnrollmentResponse.of(enrollment);
     }
 
@@ -169,8 +173,12 @@ public class EventService {
         Study study = studyService.validateStudyIsRecruiting(path);
         Event event = eventRepository.findEventByIdIfAuthorized(userId, eventId, path).orElseThrow(EventNotFoundException::new);
         Enrollment enrollment = enrollmentRepository.findById(enrollmentId).orElseThrow(InvalidEnrollmentException::new);
-        enrollment.setAttended(false);
 
+        if (enrollment.isAccepted() && enrollment.isAttended()) {
+            enrollment.setAttended(false);
+        } else {
+            throw new InvalidEnrollmentStateException();
+        }
         return EnrollmentResponse.of(enrollment);
     }
 }

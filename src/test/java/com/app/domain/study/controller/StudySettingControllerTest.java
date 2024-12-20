@@ -39,6 +39,9 @@ class StudySettingControllerTest {
     MockMvc mockMvc;
 
     @Autowired
+    Clock clock;
+
+    @Autowired
     ObjectMapper objectMapper;
 
     @Autowired
@@ -121,7 +124,7 @@ class StudySettingControllerTest {
         StudyManager manager = StudyManager.createManager(user, study);
         studyManagerRepository.save(manager);
         study.addManager(manager);
-        study.publish();
+        study.publish(clock);
         Study savedStudy = studyRepository.save(study);
 
         // expected
@@ -150,8 +153,8 @@ class StudySettingControllerTest {
         StudyManager manager = StudyManager.createManager(user, study);
         studyManagerRepository.save(manager);
         study.addManager(manager);
-        study.publish();
-        study.close();
+        study.publish(clock);
+        study.close(clock);
         Study savedStudy = studyRepository.save(study);
 
         // expected
@@ -180,7 +183,7 @@ class StudySettingControllerTest {
         StudyManager manager = StudyManager.createManager(user, study);
         studyManagerRepository.save(manager);
         study.addManager(manager);
-        study.publish();
+        study.publish(clock);
         Study savedStudy = studyRepository.save(study);
 
         // expected
@@ -235,8 +238,8 @@ class StudySettingControllerTest {
         StudyManager manager = StudyManager.createManager(user, study);
         studyManagerRepository.save(manager);
         study.addManager(manager);
-        study.publish();
-        study.close();
+        study.publish(clock);
+        study.close(clock);
         Study savedStudy = studyRepository.save(study);
 
         // expected
@@ -293,7 +296,7 @@ class StudySettingControllerTest {
         StudyManager manager = StudyManager.createManager(user, study);
         studyManagerRepository.save(manager);
         study.addManager(manager);
-        study.publish();
+        study.publish(clock);
         Study savedStudy = studyRepository.save(study);
 
         // expected
@@ -320,7 +323,7 @@ class StudySettingControllerTest {
         StudyManager manager = StudyManager.createManager(user, study);
         studyManagerRepository.save(manager);
         study.addManager(manager);
-        study.publish();
+        study.publish(clock);
 
         Clock startOffsetClock = Clock.offset(Clock.systemDefaultZone(), Duration.ofMinutes(-122));
         study.startRecruit(LocalDateTime.now(startOffsetClock));
@@ -355,7 +358,7 @@ class StudySettingControllerTest {
         StudyManager manager = StudyManager.createManager(user, study);
         studyManagerRepository.save(manager);
         study.addManager(manager);
-        study.publish();
+        study.publish(clock);
 
         Clock offsetClock = Clock.offset(Clock.systemDefaultZone(), Duration.ofMinutes(-59));
         study.startRecruit(LocalDateTime.now(offsetClock));
@@ -387,7 +390,7 @@ class StudySettingControllerTest {
         StudyManager manager = StudyManager.createManager(user, study);
         studyManagerRepository.save(manager);
         study.addManager(manager);
-        study.publish();
+        study.publish(clock);
 
         Clock offsetClock = Clock.offset(Clock.systemDefaultZone(), Duration.ofMinutes(-59));
         study.startRecruit(LocalDateTime.now(offsetClock));
@@ -448,8 +451,8 @@ class StudySettingControllerTest {
         StudyManager manager = StudyManager.createManager(user, study);
         studyManagerRepository.save(manager);
         study.addManager(manager);
-        study.publish();
-        study.close();
+        study.publish(clock);
+        study.close(clock);
 
         Study savedStudy = studyRepository.save(study);
 
@@ -479,7 +482,7 @@ class StudySettingControllerTest {
         StudyManager manager = StudyManager.createManager(user, study);
         studyManagerRepository.save(manager);
         study.addManager(manager);
-        study.publish();
+        study.publish(clock);
 
         Clock offsetClock = Clock.offset(Clock.systemDefaultZone(), Duration.ofMinutes(-60));
         study.startRecruit(LocalDateTime.now(offsetClock));
@@ -512,9 +515,9 @@ class StudySettingControllerTest {
         StudyManager manager = StudyManager.createManager(user, study);
         studyManagerRepository.save(manager);
         study.addManager(manager);
-        study.publish();
+        study.publish(clock);
 
-        Clock offsetClock = Clock.offset(Clock.systemDefaultZone(), Duration.ofMinutes(-60));
+        Clock offsetClock = Clock.offset(Clock.systemDefaultZone(), Duration.ofMinutes(-61));
         study.startRecruit(LocalDateTime.now(offsetClock));
         Study savedStudy = studyRepository.save(study);
 
@@ -542,7 +545,7 @@ class StudySettingControllerTest {
         StudyManager manager = StudyManager.createManager(user, study);
         studyManagerRepository.save(manager);
         study.addManager(manager);
-        study.publish();
+        study.publish(clock);
 
         Clock offsetClock = Clock.offset(Clock.systemDefaultZone(), Duration.ofMinutes(-60));
         study.startRecruit(LocalDateTime.now(offsetClock));
@@ -574,7 +577,7 @@ class StudySettingControllerTest {
         StudyManager manager = StudyManager.createManager(user, study);
         studyManagerRepository.save(manager);
         study.addManager(manager);
-        study.publish();
+        study.publish(clock);
 
         Clock startClock = Clock.offset(Clock.systemDefaultZone(), Duration.ofMinutes(-90));
         study.startRecruit(LocalDateTime.now(startClock));
@@ -610,8 +613,8 @@ class StudySettingControllerTest {
         StudyManager manager = StudyManager.createManager(user, study);
         studyManagerRepository.save(manager);
         study.addManager(manager);
-        study.publish();
-        study.close();
+        study.publish(clock);
+        study.close(clock);
 
         Study savedStudy = studyRepository.save(study);
 

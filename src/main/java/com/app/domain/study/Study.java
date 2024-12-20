@@ -15,6 +15,7 @@ import lombok.*;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -79,19 +80,19 @@ public class Study extends BaseTimeEntity {
         this.image = image;
     }
 
-    public void publish() {
+    public void publish(Clock clock) {
         if (!this.closed && !this.published) {
             this.published = true;
-            this.publishedDateTime = LocalDateTime.now();
+            this.publishedDateTime = LocalDateTime.now(clock);
         } else {
             throw new InvalidStudyPublishStateException();
         }
     }
 
-    public void close() {
+    public void close(Clock clock) {
         if (this.published && !this.closed) {
             this.closed = true;
-            this.closedDateTime = LocalDateTime.now();
+            this.closedDateTime = LocalDateTime.now(clock);
         } else {
             throw new StudyCloseException();
         }

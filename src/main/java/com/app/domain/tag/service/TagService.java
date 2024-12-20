@@ -2,12 +2,8 @@ package com.app.domain.tag.service;
 
 import com.app.domain.tag.Tag;
 import com.app.domain.tag.repository.TagRepository;
-import com.app.domain.tag.dto.TagRequest;
-import com.app.domain.user.User;
 import com.app.domain.user.repository.UserRepository;
-import com.app.global.error.ErrorCode;
 import com.app.global.error.exception.InvalidTagException;
-import com.app.global.error.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -34,15 +30,6 @@ public class TagService {
         tagRepository.saveAll(tags);
     }
 
-    public void updateTags(Long userId, TagRequest request) {
-        User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
-    }
-
-    public boolean isValid(Set<String> userTags) {
-        Set<Tag> tags = tagRepository.findByTitleIn(userTags);
-        return userTags.size() == tags.size();
-    }
-
     public Set<Tag> findTags(Set<String> tagTitles) {
         Set<Tag> tags = tagRepository.findByTitleIn(tagTitles);
         validate(tagTitles);
@@ -57,13 +44,12 @@ public class TagService {
         };
     }
 
-    public Set<Tag> getTags(TagRequest request) {
+    public Set<Tag> getTags() {
         return new HashSet<>(tagRepository.findAll());
     }
 
     public void saveAll(List<Tag> tags) {
-        // TODO 태그 종복 체크 로직
-        tagRepository.saveAll(tags);
+        tagRepository.saveAll(new HashSet<Tag>(tags));
     }
 
     public Tag findByTitle(String title) {

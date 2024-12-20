@@ -5,7 +5,6 @@ import com.app.domain.user.User;
 import com.app.domain.zone.Zone;
 
 import java.util.List;
-import java.util.Set;
 
 public interface UserRepositoryCustom {
 

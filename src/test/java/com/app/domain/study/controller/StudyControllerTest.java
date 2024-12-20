@@ -42,6 +42,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -60,6 +61,9 @@ class StudyControllerTest {
 
     @Autowired
     ObjectMapper objectMapper;
+
+    @Autowired
+    Clock clock;
 
     @Autowired
     UserRepository userRepository;
@@ -298,7 +302,7 @@ class StudyControllerTest {
         // 스터디 가입 세팅
         for (int i = 1; i <= 3; i++) {
             Study study = studyRepository.findByPath("path" + i).orElseThrow(StudyNotFoundException::new);
-            study.publish();
+            study.publish(clock);
 
             StudyMember savedStudyMember = studyMemberRepository.save(StudyMember.createMember(findMember, study));
             study.addMember(savedStudyMember);
@@ -571,7 +575,7 @@ class StudyControllerTest {
         StudyManager savedManager = studyManagerRepository.save(manager);
         study.addManager(savedManager);
 
-        savedStudy.publish();
+        savedStudy.publish(clock);
 
         // expected
         mockMvc.perform(MockMvcRequestBuilders.post("/study/{path}/join", path))
@@ -676,7 +680,7 @@ class StudyControllerTest {
         StudyManager manager = StudyManager.createManager(savedUser, savedStudy);
         StudyManager savedManager = studyManagerRepository.save(manager);
         savedStudy.addManager(savedManager);
-        savedStudy.publish();
+        savedStudy.publish(clock);
 
         // 스터디 가입
         User guest = userRepository.findByEmail("guest@gmail.com").orElseThrow(UserNotFoundException::new);
@@ -714,7 +718,7 @@ class StudyControllerTest {
         StudyManager manager = StudyManager.createManager(user, savedStudy);
         StudyManager savedManager = studyManagerRepository.save(manager);
         savedStudy.addManager(savedManager);
-        savedStudy.publish();
+        savedStudy.publish(clock);
 
         // expected
         mockMvc.perform(MockMvcRequestBuilders.post("/study/{path}/join", path))
@@ -752,7 +756,7 @@ class StudyControllerTest {
         StudyManager savedManager = studyManagerRepository.save(manager);
         study.addManager(savedManager);
 
-        savedStudy.publish();
+        savedStudy.publish(clock);
 
         // 스터디 가입
         User guest = userRepository.findByEmail("guest@gmail.com").orElseThrow(UserNotFoundException::new);
@@ -794,7 +798,7 @@ class StudyControllerTest {
         StudyManager savedManager = studyManagerRepository.save(manager);
         study.addManager(savedManager);
 
-        savedStudy.publish();
+        savedStudy.publish(clock);
 
         // 스터디 가입
         User guest = userRepository.findByEmail("guest@gmail.com").orElseThrow(UserNotFoundException::new);

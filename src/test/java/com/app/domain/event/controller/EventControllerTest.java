@@ -76,7 +76,7 @@ class EventControllerTest {
         String path = "test";
         User user = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
         Study study = createAndSaveStudy(path, user);
-        study.publish();
+        study.publish(clock);
 
         EventCreateRequest request = EventCreateRequest.builder()
                 .title("이벤트1")
@@ -198,7 +198,7 @@ class EventControllerTest {
         String path = "test";
         User user = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
         Study study = createAndSaveStudy(path, user);
-        study.publish();
+        study.publish(clock);
 
         Event event = createAndSaveEvent(now, study, "1");
         EventUpdateRequest request = EventUpdateRequest.builder()
@@ -293,7 +293,7 @@ class EventControllerTest {
         String path = "test";
         User user = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
         Study study = createAndSaveStudy(path, user);
-        study.publish();
+        study.publish(clock);
         study.startRecruit(now);
 
         Event event = createAndSaveEvent(now, study, "1");
@@ -315,7 +315,7 @@ class EventControllerTest {
         String path = "test";
         User user = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
         Study study = createAndSaveStudy(path, user);
-        study.publish();
+        study.publish(clock);
         study.startRecruit(now);
 
         Event event = createAndSaveEvent(now, study, "1");
@@ -346,7 +346,7 @@ class EventControllerTest {
         String path = "test";
         User user = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
         Study study = createAndSaveStudy(path, user);
-        study.publish();
+        study.publish(clock);
         study.startRecruit(now);
 
         Event event = createAndSaveEvent(now, study, "1");
@@ -380,7 +380,7 @@ class EventControllerTest {
         String path = "test";
         User user = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
         Study study = createAndSaveStudy(path, user);
-        study.publish();
+        study.publish(clock);
         study.startRecruit(now);
 
         Event event = createAndSaveEvent(now, study, "1");
@@ -414,7 +414,7 @@ class EventControllerTest {
         String path = "test";
         User user = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
         Study study = createAndSaveStudy(path, user);
-        study.publish();
+        study.publish(clock);
         study.startRecruit(now);
 
         Event event = createAndSaveEvent(now, study, "1");
@@ -448,7 +448,7 @@ class EventControllerTest {
         String path = "test";
         User user = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
         Study study = createAndSaveStudy(path, user);
-        study.publish();
+        study.publish(clock);
         study.startRecruit(now);
 
         Event event = createAndSaveEvent(now, study, "1");

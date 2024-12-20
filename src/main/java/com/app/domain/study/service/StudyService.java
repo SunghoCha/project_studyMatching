@@ -149,7 +149,7 @@ public class StudyService {
 
     public Boolean publishStudy(Long userId, String path) {
         Study study = findAuthorizedStudy(userId, path);
-        study.publish();
+        study.publish(clock);
         eventPublisher.publishEvent(new StudyCreatedEvent(study));
 
         return study.isPublished();
@@ -157,7 +157,7 @@ public class StudyService {
 
     public Boolean closeStudy(Long userId, String path) {
         Study study = findAuthorizedStudy(userId, path);
-        study.close();
+        study.close(clock);
         eventPublisher.publishEvent(new StudyUpdatedEvent(study, "스터디가 종료되었습니다."));
 
         return study.isClosed();

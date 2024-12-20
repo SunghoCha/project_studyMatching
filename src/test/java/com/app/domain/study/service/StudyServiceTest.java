@@ -53,6 +53,9 @@ class StudyServiceTest {
     @Autowired
     StudyMemberRepository studyMemberRepository;
 
+    @Autowired
+    Clock clock;
+
     @Test
     @WithAccount
     @DisplayName("스터디 path 검색 테스트")
@@ -332,7 +335,7 @@ class StudyServiceTest {
         }
         List<Study> studies = studyRepository.findByPathIn(pathList);
         for (Study study : studies) {
-            study.publish();
+            study.publish(clock);
             StudyMember savedMember = studyMemberRepository.save(StudyMember.createMember(guest, study));
             study.addMember(savedMember);
         }
@@ -477,7 +480,7 @@ class StudyServiceTest {
 
         StudyManager savedManager = studyManagerRepository.save(StudyManager.createManager(savedUser, savedStudy));
         savedStudy.addManager(savedManager);
-        savedStudy.publish();
+        savedStudy.publish(clock);
 
         User guest = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
 
@@ -540,7 +543,7 @@ class StudyServiceTest {
 
         StudyManager savedManager = studyManagerRepository.save(StudyManager.createManager(savedUser, savedStudy));
         savedStudy.addManager(savedManager);
-        savedStudy.publish();
+        savedStudy.publish(clock);
 
         User guest = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
         StudyMember savedMember = studyMemberRepository.save(StudyMember.createMember(guest, savedStudy));
@@ -567,7 +570,7 @@ class StudyServiceTest {
 
         StudyManager savedManager = studyManagerRepository.save(StudyManager.createManager(savedUser, savedStudy));
         savedStudy.addManager(savedManager);
-        savedStudy.publish();
+        savedStudy.publish(clock);
 
         // expected
         assertThatThrownBy(() -> studyService.joinStudy(savedUser.getId(), path)).isInstanceOf(InvalidStudyJoinConditionException.class);
@@ -597,7 +600,7 @@ class StudyServiceTest {
         StudyManager manager = StudyManager.createManager(savedUser, savedStudy);
         StudyManager savedManager = studyManagerRepository.save(manager);
         savedStudy.addManager(savedManager);
-        savedStudy.publish();
+        savedStudy.publish(clock);
 
         User guest = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
         StudyMember savedMember = studyMemberRepository.save(StudyMember.createMember(guest, savedStudy));
@@ -686,7 +689,7 @@ class StudyServiceTest {
 
         StudyManager savedManager = studyManagerRepository.save(StudyManager.createManager(savedUser, savedStudy));
         savedStudy.addManager(savedManager);
-        savedStudy.publish();
+        savedStudy.publish(clock);
 
         // when
         assertThat(savedStudy.isRecruiting()).isFalse();
@@ -714,8 +717,8 @@ class StudyServiceTest {
 
         StudyManager savedManager = studyManagerRepository.save(StudyManager.createManager(savedUser, savedStudy));
         savedStudy.addManager(savedManager);
-        savedStudy.publish();
-        Clock offsetClock = Clock.offset(Clock.systemDefaultZone(), Duration.ofMinutes(-60));
+        savedStudy.publish(clock);
+        Clock offsetClock = Clock.offset(Clock.systemDefaultZone(), Duration.ofMinutes(-61));
         savedStudy.startRecruit(LocalDateTime.now(offsetClock));
 
         // when
@@ -744,7 +747,7 @@ class StudyServiceTest {
 
         StudyManager savedManager = studyManagerRepository.save(StudyManager.createManager(savedUser, savedStudy));
         savedStudy.addManager(savedManager);
-        savedStudy.publish();
+        savedStudy.publish(clock);
 
         StudyPathUpdateRequest request = new StudyPathUpdateRequest("newPath");
 
@@ -773,7 +776,7 @@ class StudyServiceTest {
 
             StudyManager savedManager = studyManagerRepository.save(StudyManager.createManager(savedUser, savedStudy));
             savedStudy.addManager(savedManager);
-            savedStudy.publish();
+            savedStudy.publish(clock);
         }
 
         StudyPathUpdateRequest request = new StudyPathUpdateRequest("path2");

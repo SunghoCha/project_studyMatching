@@ -27,6 +27,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Random;
@@ -47,6 +48,7 @@ public class InitDb implements ApplicationRunner {
     private final StudyZoneService studyZoneService;
     private final StudyTagService studyTagService;
     private final StudyRepository studyRepository;
+    private final Clock clock;
 
     @Override
     @Transactional
@@ -133,7 +135,7 @@ public class InitDb implements ApplicationRunner {
             log.info("스터디 생성: Path = {}, Title = {}", response.getPath(), title);
 
             Study study = studyRepository.findByPath(path).orElseThrow(StudyNotFoundException::new);
-            study.publish();
+            study.publish(clock);
             study.startRecruit(LocalDateTime.now());
 
             // 생성된 스터디에 Zone 추가
