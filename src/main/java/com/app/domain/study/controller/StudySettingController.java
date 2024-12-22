@@ -72,5 +72,13 @@ public class StudySettingController {
         return ResponseEntity.ok(response);
     }
 
+    @DeleteMapping("/remove")
+    public ResponseEntity<Void> deleteStudy(@LoginUser CurrentUser currentUser,
+                                            @PathVariable("path") String path) {
+        studyService.remove(currentUser.getId(), path);
+
+        return ResponseEntity.noContent().build();
+    }
+
 
 }

@@ -1,4 +1,4 @@
-package com.app.domain.study.event;
+package com.app.domain.study.eventListener;
 
 import com.app.domain.study.Study;
 import lombok.Getter;

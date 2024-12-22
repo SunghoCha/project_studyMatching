@@ -13,7 +13,7 @@ import java.util.Set;
 @Entity
 @Getter
 @Table(name = "users")
-@EqualsAndHashCode(of = "id", callSuper = false)
+@EqualsAndHashCode(of = {"id", "email"}, callSuper = false)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends BaseTimeEntity {
 

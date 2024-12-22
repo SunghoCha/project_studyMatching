@@ -103,9 +103,9 @@ class EventControllerTest {
 
     @ParameterizedTest
     @CsvSource({
-            "0, 2, 3",   // Case 1: endEnrollmentDateTime 가 과거인 경우
+            "0, 2, 3",           // Case 1: endEnrollmentDateTime 가 과거인 경우
             "1, -1, 3",          // Case 2: startDateTime 이 모집마감 전인 경우
-            "1, 2, 1"              // Case 3: endDateTime 이 이벤트 시작시간 전인 경우
+            "1, 2, 1"            // Case 3: endDateTime 이 이벤트 시작시간 전인 경우
     })
     @WithAccount
     @DisplayName("이벤트 생성 요청 시 모집마감, 이벤트 시작, 종료 시간이 올바르지 않으면 예외 발생")

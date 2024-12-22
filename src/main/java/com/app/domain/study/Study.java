@@ -30,10 +30,10 @@ public class Study extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToMany(mappedBy = "study")
+    @OneToMany(mappedBy = "study", cascade = CascadeType.REMOVE)
     private Set<StudyManager> studyManagers = new HashSet<>();
 
-    @OneToMany(mappedBy = "study")
+    @OneToMany(mappedBy = "study", cascade = CascadeType.REMOVE)
     private Set<StudyMember> studyMembers = new HashSet<>();
 
     @OneToMany(mappedBy = "study")

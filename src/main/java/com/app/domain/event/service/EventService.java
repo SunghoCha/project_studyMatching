@@ -4,9 +4,12 @@ import com.app.domain.event.Enrollment;
 import com.app.domain.event.Event;
 import com.app.domain.event.EventEditor;
 import com.app.domain.event.dto.*;
+import com.app.domain.event.eventListener.event.EnrollmentAcceptedEvent;
+import com.app.domain.event.eventListener.event.EnrollmentRejectedEvent;
 import com.app.domain.event.repository.EnrollmentRepository;
 import com.app.domain.event.repository.EventRepository;
 import com.app.domain.study.Study;
+import com.app.domain.study.eventListener.StudyUpdatedEvent;
 import com.app.domain.study.service.StudyService;
 import com.app.domain.user.User;
 import com.app.domain.user.service.UserService;
@@ -37,8 +40,10 @@ public class EventService {
     public EventCreateResponse createEvent(Long userId, String path, EventCreateRequest request) {
         Study study = studyService.validateStudyIsActive(path);
         Event event = createEvent(request, study);
-        // TODO : eventPublisher 로직 구현
         Event savedEvent = eventRepository.save(event);
+
+        eventPublisher.publishEvent(new StudyUpdatedEvent(event.getStudy(),
+                "'" + event.getTitle() + "' 모임을 만들었습니다."));
 
         return EventCreateResponse.of(savedEvent);
     }
@@ -93,15 +98,21 @@ public class EventService {
                 .endDateTime(request.getEndDateTime())
                 .limitOfEnrollments(request.getLimitOfEnrollments())
                 .build();
-        event.editEvent(eventEditor);
+        event.edit(eventEditor);
+
+        eventPublisher.publishEvent(new StudyUpdatedEvent(event.getStudy(),
+                "'" + event.getTitle() + "' 모임 정보를 수정했으니 확인하세요."));
 
         return EventUpdateResponse.of(event);
     }
 
     public void deleteEvent(Long userId, Long eventId, String path) {
         // 해당 이벤트가 존재하고 권한이 있는지 체크용
-        eventRepository.findEventByIdIfAuthorized(userId, eventId, path).orElseThrow(EventNotFoundException::new);
+        Event event = eventRepository.findEventByIdIfAuthorized(userId, eventId, path).orElseThrow(EventNotFoundException::new);
         eventRepository.deleteById(eventId);
+
+        eventPublisher.publishEvent(new StudyUpdatedEvent(event.getStudy(),
+                "'" + event.getTitle() + "' 모임을 취소했습니다."));
     }
 
     public EnrollmentCreateResponse createEnrollment(Long userId, Long eventId, String path) {
@@ -127,7 +138,6 @@ public class EventService {
         User user = userService.getById(userId);
         Study study = studyService.validateStudyIsRecruiting(path);
         Event event = eventRepository.findEventWithEnrollmentById(eventId).orElseThrow(EventNotFoundException::new);
-
         Enrollment enrollment = enrollmentRepository.findByEventAndUser(event, user).orElseThrow(InvalidEnrollmentException::new);
 
         if (enrollment.isAccepted() && !enrollment.isAttended()) {
@@ -144,6 +154,8 @@ public class EventService {
         Enrollment enrollment = enrollmentRepository.findById(enrollmentId).orElseThrow(InvalidEnrollmentException::new);
         event.accept(enrollment);
 
+        eventPublisher.publishEvent(new EnrollmentAcceptedEvent(enrollment));
+
         return EnrollmentResponse.of(enrollment);
     }
 
@@ -152,6 +164,8 @@ public class EventService {
         Event event = eventRepository.findEventByIdIfAuthorized(userId, eventId, path).orElseThrow(EventNotFoundException::new);
         Enrollment enrollment = enrollmentRepository.findById(enrollmentId).orElseThrow(InvalidEnrollmentException::new);
         event.reject(enrollment);
+
+        eventPublisher.publishEvent(new EnrollmentRejectedEvent(enrollment));
 
         return EnrollmentResponse.of(enrollment);
     }

@@ -1,13 +1,13 @@
 package com.app.domain.study.service;
 
 import com.app.domain.common.dto.PagedResponse;
-import com.app.domain.study.event.StudyCreatedEvent;
+import com.app.domain.study.eventListener.StudyCreatedEvent;
 import com.app.domain.study.Study;
 import com.app.domain.study.StudyEditor;
 import com.app.domain.study.dto.*;
 import com.app.domain.study.dto.studySetting.StudyPathUpdateRequest;
 import com.app.domain.study.dto.studySetting.StudyTitleUpdateRequest;
-import com.app.domain.study.event.StudyUpdatedEvent;
+import com.app.domain.study.eventListener.StudyUpdatedEvent;
 import com.app.domain.study.repository.StudyQueryRepository;
 import com.app.domain.study.repository.StudyRepository;
 import com.app.domain.study.studyManager.StudyManager;
@@ -111,6 +111,7 @@ public class StudyService {
                 .fullDescription(request.getFullDescription())
                 .build();
         study.edit(studyEditor);
+
         eventPublisher.publishEvent(new StudyUpdatedEvent(study, "스터디 소개를 수정했습니다."));
 
         return StudyUpdateResponse.of(study);
@@ -150,6 +151,7 @@ public class StudyService {
     public Boolean publishStudy(Long userId, String path) {
         Study study = findAuthorizedStudy(userId, path);
         study.publish(clock);
+
         eventPublisher.publishEvent(new StudyCreatedEvent(study));
 
         return study.isPublished();
@@ -158,6 +160,7 @@ public class StudyService {
     public Boolean closeStudy(Long userId, String path) {
         Study study = findAuthorizedStudy(userId, path);
         study.close(clock);
+
         eventPublisher.publishEvent(new StudyUpdatedEvent(study, "스터디가 종료되었습니다."));
 
         return study.isClosed();
@@ -166,6 +169,7 @@ public class StudyService {
     public Boolean startRecruit(Long userId, String path) {
         Study study = findAuthorizedStudy(userId, path);
         study.startRecruit(LocalDateTime.now(clock));
+
         eventPublisher.publishEvent(new StudyUpdatedEvent(study, "팀원 모집이 시작되었습니다."));
 
         return study.isRecruiting();
@@ -174,6 +178,7 @@ public class StudyService {
     public Boolean stopRecruit(Long userId, String path) {
         Study study = findAuthorizedStudy(userId, path);
         study.stopRecruit(LocalDateTime.now(clock));
+
         eventPublisher.publishEvent(new StudyUpdatedEvent(study, "팀원 모집이 중단되었습니다."));
 
         return study.isRecruiting();
@@ -236,5 +241,10 @@ public class StudyService {
             throw new InvalidRecruitmentStateException();
         }
         return study;
+    }
+
+    public void remove(Long userId, String path) {
+        Study study = findAuthorizedStudy(userId, path);
+        studyRepository.delete(study);
     }
 }

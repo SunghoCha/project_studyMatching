@@ -23,8 +23,6 @@ public class UserZoneController {
     public ResponseEntity<UserZoneResponse> getUserZones(@LoginUser CurrentUser currentUser) {
         UserZoneResponse userZones = userZoneService.findUserZones(currentUser.getId());
 
-
-
         return ResponseEntity.ok(userZones);
     }
 

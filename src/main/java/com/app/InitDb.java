@@ -50,6 +50,17 @@ public class InitDb implements ApplicationRunner {
     private final StudyRepository studyRepository;
     private final Clock clock;
 
+    private static final String COMMON_SHORT_DESCRIPTION = "스터디에 참여하여 협력과 성장을 경험하세요.\n" +
+            "초보자와 전문가 모두 환영합니다.\n" +
+            "서로 배우고 공유하며 함께 성장할 수 있습니다.";
+
+    private static final String COMMON_FULL_DESCRIPTION = "이 스터디는 개발자들에게 실질적인 학습과 협력의 기회를 제공합니다.\n" +
+            "팀 프로젝트와 세미나를 통해 경험을 쌓을 수 있습니다.\n" +
+            "최신 기술 트렌드를 배우고 적용하는 것을 목표로 합니다.\n" +
+            "모든 구성원이 함께 성장할 수 있는 환경을 지향합니다.\n" +
+            "구성원 간 피드백과 코드 리뷰를 강조합니다.\n" +
+            "모임 종료 후에도 네트워크를 유지하며 지속적인 성장을 지원합니다.";
+
     @Override
     @Transactional
     public void run(ApplicationArguments args) throws Exception {
@@ -120,8 +131,12 @@ public class InitDb implements ApplicationRunner {
         for (int i = 1; i <= 50; i++) {
             String path = "study-" + i;
             String title = studyTopics.get(random.nextInt(studyTopics.size())) + " " + i;
-            String shortDescription = shortDescriptions.get(random.nextInt(shortDescriptions.size()));
-            String fullDescription = fullDescriptions.get(random.nextInt(fullDescriptions.size()));
+            String shortDescription =
+                    shortDescriptions.get(random.nextInt(shortDescriptions.size())) +  "\n" +
+                    COMMON_SHORT_DESCRIPTION;
+            String fullDescription =
+                    fullDescriptions.get(random.nextInt(fullDescriptions.size()))  +  "\n" +
+                    COMMON_FULL_DESCRIPTION;
 
             StudyCreateRequest request = StudyCreateRequest.builder()
                     .path(path)

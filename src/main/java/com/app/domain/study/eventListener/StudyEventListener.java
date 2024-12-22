@@ -1,4 +1,4 @@
-package com.app.domain.study.event;
+package com.app.domain.study.eventListener;
 
 import com.app.domain.notification.Notification;
 import com.app.domain.notification.NotificationType;
@@ -18,6 +18,7 @@ import com.app.infra.email.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.TemplateEngine;
@@ -26,6 +27,7 @@ import org.thymeleaf.context.Context;
 import java.util.List;
 
 @Slf4j
+@Async
 @Component
 @Transactional
 @RequiredArgsConstructor
@@ -56,9 +58,7 @@ public class StudyEventListener {
                 saveStudyCreatedNotification(user, study, study.getShortDescription(), NotificationType.STUDY_CREATED);
             }
         });
-
         log.info("{} is created.", study.getTitle());
-
     }
 
     @EventListener
@@ -76,24 +76,12 @@ public class StudyEventListener {
                         "관심 스터디, '" + study.getTitle() + "' 에 새 소식이 있습니다.");
             }
             if (user.isStudyUpdatedByWeb()) {
-                saveStudyCreatedNotification(user, study, study.getShortDescription(), NotificationType.STUDY_UPDATED);
+                saveStudyCreatedNotification(user, study, studyUpdatedEvent.getMessage(), NotificationType.STUDY_UPDATED);
             }
         });
-
     }
 
-    private void saveStudyCreatedNotification(User user, Study study, String message, NotificationType notificationType) {
-        Notification notification = Notification.builder()
-                .title(study.getTitle())
-                .link("/study/" + study.getEncodedPath())
-                .checked(false)
-                .message(study.getShortDescription())
-                .user(user)
-                .notificationType(NotificationType.STUDY_CREATED)
-                .build();
-        notificationRepository.save(notification);
-    }
-
+    // TODO: 링크 수정
     private void sendStudyCreatedByEmail(User user, Study study, String contextMessage, String emailSubject) {
         Context context = new Context();
         context.setVariable("name", user.getName());
@@ -110,5 +98,19 @@ public class StudyEventListener {
                 .build();
 
         emailService.sendEmail(emailMessage);
+    }
+
+    // TODO: 링크 수정
+    private void saveStudyCreatedNotification(User user, Study study, String message, NotificationType notificationType) {
+        Notification notification = Notification.builder()
+                .title(study.getTitle())
+                .link("/study/" + study.getEncodedPath())
+                .checked(false)
+                .message(message)
+                .user(user)
+                .notificationType(notificationType)
+                .build();
+
+        notificationRepository.save(notification);
     }
 }

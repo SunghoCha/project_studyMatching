@@ -1,17 +1,28 @@
 package com.app.domain.userZone.controller;
 
+import com.app.TestUtils;
+import com.app.WithAccount;
 import com.app.domain.user.User;
 import com.app.domain.user.repository.UserRepository;
 import com.app.domain.user.userZone.UserZone;
+import com.app.domain.user.userZone.dto.UserZoneUpdateRequest;
+import com.app.domain.user.userZone.dto.UserZoneUpdateResponse;
 import com.app.domain.zone.Zone;
 import com.app.domain.zone.repository.ZoneRepository;
+import com.app.global.error.exception.UserNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -40,55 +51,40 @@ class UserZoneControllerTest {
 
 
     // TODO 추후 수정
-//    @Test
-//    @WithAccount
-//    @DisplayName("")
-//    void edit_user_with_correct_input()
-//            throws Exception {
-//        // given
-//        User user = getUserFromContext();
-//
-//        List<Zone> newZones = createZones("Seoul", "서울특별시", "none", 3);
-//        List<Zone> findNewZones = zoneRepository.saveAll(newZones);
-//
-//        List<UserZoneUpdateRequest> requests = findNewZones.stream()
-//                .map(zone -> UserZoneUpdateRequest.builder()
-//                        .id(zone.getId())
-//                        .city(zone.getCity())
-//                        .localName(zone.getLocalName())
-//                        .province(zone.getProvince())
-//                        .build())
-//                .collect(Collectors.toList());
-//
-//        String json = objectMapper.writeValueAsString(requests);
-//
-//        // when
-//        mockMvc.perform(MockMvcRequestBuilders.patch("/user-zone/{userId}", user.getId())
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(json)
-//                )
-//                .andExpect(MockMvcResultMatchers.status().isOk())
-//                .andExpect(result -> {
-//                    String content = result.getResponse().getContentAsString(UTF_8);
-//
-//                    List<UserZoneUpdateResponse> responses = objectMapper.readValue(
-//                            content, new TypeReference<>() {}
-//                    );
-//
-//                    assertThat(responses).containsExactlyInAnyOrder(
-//                            new UserZoneUpdateResponse("Seoul0", "서울특별시0", "none0"),
-//                            new UserZoneUpdateResponse("Seoul1", "서울특별시1", "none1"),
-//                            new UserZoneUpdateResponse("Seoul2", "서울특별시2", "none2")
-//                    );
-//                })
-//                .andDo(MockMvcResultHandlers.print());
-//    }
+    @Test
+    @WithAccount
+    @DisplayName("")
+    void edit_user_with_correct_input()
+            throws Exception {
+        // given
+        User user = userRepository.findByEmail(TestUtils.getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
 
-    private User getUserFromContext() {
-        OAuth2User principal = (OAuth2User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String email = (String) principal.getAttributes().get("email");
+        List<Zone> newZones = createZones("Seoul", "서울특별시", "none", 3);
+        List<Zone> foundNewZones = zoneRepository.saveAll(newZones);
 
-        return userRepository.findByEmail(email).orElseThrow(IllegalArgumentException::new);
+        Set<Long> zoneIds = foundNewZones.stream()
+                .map(Zone::getId)
+                .collect(Collectors.toSet());
+
+        UserZoneUpdateRequest request = UserZoneUpdateRequest.builder()
+                .zoneIds(zoneIds)
+                .build();
+
+        String json = objectMapper.writeValueAsString(request);
+
+        // when
+        mockMvc.perform(MockMvcRequestBuilders.patch("/user-zone")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json)
+                )
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.zones[0].city").value("Seoul0"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.zones[0].localName").value("서울특별시0"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.zones[0].province").value("none0"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.zones[2].city").value("Seoul2"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.zones[2].localName").value("서울특별시2"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.zones[2].province").value("none2"))
+                .andDo(MockMvcResultHandlers.print());
     }
 
     private List<UserZone> createUserZones(User user, Set<Zone> zones) {
@@ -112,5 +108,4 @@ class UserZoneControllerTest {
         }
         return zones;
     }
-
 }

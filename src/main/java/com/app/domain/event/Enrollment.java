@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter @Setter
+@EqualsAndHashCode(of = {"event" , "user"})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Enrollment {
 
@@ -27,10 +28,6 @@ public class Enrollment {
     private boolean accepted;
 
     private boolean attended;
-
-    public boolean isEnrolledByUser(User user) {
-        return this.user.equals(user);
-    }
 
     @Builder
     public Enrollment(Event event, User user, LocalDateTime enrolledAt, boolean accepted, boolean attended) {

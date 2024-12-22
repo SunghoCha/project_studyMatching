@@ -1,7 +1,6 @@
 package com.app.domain.event;
 
 import com.app.domain.study.Study;
-import com.app.domain.user.User;
 import com.app.global.error.exception.InvalidEnrollmentStateException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -11,7 +10,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @Entity
@@ -63,36 +61,6 @@ public class Event {
         this.enrollments = enrollments != null ? enrollments : new ArrayList<>();
     }
 
-    public boolean isEnrollableFor(User user) {
-        return isNotClosed() && !isAttended(user) && !isAlreadyEnrolled(user);
-    }
-
-    public boolean isDisenrollableFor(User user) {
-        return isNotClosed() && !isAttended(user) && isAlreadyEnrolled(user);
-    }
-
-    private boolean isNotClosed() {
-        return this.endEnrollmentDateTime.isAfter(LocalDateTime.now());
-    }
-
-    public boolean isAttended(User user) {
-        for (Enrollment enrollment : enrollments) {
-            if (enrollment.isEnrolledByUser(user) && enrollment.isAttended()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean isAlreadyEnrolled(User user) {
-        for (Enrollment enrollment : enrollments) {
-            if (enrollment.isEnrolledByUser(user)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     public boolean canAccept(Enrollment enrollment) {
         return this.enrollments.contains(enrollment)
                 && canAcceptMoreEnrollments()
@@ -111,14 +79,18 @@ public class Event {
     }
 
     public void addEnrollment(Enrollment enrollment) {
-        this.enrollments.add(enrollment);
-        enrollment.setEvent(this);
+        if (!this.enrollments.contains(enrollment)) {
+            this.enrollments.add(enrollment);
+            enrollment.setEvent(this);
+        }
     }
 
     // TODO: enrollment의 event가 null이 되면 삭제시키는게 나을지도
     public void removeEnrollment(Enrollment enrollment) {
-        this.enrollments.remove(enrollment);
-        enrollment.setEvent(null);
+        if (this.enrollments.contains(enrollment)) {
+            this.enrollments.remove(enrollment);
+            enrollment.setEvent(null);
+        }
     }
 
     public void accept(Enrollment enrollment) {
@@ -148,7 +120,7 @@ public class Event {
                 .endDateTime(endDateTime);
     }
 
-    public void editEvent(EventEditor eventEditor) {
+    public void edit(EventEditor eventEditor) {
         this.title = eventEditor.getTitle();
         this.description = eventEditor.getDescription();
         this.endEnrollmentDateTime = eventEditor.getEndEnrollmentDateTime();
