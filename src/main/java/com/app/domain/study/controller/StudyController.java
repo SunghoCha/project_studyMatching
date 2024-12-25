@@ -36,9 +36,7 @@ public class StudyController {
 
     @GetMapping("/list")
     public ResponseEntity<PagedResponse<StudyQueryResponse>> getStudies(StudySearchCond searchCond, Pageable pageable) {
-        log.info("스터디 목록 요청: 검색 조건 = {}, 페이지 정보 = {}", searchCond, pageable);
         PagedResponse<StudyQueryResponse> response = studyService.getStudies(searchCond,pageable);
-        log.info("스터디 목록 반환 성공: 총 {}건", response.getTotalCount());
 
         return ResponseEntity.ok(response);
     }

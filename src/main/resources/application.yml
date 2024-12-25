@@ -1,10 +1,30 @@
 server:
-  port: 80
+  port: 8080
   servlet:
     context-path: /
 
 app:
-  host: http://localhost:80
+  host: http://localhost:8080
+
+management:
+  info:
+    java:
+      enabled: true
+    os:
+      enabled: true
+    env:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    enable:
+      tomcat: true
+
 
 spring:
   profiles:
@@ -54,15 +74,6 @@ logging:
     com.app: INFO
     org.springframework.security: DEBUG
     org.springframework.web.filter: DEBUG
-
-    logging:
-      level:
-        org:
-          hibernate:
-            orm:
-              jdbc:
-                bind=TRACE:
-
 
 
 
