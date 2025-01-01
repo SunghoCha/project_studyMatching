@@ -52,7 +52,10 @@ public enum ErrorCode {
     NOTIFICATION_NOT_EXIST(HttpStatus.BAD_REQUEST, "N-002", "해당 알림은 존재하지 않습니다."),
 
     // Enrollment
-    INVALID_ENROLLMENT_STATE(HttpStatus.BAD_REQUEST, "EN-001", "참가 조건이 유효하지 않습니다.");
+    INVALID_ENROLLMENT_STATE(HttpStatus.BAD_REQUEST, "EN-001", "참가 조건이 유효하지 않습니다."),
+
+    // FileUpload
+    INVALID_FILE_UPLOAD(HttpStatus.BAD_REQUEST, "F-001", "파일 업로드 오류가 발생하였습니다.");
 
     ErrorCode(HttpStatus httpStatus, String errorCode, String message) {
         this.httpStatus = httpStatus;

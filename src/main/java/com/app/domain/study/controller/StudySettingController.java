@@ -2,6 +2,7 @@ package com.app.domain.study.controller;
 
 import com.app.domain.study.dto.studySetting.StudyPathUpdateRequest;
 import com.app.domain.study.dto.studySetting.StudyTitleUpdateRequest;
+import com.app.domain.study.service.S3Service;
 import com.app.domain.study.service.StudyService;
 import com.app.global.config.auth.LoginUser;
 import com.app.global.config.auth.dto.CurrentUser;
@@ -9,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 
@@ -19,6 +21,7 @@ import java.util.Map;
 public class StudySettingController {
 
     private final StudyService studyService;
+    private final S3Service s3service;
 
     @PostMapping("/publish")
     public ResponseEntity<Map<String, Boolean>> publishStudy(@LoginUser CurrentUser currentUser, @PathVariable("path") String path) {
@@ -68,6 +71,16 @@ public class StudySettingController {
                                                                 @RequestBody StudyTitleUpdateRequest request) {
         String newTitle = studyService.updateStudyTitle(currentUser.getId(), path, request);
         Map<String, String> response = Map.of("title", newTitle);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/banner")
+    public ResponseEntity<Map<String, String>> updateStudyBanner(@LoginUser CurrentUser currentUser,
+                                                                 @PathVariable("path") String path, @RequestParam("image") MultipartFile file) {
+        String imageUrl = s3service.updateImage(file);
+        String newImage = studyService.updateStudyBanner(currentUser.getId(), path, imageUrl);
+        Map<String, String> response = Map.of("image", newImage);
 
         return ResponseEntity.ok(response);
     }

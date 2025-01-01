@@ -28,6 +28,7 @@ public class EventUpdateValidator implements Validator {
                     request.getStartDateTime(),
                     request.getEndDateTime(),
                     errors);
+
         } else if (target instanceof EventUpdateRequest request) {
             eventValidationUtils.validateEventDates(
                     request.getEndEnrollmentDateTime(),

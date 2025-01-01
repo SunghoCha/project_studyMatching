@@ -1,0 +1,49 @@
+<configuration>
+    <property name="LOG_FILE" value="application.log"/>
+
+    <!-- 콘솔 출력 -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} dev %-5level [%thread] %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 파일 출력 -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_FILE}</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>application.%d{yyyy-MM-dd_HH-mm}.log.gz</fileNamePattern>
+            <maxHistory>5</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} dev %-5level [%thread] %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Elasticsearch Appender 설정 -->
+    <appender name="ES" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <!-- Elasticsearch 엔드포인트 설정 (AWS Elasticsearch 서비스의 엔드포인트) -->
+        <destination>your-elasticsearch-cluster-endpoint:9200</destination>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <pattern>
+                {
+                "timestamp": "%date{ISO8601}",
+                "level": "%level",
+                "thread": "%thread",
+                "logger": "%logger",
+                "message": "%message",
+                "context": "%mdc",
+                "exception": "%exception"
+                }
+            </pattern>
+        </encoder>
+    </appender>
+
+    <!-- Logger 설정 -->
+    <root level="info">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="FILE" />
+        <!-- Elasticsearch로 로그 전송 -->
+        <appender-ref ref="ES" />
+    </root>
+</configuration>

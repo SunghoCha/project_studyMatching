@@ -17,6 +17,7 @@ public class StudyResponse {
 
     private String path;
     private String title;
+    private String image;
     private boolean published;
     private boolean closed;
     private boolean recruiting;
@@ -37,12 +38,13 @@ public class StudyResponse {
     private boolean isManager;
 
     @Builder
-    private StudyResponse(String path, String title, boolean published, boolean closed,
+    private StudyResponse(String path, String title, String image, boolean published, boolean closed,
                           boolean recruiting, String shortDescription, String fullDescription,
                           List<TagResponse> tags, List<ZoneResponse> zones, List<UserResponse> members,
                           List<UserResponse> managers, boolean isJoinable, boolean isMember, boolean isManager) {
         this.path = path;
         this.title = title;
+        this.image = image;
         this.published = published;
         this.closed = closed;
         this.recruiting = recruiting;
@@ -62,6 +64,7 @@ public class StudyResponse {
         return StudyResponse.builder()
                 .path(study.getPath())
                 .title(study.getTitle())
+                .image(study.getImage())
                 .published(study.isPublished())
                 .closed(study.isClosed())
                 .recruiting(study.isRecruiting())
@@ -89,6 +92,7 @@ public class StudyResponse {
         return StudyResponse.builder()
                 .path(study.getPath())
                 .title(study.getTitle())
+                .image(study.getImage())
                 .shortDescription(study.getShortDescription())
                 .tags(study.getStudyTags().stream()
                         .map(studyTag -> TagResponse.of(studyTag.getTag()))

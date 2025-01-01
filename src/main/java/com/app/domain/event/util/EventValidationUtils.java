@@ -1,6 +1,5 @@
 package com.app.domain.event.util;
 
-import com.app.domain.event.dto.EventCreateRequest;
 import com.app.global.error.ErrorCode;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;

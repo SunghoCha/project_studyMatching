@@ -16,6 +16,7 @@ import com.app.domain.user.constant.Role;
 import com.app.domain.user.service.UserService;
 import com.app.domain.zone.Zone;
 import com.app.domain.zone.service.ZoneService;
+import com.app.global.config.auth.CustomOauth2UserService;
 import com.app.global.error.exception.StudyNotFoundException;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -23,20 +24,23 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.time.Clock;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
 @Slf4j
-@Profile("local")
+@Profile("dev")
 @Component
 @RequiredArgsConstructor
 public class InitDb implements ApplicationRunner {
@@ -47,6 +51,7 @@ public class InitDb implements ApplicationRunner {
     private final ZoneService zoneService;
     private final StudyZoneService studyZoneService;
     private final StudyTagService studyTagService;
+    private final CustomOauth2UserService customOauth2UserService;
     private final StudyRepository studyRepository;
     private final Clock clock;
 
@@ -83,8 +88,24 @@ public class InitDb implements ApplicationRunner {
                 .email("admin@example.com")
                 .role(Role.ADMIN)
                 .build();
+        User savedUser = userService.save(user);
+        SecurityContextHolder.getContext().setAuthentication(createAuthentication(savedUser));
 
-        return userService.save(user);
+        return savedUser;
+    }
+
+    private static OAuth2AuthenticationToken createAuthentication(User user) {
+        Map<String, Object> attributes = new HashMap<>();
+        attributes.put("email", user.getEmail());
+        attributes.put("name", user.getName());
+        attributes.put("sub", String.valueOf(user.getId()));
+
+        DefaultOAuth2User oAuth2User = new DefaultOAuth2User(Collections.singleton(new SimpleGrantedAuthority(user.getRoleKey())),
+                attributes, "sub");
+
+        return new OAuth2AuthenticationToken(oAuth2User,
+                oAuth2User.getAuthorities(),
+                "registrationId");
     }
 
     private void initStudies(Long userId) {

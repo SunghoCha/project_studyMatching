@@ -17,15 +17,17 @@ public class StudyQueryResponse {
 
     private String path;
     private String title;
+    private String image;
     private String shortDescription;
     private Set<TagResponse> tags;
     private Set<ZoneResponse> zones;
 
     @Builder
     @QueryProjection
-    public StudyQueryResponse(String path, String title, String shortDescription, Set<TagResponse> tags, Set<ZoneResponse> zones) {
+    public StudyQueryResponse(String path, String title, String image, String shortDescription, Set<TagResponse> tags, Set<ZoneResponse> zones) {
         this.path = path;
         this.title = title;
+        this.image = image;
         this.shortDescription = shortDescription;
         this.tags = tags;
         this.zones= zones;
@@ -35,6 +37,7 @@ public class StudyQueryResponse {
         return StudyQueryResponse.builder()
                 .path(study.getPath())
                 .title(study.getTitle())
+                .image(study.getImage())
                 .shortDescription(study.getShortDescription())
                 .tags(study.getStudyTags().stream()
                         .map(studyTag -> TagResponse.of(studyTag.getTag()))

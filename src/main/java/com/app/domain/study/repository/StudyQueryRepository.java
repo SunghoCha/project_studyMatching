@@ -199,13 +199,14 @@ public class StudyQueryRepository {
                 .select(Projections.constructor(StudyQueryResponse.class,
                         study.path,
                         study.title,
+                        study.image,
                         study.shortDescription,
                         Projections.list(Projections.constructor(TagResponse.class, tag.title)),
                         Projections.list(Projections.constructor(ZoneResponse.class,
-                                        zone.id,
-                                        zone.city,
-                                        zone.localName,
-                                        zone.province)
+                                zone.id,
+                                zone.city,
+                                zone.localName,
+                                zone.province)
                         )
                 ))
                 .distinct()
@@ -301,6 +302,7 @@ public class StudyQueryRepository {
                                 new QStudyQueryResponse(
                                         study.path,
                                         study.title,
+                                        study.image,
                                         study.shortDescription,
                                         GroupBy.set(new QTagResponse(tag.title)),
                                         GroupBy.set(new QZoneResponse(zone.id, zone.city, zone.localName, zone.province))
@@ -426,6 +428,7 @@ public class StudyQueryRepository {
                         StudyQueryResponse.class,
                         study.path,
                         study.title,
+                        study.image,
                         study.shortDescription,
                         Projections.list(Projections.constructor(
                                 TagResponse.class,

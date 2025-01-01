@@ -210,6 +210,16 @@ public class StudyService {
         return study.getTitle();
     }
 
+    public String updateStudyBanner(Long userId, String path, String imageUrl) {
+        Study study = findAuthorizedStudy(userId, path);
+        StudyEditor studyEditor = study.toEditor()
+                .image(imageUrl)
+                .build();
+        study.edit(studyEditor);
+
+        return study.getImage();
+    }
+
     public PagedResponse<StudyQueryResponse> getStudyWishlist(Long userId, Pageable pageable) {
         List<UserTag> userTags = userTagService.getUserTags(userId);
         List<String> tags = userTags.stream()

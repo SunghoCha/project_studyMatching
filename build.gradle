@@ -33,9 +33,18 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-aop'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'io.micrometer:micrometer-registry-prometheus'
+
     implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+    implementation 'net.logstash.logback:logstash-logback-encoder:6.6'
+
+    implementation 'mysql:mysql-connector-java:8.0.28'
+
+    implementation 'com.amazonaws:aws-java-sdk-s3:1.12.122'
+
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
     //Querydsl 추가
