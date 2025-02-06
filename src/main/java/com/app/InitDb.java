@@ -146,6 +146,11 @@ public class InitDb implements ApplicationRunner {
                 "전문 멘토와 함께 문제를 해결하며 실력을 키울 수 있는 실질적인 과정입니다."
         );
 
+        List<String> sharedImages = new ArrayList<>();
+        for (int i = 1; i <= 20; i++) {
+            sharedImages.add("https://study-matching-files.s3.ap-northeast-2.amazonaws.com/banner" + i + ".png ");
+        }
+
         // 랜덤 데이터 생성
         Random random = new Random();
 
@@ -179,6 +184,9 @@ public class InitDb implements ApplicationRunner {
 
             // 생성된 스터디에 Tag 추가
             addTagsToStudy(userId, path, title, tags);
+
+            // 생성된 스터디에 Image 추가
+            studyService.updateStudyBanner(userId, path, sharedImages.get(random.nextInt(sharedImages.size())));
         }
         log.info("스터디 초기화 완료");
     }

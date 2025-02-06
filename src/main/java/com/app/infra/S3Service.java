@@ -1,4 +1,4 @@
-package com.app.domain.study.service;
+package com.app.infra;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.PutObjectRequest;
@@ -20,7 +20,7 @@ public class S3Service {
     private final S3Properties s3Properties;
 
     public String updateImage(MultipartFile file) {
-        String fileName = UUID.randomUUID().toString() + "-" + file.getOriginalFilename();
+        String fileName =  UUID.randomUUID() + "-" + file.getOriginalFilename();
 
         try (InputStream inputStream = file.getInputStream()) {
             amazonS3.putObject(new PutObjectRequest(s3Properties.getBucket(), fileName, inputStream, null));

@@ -1,6 +1,7 @@
 package com.app.domain.event;
 
 import com.app.domain.study.Study;
+import com.app.domain.user.User;
 import com.app.global.error.exception.InvalidEnrollmentStateException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -8,6 +9,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -76,6 +78,28 @@ public class Event {
 
     private long getNumberOfAcceptedEnrollments() {
         return this.enrollments != null ? this.enrollments.stream().filter(Enrollment::isAccepted).count() : 0L;
+    }
+
+    public boolean isEnrollable(User user, Clock clock) {
+        return isNotClosed(clock) && isNotAttended(user) && !isAlreadyEnrolled(user);
+    }
+
+    public boolean isDisenrollable(User user, Clock clock) {
+        return isNotClosed(clock) && isNotAttended(user) && isAlreadyEnrolled(user);
+    }
+
+    private boolean isNotAttended(User user) {
+        return this.enrollments.stream()
+                .noneMatch(enrollment -> enrollment.getUser().equals(user) && enrollment.isAttended());
+    }
+
+    private boolean isAlreadyEnrolled(User user) {
+        return enrollments.stream()
+                .anyMatch(enrollment -> enrollment.getUser().equals(user));
+    }
+
+    private boolean isNotClosed(Clock clock) {
+        return this.endEnrollmentDateTime.isAfter(LocalDateTime.now(clock));
     }
 
     public void addEnrollment(Enrollment enrollment) {

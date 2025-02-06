@@ -40,6 +40,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         String refreshToken = createRefreshToken(oAuth2User);
         log.info("refreshToken 생성 완료");
 
+
         // TODO: url 변수화
         String redirectUrlWithToken = "http://localhost:82/login-success?accessToken=" + accessToken
                 + "&refreshToken=" + refreshToken;

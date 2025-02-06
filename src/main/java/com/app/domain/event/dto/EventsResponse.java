@@ -12,11 +12,11 @@ import java.util.List;
 @NoArgsConstructor
 public class EventsResponse {
 
-    private List<EventResponse> newEvents;
-    private List<EventResponse> oldEvents;
+    private List<EventSummaryResponse> newEvents;
+    private List<EventSummaryResponse> oldEvents;
 
     @Builder
-    public EventsResponse(List<EventResponse> newEvents, List<EventResponse> oldEvents) {
+    public EventsResponse(List<EventSummaryResponse> newEvents, List<EventSummaryResponse> oldEvents) {
         this.newEvents = newEvents;
         this.oldEvents = oldEvents;
     }

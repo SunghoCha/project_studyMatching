@@ -8,6 +8,7 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -25,7 +26,9 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests(authRequest -> authRequest
+        http
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(authRequest -> authRequest
                         //.requestMatchers("/api/**").hasAnyAuthority("SCOPE_profile", "SCOPE_email")
                         .requestMatchers("/guest").hasRole(Role.GUEST.name())
                         .requestMatchers("/user").hasRole(Role.USER.name())
@@ -45,7 +48,7 @@ public class SecurityConfig {
                                 .userService(customOAuth2UserService))
                         .successHandler(customOAuth2SuccessHandler))
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.decoder(customJwtDecoder))) // jwt 토큰을 검증하는 빈들과 클래스를 생성하고 초기화함
-               // .addFilterBefore(requestLoggingFilter, OAuth2LoginAuthenticationFilter.class);
+        // .addFilterBefore(requestLoggingFilter, OAuth2LoginAuthenticationFilter.class);
         ;
 
         return http.build();

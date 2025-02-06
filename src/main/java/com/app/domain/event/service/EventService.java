@@ -12,14 +12,13 @@ import com.app.domain.study.Study;
 import com.app.domain.study.eventListener.StudyUpdatedEvent;
 import com.app.domain.study.service.StudyService;
 import com.app.domain.user.User;
+import com.app.domain.user.repository.UserRepository;
 import com.app.domain.user.service.UserService;
-import com.app.global.error.exception.EnrollmentAlreadyExistException;
-import com.app.global.error.exception.EventNotFoundException;
-import com.app.global.error.exception.InvalidEnrollmentException;
-import com.app.global.error.exception.InvalidEnrollmentStateException;
+import com.app.global.error.exception.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -27,15 +26,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class EventService {
-    // TODO : event 발행
+
     private final EventRepository eventRepository;
     private final StudyService studyService;
     private final ApplicationEventPublisher eventPublisher;
     private final EnrollmentRepository enrollmentRepository;
     private final UserService userService;
     private final Clock clock;
+    private final UserRepository userRepository;
 
     public EventCreateResponse createEvent(Long userId, String path, EventCreateRequest request) {
         Study study = studyService.validateStudyIsActive(path);
@@ -60,15 +61,16 @@ public class EventService {
                 .build();
     }
 
-    public EventResponse getEvent(Long eventId) {
+    public EventResponse getEvent(Long userId, Long eventId) {
+        User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
         Event event = eventRepository.findEventWithEnrollmentById(eventId).orElseThrow(EventNotFoundException::new);
 
-        return EventResponse.of(event);
+        return EventResponse.of(event, user, clock);
     }
 
     public EventsResponse getEvents(String path) {
         Study study = studyService.findByPath(path); // path 체크용
-        List<Event> events = eventRepository.findAllEventWithEnrollmentByPath(path);
+        List<Event> events = eventRepository.findAllEventWithEnrollmentAndUserByPath(path);
         List<Event> newEvents = new ArrayList<>();
         List<Event> oldEvents = new ArrayList<>();
 
@@ -81,14 +83,14 @@ public class EventService {
         });
 
         return EventsResponse.builder()
-                .oldEvents(oldEvents.stream().map(EventResponse::of).toList())
-                .newEvents(newEvents.stream().map(EventResponse::of).toList())
+                .oldEvents(oldEvents.stream().map(EventSummaryResponse::of).toList())
+                .newEvents(newEvents.stream().map(EventSummaryResponse::of).toList())
                 .build();
     }
 
     public EventUpdateResponse updateEvent(Long userId, Long eventId, String path, EventUpdateRequest request) {
         Study study = studyService.validateStudyIsActive(path);
-        Event event = eventRepository.findEventByIdIfAuthorized(userId, eventId, path).orElseThrow(EventNotFoundException::new);
+        Event event = eventRepository.findEventWithEnrollmentByIdIfManager(userId, eventId, path).orElseThrow(EventNotFoundException::new);
 
         EventEditor eventEditor = event.toEditor()
                 .title(request.getTitle())
@@ -108,11 +110,15 @@ public class EventService {
 
     public void deleteEvent(Long userId, Long eventId, String path) {
         // 해당 이벤트가 존재하고 권한이 있는지 체크용
-        Event event = eventRepository.findEventByIdIfAuthorized(userId, eventId, path).orElseThrow(EventNotFoundException::new);
-        eventRepository.deleteById(eventId);
-
-        eventPublisher.publishEvent(new StudyUpdatedEvent(event.getStudy(),
-                "'" + event.getTitle() + "' 모임을 취소했습니다."));
+        // 이벤트에 참석자가 있을때는 삭제 불가능
+        Event event = eventRepository.findEventWithEnrollmentByIdIfManager(userId, eventId, path).orElseThrow(EventNotFoundException::new);
+        if (event.getEnrollments().isEmpty()) {
+            eventRepository.deleteById(eventId);
+            eventPublisher.publishEvent(new StudyUpdatedEvent(event.getStudy(),
+                    "'" + event.getTitle() + "' 모임을 취소했습니다."));
+        } else {
+            throw new InvalidEventStateException();
+        }
     }
 
     public EnrollmentCreateResponse createEnrollment(Long userId, Long eventId, String path) {
@@ -126,10 +132,12 @@ public class EventService {
         Enrollment enrollment = Enrollment.builder()
                 .event(event)
                 .enrolledAt(LocalDateTime.now(clock))
-                .accepted(event.isAbleToAccept())
+                .accepted(false)
+                .accepted(false)
                 .user(user)
                 .build();
         Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
+        event.addEnrollment(savedEnrollment);
 
         return EnrollmentCreateResponse.of(savedEnrollment);
     }
@@ -150,8 +158,9 @@ public class EventService {
 
     public EnrollmentResponse acceptEnrollment(Long userId, Long eventId, Long enrollmentId, String path) {
         Study study = studyService.validateStudyIsRecruiting(path);
-        Event event = eventRepository.findEventByIdIfAuthorized(userId, eventId, path).orElseThrow(EventNotFoundException::new);
-        Enrollment enrollment = enrollmentRepository.findById(enrollmentId).orElseThrow(InvalidEnrollmentException::new);
+        Event event = eventRepository.findEventWithEnrollmentByIdIfManager(userId, eventId, path).orElseThrow(EventNotFoundException::new);
+        Enrollment enrollment = enrollmentRepository.findEnrollmentWithUserById(enrollmentId).orElseThrow(InvalidEnrollmentException::new);
+        enrollmentRepository.findEnrollmentWithUserById(enrollmentId);
         event.accept(enrollment);
 
         eventPublisher.publishEvent(new EnrollmentAcceptedEvent(enrollment));
@@ -161,8 +170,8 @@ public class EventService {
 
     public EnrollmentResponse rejectEnrollment(Long userId, Long eventId, Long enrollmentId, String path) {
         Study study = studyService.validateStudyIsRecruiting(path);
-        Event event = eventRepository.findEventByIdIfAuthorized(userId, eventId, path).orElseThrow(EventNotFoundException::new);
-        Enrollment enrollment = enrollmentRepository.findById(enrollmentId).orElseThrow(InvalidEnrollmentException::new);
+        Event event = eventRepository.findEventWithEnrollmentByIdIfManager(userId, eventId, path).orElseThrow(EventNotFoundException::new);
+        Enrollment enrollment = enrollmentRepository.findEnrollmentWithUserById(enrollmentId).orElseThrow(InvalidEnrollmentException::new);
         event.reject(enrollment);
 
         eventPublisher.publishEvent(new EnrollmentRejectedEvent(enrollment));
@@ -172,8 +181,8 @@ public class EventService {
 
     public EnrollmentResponse checkInEnrollment(Long userId, Long eventId, Long enrollmentId, String path) {
         Study study = studyService.validateStudyIsRecruiting(path);
-        Event event = eventRepository.findEventByIdIfAuthorized(userId, eventId, path).orElseThrow(EventNotFoundException::new);
-        Enrollment enrollment = enrollmentRepository.findById(enrollmentId).orElseThrow(InvalidEnrollmentException::new);
+        Event event = eventRepository.findEventWithEnrollmentByIdIfMember(userId, eventId, path).orElseThrow(EventNotFoundException::new);
+        Enrollment enrollment = enrollmentRepository.findEnrollmentWithUserById(enrollmentId).orElseThrow(InvalidEnrollmentException::new);
 
         if (enrollment.isAccepted() && !enrollment.isAttended()) {
             enrollment.setAttended(true);
@@ -185,8 +194,8 @@ public class EventService {
 
     public EnrollmentResponse cancelCheckInEnrollment(Long userId, Long eventId, Long enrollmentId, String path) {
         Study study = studyService.validateStudyIsRecruiting(path);
-        Event event = eventRepository.findEventByIdIfAuthorized(userId, eventId, path).orElseThrow(EventNotFoundException::new);
-        Enrollment enrollment = enrollmentRepository.findById(enrollmentId).orElseThrow(InvalidEnrollmentException::new);
+        Event event = eventRepository.findEventWithEnrollmentByIdIfMember(userId, eventId, path).orElseThrow(EventNotFoundException::new);
+        Enrollment enrollment = enrollmentRepository.findEnrollmentWithUserById(enrollmentId).orElseThrow(InvalidEnrollmentException::new);
 
         if (enrollment.isAccepted() && enrollment.isAttended()) {
             enrollment.setAttended(false);

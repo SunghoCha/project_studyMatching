@@ -44,6 +44,8 @@ public enum ErrorCode {
     ENROLLMENT_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "E-005", "이미 존재하는 등록입니다."),
     INVALID_ENROLLMENT(HttpStatus.BAD_REQUEST, "E-006", "유효하지 않는 등록입니다."),
     INVALID_RECRUITMENT_STATE(HttpStatus.BAD_REQUEST, "E-007", "유효하지 않은 모집 상태입니다."),
+    INVALID_EVENT_STATE(HttpStatus.BAD_REQUEST, "E-008", "이벤트 참가자가 있으면 이벤트를 삭제할 수 없습니다."),
+
 
     // Email
     INVALID_EMAIL_SEND_CONDITION(HttpStatus.BAD_REQUEST, "EM-001", "이메일 전송에 실패하였습니다."),

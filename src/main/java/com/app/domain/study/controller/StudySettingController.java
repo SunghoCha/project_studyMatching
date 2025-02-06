@@ -2,7 +2,7 @@ package com.app.domain.study.controller;
 
 import com.app.domain.study.dto.studySetting.StudyPathUpdateRequest;
 import com.app.domain.study.dto.studySetting.StudyTitleUpdateRequest;
-import com.app.domain.study.service.S3Service;
+import com.app.infra.S3Service;
 import com.app.domain.study.service.StudyService;
 import com.app.global.config.auth.LoginUser;
 import com.app.global.config.auth.dto.CurrentUser;

@@ -37,8 +37,10 @@ public class EventController {
     }
 
     @GetMapping("/{eventId}")
-    public ResponseEntity<EventResponse> getEvent(@PathVariable("path") String path, @PathVariable("eventId") Long eventId) {
-        EventResponse response = eventService.getEvent(eventId);
+    public ResponseEntity<EventResponse> getEvent(@LoginUser CurrentUser currentUser,
+                                                  @PathVariable("path") String path,
+                                                  @PathVariable("eventId") Long eventId) {
+        EventResponse response = eventService.getEvent(currentUser.getId(), eventId);
 
         return ResponseEntity.ok(response);
     }
@@ -82,7 +84,9 @@ public class EventController {
     }
 
     @DeleteMapping("/{eventId}/disenroll")
-    public ResponseEntity<Void> cancelEnrollment(@LoginUser CurrentUser currentUser, @PathVariable("path") String path, @PathVariable("eventId") Long eventId) {
+    public ResponseEntity<Void> cancelEnrollment(@LoginUser CurrentUser currentUser,
+                                                 @PathVariable("path") String path,
+                                                 @PathVariable("eventId") Long eventId) {
         eventService.cancelEnrollment(currentUser.getId(), eventId, path);
 
         return ResponseEntity.noContent().build();
@@ -90,9 +94,9 @@ public class EventController {
 
     @PostMapping("/{eventId}/enrollments/{enrollmentId}/accept")
     public ResponseEntity<EnrollmentResponse> acceptEnrollment(@LoginUser CurrentUser currentUser,
+                                                               @PathVariable("path") String path,
                                                                @PathVariable("eventId") Long eventId,
-                                                               @PathVariable("enrollmentId") Long enrollmentId,
-                                                               @PathVariable("path") String path) {
+                                                               @PathVariable("enrollmentId") Long enrollmentId) {
         EnrollmentResponse response = eventService.acceptEnrollment(currentUser.getId(), eventId, enrollmentId, path);
 
         return ResponseEntity.ok(response);
@@ -100,9 +104,9 @@ public class EventController {
 
     @PostMapping("/{eventId}/enrollments/{enrollmentId}/reject")
     public ResponseEntity<EnrollmentResponse> rejectEnrollment(@LoginUser CurrentUser currentUser,
+                                                               @PathVariable("path") String path,
                                                                @PathVariable("eventId") Long eventId,
-                                                               @PathVariable("enrollmentId") Long enrollmentId,
-                                                               @PathVariable("path") String path) {
+                                                               @PathVariable("enrollmentId") Long enrollmentId) {
         EnrollmentResponse response = eventService.rejectEnrollment(currentUser.getId(), eventId, enrollmentId, path);
 
         return ResponseEntity.ok(response);
@@ -110,9 +114,9 @@ public class EventController {
 
     @PostMapping("/{eventId}/enrollments/{enrollmentId}/check-in")
     public ResponseEntity<EnrollmentResponse> checkInEnrollment(@LoginUser CurrentUser currentUser,
+                                                                @PathVariable("path") String path,
                                                                 @PathVariable("eventId") Long eventId,
-                                                                @PathVariable("enrollmentId") Long enrollmentId,
-                                                                @PathVariable("path") String path) {
+                                                                @PathVariable("enrollmentId") Long enrollmentId) {
         EnrollmentResponse response = eventService.checkInEnrollment(currentUser.getId(), eventId, enrollmentId, path);
 
         return ResponseEntity.ok(response);

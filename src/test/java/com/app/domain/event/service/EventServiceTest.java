@@ -155,7 +155,7 @@ class EventServiceTest {
         Event event = createAndSaveEvent(now, study, "이벤트");
 
         // when
-        EventResponse response = eventService.getEvent(event.getId());
+        EventResponse response = eventService.getEvent(user.getId(), event.getId());
 
         // then
         assertThat(response).isNotNull();
@@ -182,7 +182,7 @@ class EventServiceTest {
         Event event = createAndSaveEvent(now, study, "이벤트");
 
         // expected
-        assertThatThrownBy(() -> eventService.getEvent(123154132L)).isInstanceOf(EventNotFoundException.class);
+        assertThatThrownBy(() -> eventService.getEvent(user.getId(), 123154132L)).isInstanceOf(EventNotFoundException.class);
     }
 
     @Test
@@ -210,7 +210,7 @@ class EventServiceTest {
         assertThat(response.getNewEvents()).isNotEmpty();
         assertThat(response.getNewEvents()).hasSize(3);
         for (int i = 0; i < 3; i++) {
-            EventResponse eventResponse = response.getNewEvents().get(i);
+            EventSummaryResponse eventResponse = response.getNewEvents().get(i);
             assertThat(eventResponse.getTitle()).isEqualTo("제목이벤트" + (i + 1));
             assertThat(eventResponse.getDescription()).isEqualTo("소개이벤트" + (i + 1));
         }
@@ -218,7 +218,7 @@ class EventServiceTest {
         assertThat(response.getOldEvents()).isNotEmpty();
         assertThat(response.getOldEvents()).hasSize(3);
         for (int i = 0; i < 3; i++) {
-            EventResponse eventResponse = response.getOldEvents().get(i);
+            EventSummaryResponse eventResponse = response.getOldEvents().get(i);
             assertThat(eventResponse.getTitle()).isEqualTo("제목지난이벤트" + (i + 1));
             assertThat(eventResponse.getDescription()).isEqualTo("소개지난이벤트" + (i + 1));
         }

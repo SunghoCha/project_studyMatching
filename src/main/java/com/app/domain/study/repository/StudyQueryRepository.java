@@ -106,6 +106,131 @@ public class StudyQueryRepository {
                 .build();
     }
 
+    public PagedResponse<StudyQueryResponse> findStudiesWithCond2(Predicate whereClause, Pageable pageable) {
+        QStudy study = QStudy.study;
+
+        BooleanExpression finalCondition = whereClause != null ? (BooleanExpression) whereClause : Expressions.asBoolean(true).isTrue();
+        log.info("Final condition: {}", finalCondition != null ? finalCondition.toString() : "No condition applied");
+
+        // 총 데이터 수
+        Long totalCount = queryFactory
+                .select(study.count())
+                .from(study)
+                .where(finalCondition)
+                .fetchOne();
+
+        //
+        log.info("Sort orders: {}", pageable.getSort());
+        List<OrderSpecifier<?>> orderSpecifiers = pageable.getSort()
+                .stream()
+                .map(order ->
+                        switch (order.getProperty()) {
+                            case "title" -> (OrderSpecifier<?>) (order.isAscending()
+                                    ? study.title.asc()
+                                    : study.title.desc());
+                            case "publishedDateTime" -> (OrderSpecifier<?>) (order.isAscending()
+                                    ? study.publishedDateTime.asc()
+                                    : study.publishedDateTime.desc()).nullsLast();
+                            default -> throw new InvalidSortPropertyException();
+                        })
+                .toList();
+
+
+        List<Study> studies = queryFactory
+                .selectFrom(study)
+                .distinct()
+                .leftJoin(study.studyTags, QStudyTag.studyTag).fetchJoin()
+                .leftJoin(QStudyTag.studyTag.tag, QTag.tag).fetchJoin()
+                .leftJoin(study.studyZones, QStudyZone.studyZone).fetchJoin()
+                .leftJoin(QStudyZone.studyZone.zone, QZone.zone).fetchJoin()
+                .where(finalCondition)
+                .orderBy(orderSpecifiers.toArray(new OrderSpecifier[0]))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+
+        // study <-> dto 변환
+        List<StudyQueryResponse> studyQueryResponses = convertToQueryResponses(studies);
+
+        // 총 페이지
+        int totalPages = getTotalPages(pageable, totalCount);
+
+        return PagedResponse.<StudyQueryResponse>builder()
+                .content(studyQueryResponses)
+                .currentPage(pageable.getPageNumber() + 1) // 페이지는 0이 아닌 1페이지부터
+                .totalPages(totalPages)
+                .totalCount(totalCount != null ? totalCount : 0)
+                .size(pageable.getPageSize())
+                .build();
+    }
+
+    public PagedResponse<StudyQueryResponse> findStudiesWithCond3(Predicate whereClause, Pageable pageable) {
+        QStudy study = QStudy.study;
+
+        BooleanExpression finalCondition = whereClause != null ? (BooleanExpression) whereClause : Expressions.asBoolean(true).isTrue();
+        log.info("Final condition: {}", finalCondition != null ? finalCondition.toString() : "No condition applied");
+
+        // 총 데이터 수
+        Long totalCount = queryFactory
+                .select(study.count())
+                .from(study)
+                .where(finalCondition)
+                .fetchOne();
+
+        //
+        log.info("Sort orders: {}", pageable.getSort());
+        List<OrderSpecifier<?>> orderSpecifiers = pageable.getSort()
+                .stream()
+                .map(order ->
+                        switch (order.getProperty()) {
+                            case "title" -> (OrderSpecifier<?>) (order.isAscending()
+                                    ? study.title.asc()
+                                    : study.title.desc());
+                            case "publishedDateTime" -> (OrderSpecifier<?>) (order.isAscending()
+                                    ? study.publishedDateTime.asc()
+                                    : study.publishedDateTime.desc()).nullsLast();
+                            default -> throw new InvalidSortPropertyException();
+                        })
+                .toList();
+
+
+        // 1. 페이징 쿼리로 기본 엔티티 가져오기
+        List<Long> studyIds = queryFactory
+                .select(study.id)
+                .from(study)
+                .where(finalCondition)
+                .orderBy(orderSpecifiers.toArray(new OrderSpecifier[0]))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        // 2. 페치 조인으로 연관 데이터 로딩
+        List<Study> studies = queryFactory
+                .selectFrom(study)
+                .leftJoin(study.studyTags, QStudyTag.studyTag).fetchJoin()
+                .leftJoin(QStudyTag.studyTag.tag, QTag.tag).fetchJoin()
+                .leftJoin(study.studyZones, QStudyZone.studyZone).fetchJoin()
+                .leftJoin(QStudyZone.studyZone.zone, QZone.zone).fetchJoin()
+                .where(study.id.in(studyIds))
+                .fetch();
+
+
+        // study <-> dto 변환
+        List<StudyQueryResponse> studyQueryResponses = convertToQueryResponses(studies);
+
+        // 총 페이지
+        int totalPages = getTotalPages(pageable, totalCount);
+
+        return PagedResponse.<StudyQueryResponse>builder()
+                .content(studyQueryResponses)
+                .currentPage(pageable.getPageNumber() + 1) // 페이지는 0이 아닌 1페이지부터
+                .totalPages(totalPages)
+                .totalCount(totalCount != null ? totalCount : 0)
+                .size(pageable.getPageSize())
+                .build();
+    }
+
     public PagedResponse<StudyQueryResponse> findAllStudies(StudySearchCond searchCond, Pageable pageable) {
         BooleanExpression expression = searchCond != null
                 ? titlesLike(QStudy.study, searchCond.getTitles())
