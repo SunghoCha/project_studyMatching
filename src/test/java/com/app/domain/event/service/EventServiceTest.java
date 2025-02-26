@@ -1,5 +1,6 @@
 package com.app.domain.event.service;
 
+import com.app.WithAccount;
 import com.app.config.TestClockConfig;
 import com.app.domain.event.Enrollment;
 import com.app.domain.event.Event;
@@ -11,6 +12,8 @@ import com.app.domain.study.repository.StudyRepository;
 import com.app.domain.study.service.StudyService;
 import com.app.domain.study.studyManager.StudyManager;
 import com.app.domain.study.studyManager.repository.StudyManagerRepository;
+import com.app.domain.study.studyMember.StudyMember;
+import com.app.domain.study.studyMember.repository.StudyMemberRepository;
 import com.app.domain.user.User;
 import com.app.domain.user.constant.Role;
 import com.app.domain.user.repository.UserRepository;
@@ -35,6 +38,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @SpringBootTest
 class EventServiceTest {
 
+    private static final Long INVALID_USER_ID = -1L;
+
     @Autowired
     EventService eventService;
 
@@ -48,6 +53,9 @@ class EventServiceTest {
     StudyManagerRepository studyManagerRepository;
 
     @Autowired
+    StudyMemberRepository studyMemberRepository;
+
+    @Autowired
     EventRepository eventRepository;
 
     @Autowired
@@ -58,13 +66,14 @@ class EventServiceTest {
     private StudyService studyService;
 
     @Test
+    @WithAccount
     @DisplayName("올바른 입력으로 이벤트를 생성한다")
     void createEvent_with_correct_input() {
         // given
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
 
@@ -98,7 +107,7 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
 
         EventCreateRequest request = EventCreateRequest.builder()
@@ -122,7 +131,7 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
 
         EventCreateRequest request = EventCreateRequest.builder()
@@ -148,7 +157,7 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
 
@@ -175,14 +184,14 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
 
         Event event = createAndSaveEvent(now, study, "이벤트");
 
         // expected
-        assertThatThrownBy(() -> eventService.getEvent(user.getId(), 123154132L)).isInstanceOf(EventNotFoundException.class);
+        assertThatThrownBy(() -> eventService.getEvent(user.getId(), INVALID_USER_ID)).isInstanceOf(EventNotFoundException.class);
     }
 
     @Test
@@ -192,7 +201,7 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
 
@@ -231,7 +240,7 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
 
@@ -251,7 +260,7 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
 
@@ -287,7 +296,7 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
 
@@ -303,7 +312,7 @@ class EventServiceTest {
                 .build();
 
         // expected
-        assertThatThrownBy(() -> eventService.updateEvent(user.getId(), 9861232L, path, request)).isInstanceOf(EventNotFoundException.class);
+        assertThatThrownBy(() -> eventService.updateEvent(user.getId(), INVALID_USER_ID, path, request)).isInstanceOf(EventNotFoundException.class);
     }
 
     @Test
@@ -313,7 +322,7 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
 
@@ -340,7 +349,7 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
 
@@ -356,7 +365,7 @@ class EventServiceTest {
                 .build();
 
         // expected
-        assertThatThrownBy(() -> eventService.updateEvent(120398213L, event.getId(), path, request))
+        assertThatThrownBy(() -> eventService.updateEvent(INVALID_USER_ID, event.getId(), path, request))
                 .isInstanceOf(EventNotFoundException.class);
     }
 
@@ -367,7 +376,7 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
 
@@ -388,14 +397,14 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
 
         Event event = createAndSaveEvent(now, study, "이벤트");
 
         // expected
-        assertThatThrownBy(() -> eventService.deleteEvent(8904322L, event.getId(), path)).isInstanceOf(EventNotFoundException.class);
+        assertThatThrownBy(() -> eventService.deleteEvent(INVALID_USER_ID, event.getId(), path)).isInstanceOf(EventNotFoundException.class);
     }
 
     @Test
@@ -405,14 +414,14 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
 
         Event event = createAndSaveEvent(now, study, "이벤트");
 
         // expected
-        assertThatThrownBy(() -> eventService.deleteEvent(user.getId(), 435345908L, path))
+        assertThatThrownBy(() -> eventService.deleteEvent(user.getId(), INVALID_USER_ID, path))
                 .isInstanceOf(EventNotFoundException.class);
     }
 
@@ -423,7 +432,7 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
 
@@ -441,15 +450,19 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
         study.startRecruit(now);
+        // 스터디 세팅
+        User guest = createAndSaveUser("guest", Role.GUEST);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
 
         Event event = createAndSaveEvent(now, study, "이벤트");
 
         // when
-        EnrollmentCreateResponse response = eventService.createEnrollment(user.getId(), event.getId(), path);
+        EnrollmentCreateResponse response = eventService.createEnrollment(guest.getId(), event.getId(), path);
 
         // then
         Assertions.assertThat(response).isNotNull();
@@ -465,13 +478,17 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
+        // 스터디 세팅
+        User guest = createAndSaveUser("guest", Role.GUEST);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
 
         Event event = createAndSaveEvent(now, study, "이벤트");
 
         // expected
-        assertThatThrownBy(() -> eventService.createEnrollment(user.getId(), event.getId(), path))
+        assertThatThrownBy(() -> eventService.createEnrollment(guest.getId(), event.getId(), path))
                 .isInstanceOf(InvalidStudyPublishStateException.class);
     }
 
@@ -482,15 +499,19 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
         study.close(clock);
+        // 스터디 세팅
+        User guest = createAndSaveUser("guest", Role.GUEST);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
 
         Event event = createAndSaveEvent(now, study, "이벤트");
 
         // expected
-        assertThatThrownBy(() -> eventService.createEnrollment(user.getId(), event.getId(), path))
+        assertThatThrownBy(() -> eventService.createEnrollment(guest.getId(), event.getId(), path))
                 .isInstanceOf(InvalidStudyPublishStateException.class);
     }
 
@@ -501,14 +522,18 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
+        // 스터디 세팅
+        User guest = createAndSaveUser("guest", Role.GUEST);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
 
         Event event = createAndSaveEvent(now, study, "이벤트");
 
         // expected
-        assertThatThrownBy(() -> eventService.createEnrollment(user.getId(), event.getId(), path))
+        assertThatThrownBy(() -> eventService.createEnrollment(guest.getId(), event.getId(), path))
                 .isInstanceOf(InvalidRecruitmentStateException.class);
     }
 
@@ -519,10 +544,14 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
         study.startRecruit(now);
+        // 스터디 세팅
+        User guest = createAndSaveUser("guest", Role.GUEST);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
 
         Event event = createAndSaveEvent(now, study, "이벤트");
         Enrollment enrollment = Enrollment.builder()
@@ -530,13 +559,13 @@ class EventServiceTest {
                 .enrolledAt(now.plusMinutes(10))
                 .accepted(true)
                 .attended(false)
-                .user(user)
+                .user(guest)
                 .build();
         Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
         event.addEnrollment(savedEnrollment);
 
         // when
-        eventService.cancelEnrollment(user.getId(), event.getId(), path);
+        eventService.cancelEnrollment(guest.getId(), event.getId(), path);
 
         // then
         boolean enrollmentExists = enrollmentRepository.findById(savedEnrollment.getId()).isPresent();
@@ -550,10 +579,14 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
         study.startRecruit(now);
+        // 스터디 세팅
+        User guest = createAndSaveUser("guest", Role.GUEST);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
 
         Event event = createAndSaveEvent(now, study, "이벤트");
         Enrollment enrollment = Enrollment.builder()
@@ -561,13 +594,13 @@ class EventServiceTest {
                 .enrolledAt(now.plusMinutes(10))
                 .accepted(false)
                 .attended(false)
-                .user(user)
+                .user(guest)
                 .build();
         Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
         event.addEnrollment(savedEnrollment);
 
         // when
-        assertThatThrownBy(() -> eventService.cancelEnrollment(user.getId(), event.getId(), path))
+        assertThatThrownBy(() -> eventService.cancelEnrollment(guest.getId(), event.getId(), path))
                 .isInstanceOf(InvalidEnrollmentStateException.class);
     }
 
@@ -578,8 +611,12 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
+        // 스터디 세팅
+        User guest = createAndSaveUser("guest", Role.GUEST);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
 
         Event event = createAndSaveEvent(now, study, "이벤트");
         Enrollment enrollment = Enrollment.builder()
@@ -587,13 +624,13 @@ class EventServiceTest {
                 .enrolledAt(now.plusMinutes(10))
                 .accepted(true)
                 .attended(false)
-                .user(user)
+                .user(guest)
                 .build();
         Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
         event.addEnrollment(savedEnrollment);
 
         // expected
-        assertThatThrownBy(() -> eventService.cancelEnrollment(user.getId(), event.getId(), path))
+        assertThatThrownBy(() -> eventService.cancelEnrollment(guest.getId(), event.getId(), path))
                 .isInstanceOf(InvalidStudyPublishStateException.class);
     }
 
@@ -604,10 +641,14 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
         study.close(clock);
+        // 스터디 세팅
+        User guest = createAndSaveUser("guest", Role.GUEST);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
 
         Event event = createAndSaveEvent(now, study, "이벤트");
         Enrollment enrollment = Enrollment.builder()
@@ -615,13 +656,13 @@ class EventServiceTest {
                 .enrolledAt(now.plusMinutes(10))
                 .accepted(true)
                 .attended(false)
-                .user(user)
+                .user(guest)
                 .build();
         Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
         event.addEnrollment(savedEnrollment);
 
         // expected
-        assertThatThrownBy(() -> eventService.cancelEnrollment(user.getId(), event.getId(), path))
+        assertThatThrownBy(() -> eventService.cancelEnrollment(guest.getId(), event.getId(), path))
                 .isInstanceOf(InvalidStudyPublishStateException.class);
     }
 
@@ -632,10 +673,14 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
         study.startRecruit(now);
+        // 스터디 세팅
+        User guest = createAndSaveUser("guest", Role.GUEST);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
 
         Event event = createAndSaveEvent(now, study, "이벤트");
         Enrollment enrollment = Enrollment.builder()
@@ -643,13 +688,13 @@ class EventServiceTest {
                 .enrolledAt(now.plusMinutes(10))
                 .accepted(true)
                 .attended(true)
-                .user(user)
+                .user(guest)
                 .build();
         Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
         event.addEnrollment(savedEnrollment);
 
         // expected
-        assertThatThrownBy(() -> eventService.cancelEnrollment(user.getId(), event.getId(), path))
+        assertThatThrownBy(() -> eventService.cancelEnrollment(guest.getId(), event.getId(), path))
                 .isInstanceOf(InvalidEnrollmentStateException.class);
     }
 
@@ -660,14 +705,27 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
+        // 스터디 세팅
+        User guest = createAndSaveUser("guest", Role.GUEST);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
 
         Event event = createAndSaveEvent(now, study, "이벤트");
+        Enrollment enrollment = Enrollment.builder()
+                .event(event)
+                .enrolledAt(now.plusMinutes(10))
+                .accepted(true)
+                .attended(true)
+                .user(guest)
+                .build();
+        Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
+        event.addEnrollment(savedEnrollment);
 
         // expected
-        assertThatThrownBy(() -> eventService.cancelEnrollment(user.getId(), event.getId(), path))
+        assertThatThrownBy(() -> eventService.cancelEnrollment(guest.getId(), event.getId(), path))
                 .isInstanceOf(InvalidRecruitmentStateException.class);
     }
 
@@ -678,10 +736,14 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
         study.startRecruit(now);
+        // 스터디 세팅
+        User guest = createAndSaveUser("guest", Role.GUEST);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
 
         Event event = createAndSaveEvent(now, study, "이벤트");
         Enrollment enrollment = Enrollment.builder()
@@ -689,7 +751,7 @@ class EventServiceTest {
                 .enrolledAt(now.plusMinutes(10))
                 .accepted(false)
                 .attended(false)
-                .user(user)
+                .user(guest)
                 .build();
         Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
         event.addEnrollment(savedEnrollment);
@@ -712,8 +774,12 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
+        // 스터디 세팅
+        User guest = createAndSaveUser("guest", Role.GUEST);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
 
         Event event = createAndSaveEvent(now, study, "이벤트");
         Enrollment enrollment = Enrollment.builder()
@@ -721,7 +787,7 @@ class EventServiceTest {
                 .enrolledAt(now.plusMinutes(10))
                 .accepted(false)
                 .attended(false)
-                .user(user)
+                .user(guest)
                 .build();
         Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
         event.addEnrollment(savedEnrollment);
@@ -738,10 +804,14 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
         study.close(clock);
+        // 스터디 세팅
+        User guest = createAndSaveUser("guest", Role.GUEST);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
 
         Event event = createAndSaveEvent(now, study, "이벤트");
         Enrollment enrollment = Enrollment.builder()
@@ -749,7 +819,7 @@ class EventServiceTest {
                 .enrolledAt(now.plusMinutes(10))
                 .accepted(false)
                 .attended(false)
-                .user(user)
+                .user(guest)
                 .build();
         Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
         event.addEnrollment(savedEnrollment);
@@ -766,9 +836,13 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
+        // 스터디 세팅
+        User guest = createAndSaveUser("guest", Role.GUEST);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
 
         Event event = createAndSaveEvent(now, study, "이벤트");
         Enrollment enrollment = Enrollment.builder()
@@ -782,7 +856,7 @@ class EventServiceTest {
         event.addEnrollment(savedEnrollment);
 
         // expected
-        assertThatThrownBy(() -> eventService.acceptEnrollment(user.getId(), event.getId(), enrollment.getId(), path))
+        assertThatThrownBy(() -> eventService.acceptEnrollment(guest.getId(), event.getId(), enrollment.getId(), path))
                 .isInstanceOf(InvalidRecruitmentStateException.class);
     }
 
@@ -793,10 +867,14 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
         study.startRecruit(now);
+        // 스터디 세팅
+        User guest = createAndSaveUser("guest", Role.GUEST);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
 
         Event event = createAndSaveEvent(now, study, "이벤트");
         Enrollment enrollment = Enrollment.builder()
@@ -804,7 +882,7 @@ class EventServiceTest {
                 .enrolledAt(now.plusMinutes(10))
                 .accepted(true)
                 .attended(false)
-                .user(user)
+                .user(guest)
                 .build();
         Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
         event.addEnrollment(savedEnrollment);
@@ -821,10 +899,14 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
         study.startRecruit(now);
+        // 스터디 세팅
+        User guest = createAndSaveUser("guest", Role.GUEST);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
 
         Event event = createAndSaveEvent(now, study, "이벤트");
         Enrollment enrollment = Enrollment.builder()
@@ -832,7 +914,7 @@ class EventServiceTest {
                 .enrolledAt(now.plusMinutes(10))
                 .accepted(true)
                 .attended(true)
-                .user(user)
+                .user(guest)
                 .build();
         Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
         event.addEnrollment(savedEnrollment);
@@ -849,10 +931,14 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
         study.startRecruit(now);
+        // 스터디 세팅
+        User guest = createAndSaveUser("guest", Role.GUEST);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
 
         Event event = createAndSaveEvent(now, study, "이벤트");
         Enrollment enrollment = Enrollment.builder()
@@ -860,7 +946,7 @@ class EventServiceTest {
                 .enrolledAt(now.plusMinutes(10))
                 .accepted(true)
                 .attended(false)
-                .user(user)
+                .user(guest)
                 .build();
         Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
         event.addEnrollment(savedEnrollment);
@@ -889,8 +975,12 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
+        // 스터디 세팅
+        User guest = createAndSaveUser("guest", Role.GUEST);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
 
         Event event = createAndSaveEvent(now, study, "이벤트");
         Enrollment enrollment = Enrollment.builder()
@@ -898,7 +988,7 @@ class EventServiceTest {
                 .enrolledAt(now.plusMinutes(10))
                 .accepted(true)
                 .attended(false)
-                .user(user)
+                .user(guest)
                 .build();
         Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
         event.addEnrollment(savedEnrollment);
@@ -915,10 +1005,14 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
         study.close(clock);
+        // 스터디 세팅
+        User guest = createAndSaveUser("guest", Role.GUEST);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
 
         Event event = createAndSaveEvent(now, study, "이벤트");
         Enrollment enrollment = Enrollment.builder()
@@ -926,7 +1020,7 @@ class EventServiceTest {
                 .enrolledAt(now.plusMinutes(10))
                 .accepted(true)
                 .attended(false)
-                .user(user)
+                .user(guest)
                 .build();
         Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
         event.addEnrollment(savedEnrollment);
@@ -943,9 +1037,13 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
+        // 스터디 세팅
+        User guest = createAndSaveUser("guest", Role.GUEST);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
 
         Event event = createAndSaveEvent(now, study, "이벤트");
         Enrollment enrollment = Enrollment.builder()
@@ -953,7 +1051,7 @@ class EventServiceTest {
                 .enrolledAt(now.plusMinutes(10))
                 .accepted(true)
                 .attended(false)
-                .user(user)
+                .user(guest)
                 .build();
         Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
         event.addEnrollment(savedEnrollment);
@@ -970,10 +1068,14 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
         study.startRecruit(now);
+        // 스터디 세팅
+        User guest = createAndSaveUser("guest", Role.GUEST);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
 
         Event event = createAndSaveEvent(now, study, "이벤트");
         Enrollment enrollment = Enrollment.builder()
@@ -981,13 +1083,13 @@ class EventServiceTest {
                 .enrolledAt(now.plusMinutes(10))
                 .accepted(true)
                 .attended(false)
-                .user(user)
+                .user(guest)
                 .build();
         Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
         event.addEnrollment(savedEnrollment);
 
         // expected
-        assertThatThrownBy(() -> eventService.rejectEnrollment(987645634L, event.getId(), enrollment.getId(), path))
+        assertThatThrownBy(() -> eventService.rejectEnrollment(INVALID_USER_ID, event.getId(), enrollment.getId(), path))
                 .isInstanceOf(EventNotFoundException.class);
     }
 
@@ -998,10 +1100,14 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
         study.startRecruit(now);
+        // 스터디 세팅
+        User guest = createAndSaveUser("guest", Role.GUEST);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
 
         Event event = createAndSaveEvent(now, study, "이벤트");
         Enrollment enrollment = Enrollment.builder()
@@ -1009,13 +1115,13 @@ class EventServiceTest {
                 .enrolledAt(now.plusMinutes(10))
                 .accepted(true)
                 .attended(false)
-                .user(user)
+                .user(guest)
                 .build();
         Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
         event.addEnrollment(savedEnrollment);
 
         // expected
-        assertThatThrownBy(() -> eventService.rejectEnrollment(user.getId(), 987645634L, enrollment.getId(), path))
+        assertThatThrownBy(() -> eventService.rejectEnrollment(user.getId(), INVALID_USER_ID, enrollment.getId(), path))
                 .isInstanceOf(EventNotFoundException.class);
     }
 
@@ -1026,10 +1132,14 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
         study.startRecruit(now);
+        // 스터디 세팅
+        User guest = createAndSaveUser("guest", Role.GUEST);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
 
         Event event = createAndSaveEvent(now, study, "이벤트");
         Enrollment enrollment = Enrollment.builder()
@@ -1037,7 +1147,7 @@ class EventServiceTest {
                 .enrolledAt(now.plusMinutes(10))
                 .accepted(true)
                 .attended(false)
-                .user(user)
+                .user(guest)
                 .build();
         Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
         event.addEnrollment(savedEnrollment);
@@ -1054,10 +1164,14 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
         study.startRecruit(now);
+        // 스터디 세팅
+        User guest = createAndSaveUser("guest", Role.GUEST);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
 
         Event event = createAndSaveEvent(now, study, "이벤트");
         Enrollment enrollment = Enrollment.builder()
@@ -1065,13 +1179,13 @@ class EventServiceTest {
                 .enrolledAt(now.plusMinutes(10))
                 .accepted(true)
                 .attended(false)
-                .user(user)
+                .user(guest)
                 .build();
         Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
         event.addEnrollment(savedEnrollment);
 
         // expected
-        assertThatThrownBy(() -> eventService.rejectEnrollment(user.getId(), event.getId(), 435473453L, path))
+        assertThatThrownBy(() -> eventService.rejectEnrollment(user.getId(), event.getId(), INVALID_USER_ID, path))
                 .isInstanceOf(InvalidEnrollmentException.class);
     }
 
@@ -1082,10 +1196,14 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
-        Study study = createAndSaveStudy(path, user);
+        User manager = createAndSaveUser("admin", Role.ADMIN);
+        Study study = createAndSaveStudy(path, manager);
         study.publish(clock);
         study.startRecruit(now);
+        // 스터디멤버 세팅
+        User guest = createAndSaveUser("guest", Role.GUEST);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
 
         Event event = createAndSaveEvent(now, study, "이벤트");
         Enrollment enrollment = Enrollment.builder()
@@ -1093,13 +1211,13 @@ class EventServiceTest {
                 .enrolledAt(now.plusMinutes(10))
                 .accepted(true)
                 .attended(false)
-                .user(user)
+                .user(guest)
                 .build();
         Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
         event.addEnrollment(savedEnrollment);
 
         // when
-        EnrollmentResponse response = eventService.checkInEnrollment(user.getId(), event.getId(), savedEnrollment.getId(), path);
+        EnrollmentResponse response = eventService.checkInEnrollment(guest.getId(), event.getId(), savedEnrollment.getId(), path);
 
         // then
         Assertions.assertThat(response).isNotNull();
@@ -1125,8 +1243,12 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
+        // 스터디 세팅
+        User guest = createAndSaveUser("guest", Role.GUEST);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
 
         Event event = createAndSaveEvent(now, study, "이벤트");
         Enrollment enrollment = Enrollment.builder()
@@ -1140,7 +1262,7 @@ class EventServiceTest {
         event.addEnrollment(savedEnrollment);
 
         // expected
-        assertThatThrownBy(() -> eventService.checkInEnrollment(user.getId(), event.getId(), enrollment.getId(), path))
+        assertThatThrownBy(() -> eventService.checkInEnrollment(guest.getId(), event.getId(), enrollment.getId(), path))
                 .isInstanceOf(InvalidStudyPublishStateException.class);
     }
 
@@ -1151,10 +1273,14 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
         study.close(clock);
+        // 스터디 세팅
+        User guest = createAndSaveUser("guest", Role.GUEST);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
 
         Event event = createAndSaveEvent(now, study, "이벤트");
         Enrollment enrollment = Enrollment.builder()
@@ -1168,7 +1294,7 @@ class EventServiceTest {
         event.addEnrollment(savedEnrollment);
 
         // expected
-        assertThatThrownBy(() -> eventService.checkInEnrollment(user.getId(), event.getId(), enrollment.getId(), path))
+        assertThatThrownBy(() -> eventService.checkInEnrollment(guest.getId(), event.getId(), enrollment.getId(), path))
                 .isInstanceOf(InvalidStudyPublishStateException.class);
     }
 
@@ -1179,9 +1305,13 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
+        // 스터디 세팅
+        User guest = createAndSaveUser("guest", Role.GUEST);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
 
         Event event = createAndSaveEvent(now, study, "이벤트");
         Enrollment enrollment = Enrollment.builder()
@@ -1195,7 +1325,7 @@ class EventServiceTest {
         event.addEnrollment(savedEnrollment);
 
         // expected
-        assertThatThrownBy(() -> eventService.checkInEnrollment(user.getId(), event.getId(), enrollment.getId(), path))
+        assertThatThrownBy(() -> eventService.checkInEnrollment(guest.getId(), event.getId(), enrollment.getId(), path))
                 .isInstanceOf(InvalidRecruitmentStateException.class);
     }
 
@@ -1206,10 +1336,14 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
         study.startRecruit(now);
+        // 스터디 세팅
+        User guest = createAndSaveUser("guest", Role.GUEST);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
 
         Event event = createAndSaveEvent(now, study, "이벤트");
         Enrollment enrollment = Enrollment.builder()
@@ -1223,7 +1357,7 @@ class EventServiceTest {
         event.addEnrollment(savedEnrollment);
 
         // expected
-        assertThatThrownBy(() -> eventService.checkInEnrollment(987645634L, event.getId(), enrollment.getId(), path))
+        assertThatThrownBy(() -> eventService.checkInEnrollment(INVALID_USER_ID, event.getId(), enrollment.getId(), path))
                 .isInstanceOf(EventNotFoundException.class);
     }
 
@@ -1234,10 +1368,14 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
         study.startRecruit(now);
+        // 스터디 세팅
+        User guest = createAndSaveUser("guest", Role.GUEST);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
 
         Event event = createAndSaveEvent(now, study, "이벤트");
         Enrollment enrollment = Enrollment.builder()
@@ -1251,7 +1389,7 @@ class EventServiceTest {
         event.addEnrollment(savedEnrollment);
 
         // expected
-        assertThatThrownBy(() -> eventService.checkInEnrollment(user.getId(), 987645634L, enrollment.getId(), path))
+        assertThatThrownBy(() -> eventService.checkInEnrollment(guest.getId(), INVALID_USER_ID, enrollment.getId(), path))
                 .isInstanceOf(EventNotFoundException.class);
     }
 
@@ -1262,10 +1400,14 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
         study.startRecruit(now);
+        // 스터디 세팅
+        User guest = createAndSaveUser("guest", Role.GUEST);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
 
         Event event = createAndSaveEvent(now, study, "이벤트");
         Enrollment enrollment = Enrollment.builder()
@@ -1279,7 +1421,7 @@ class EventServiceTest {
         event.addEnrollment(savedEnrollment);
 
         // expected
-        assertThatThrownBy(() -> eventService.checkInEnrollment(user.getId(), event.getId(), enrollment.getId(), "wrong"))
+        assertThatThrownBy(() -> eventService.checkInEnrollment(guest.getId(), event.getId(), enrollment.getId(), "wrong"))
                 .isInstanceOf(StudyNotFoundException.class);
     }
 
@@ -1290,10 +1432,14 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
         study.startRecruit(now);
+        // 스터디 세팅
+        User guest = createAndSaveUser("guest", Role.GUEST);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
 
         Event event = createAndSaveEvent(now, study, "이벤트");
         Enrollment enrollment = Enrollment.builder()
@@ -1307,12 +1453,10 @@ class EventServiceTest {
         event.addEnrollment(savedEnrollment);
 
         // expected
-        assertThatThrownBy(() -> eventService.checkInEnrollment(user.getId(), event.getId(), 435473453L, path))
+        assertThatThrownBy(() -> eventService.checkInEnrollment(guest.getId(), event.getId(), INVALID_USER_ID, path))
                 .isInstanceOf(InvalidEnrollmentException.class);
     }
 
-
-    ////////////////////////////////
 
     @Test
     @DisplayName("모임 체크인 취소 요청 시 참석 상태(attended)를 false로 변경한다")
@@ -1321,10 +1465,14 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
         study.startRecruit(now);
+        // 스터디 멤버 세팅
+        User guest = createAndSaveUser("guest", Role.GUEST);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
 
         Event event = createAndSaveEvent(now, study, "이벤트");
         Enrollment enrollment = Enrollment.builder()
@@ -1332,13 +1480,13 @@ class EventServiceTest {
                 .enrolledAt(now.plusMinutes(10))
                 .accepted(true)
                 .attended(true)
-                .user(user)
+                .user(guest)
                 .build();
         Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
         event.addEnrollment(savedEnrollment);
 
         // when
-        EnrollmentResponse response = eventService.cancelCheckInEnrollment(user.getId(), event.getId(), savedEnrollment.getId(), path);
+        EnrollmentResponse response = eventService.cancelCheckInEnrollment(guest.getId(), event.getId(), savedEnrollment.getId(), path);
 
         // then
         Assertions.assertThat(response).isNotNull();
@@ -1355,8 +1503,12 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
+        // 스터디 세팅
+        User guest = createAndSaveUser("guest", Role.GUEST);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
 
         Event event = createAndSaveEvent(now, study, "이벤트");
         Enrollment enrollment = Enrollment.builder()
@@ -1370,7 +1522,7 @@ class EventServiceTest {
         event.addEnrollment(savedEnrollment);
 
         // expected
-        assertThatThrownBy(() -> eventService.cancelCheckInEnrollment(user.getId(), event.getId(), enrollment.getId(), path))
+        assertThatThrownBy(() -> eventService.cancelCheckInEnrollment(guest.getId(), event.getId(), enrollment.getId(), path))
                 .isInstanceOf(InvalidStudyPublishStateException.class);
     }
 
@@ -1381,10 +1533,14 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
         study.close(clock);
+        // 스터디 세팅
+        User guest = createAndSaveUser("guest", Role.GUEST);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
 
         Event event = createAndSaveEvent(now, study, "이벤트");
         Enrollment enrollment = Enrollment.builder()
@@ -1398,7 +1554,7 @@ class EventServiceTest {
         event.addEnrollment(savedEnrollment);
 
         // expected
-        assertThatThrownBy(() -> eventService.cancelCheckInEnrollment(user.getId(), event.getId(), enrollment.getId(), path))
+        assertThatThrownBy(() -> eventService.cancelCheckInEnrollment(guest.getId(), event.getId(), enrollment.getId(), path))
                 .isInstanceOf(InvalidStudyPublishStateException.class);
     }
 
@@ -1409,9 +1565,13 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
+        // 스터디 세팅
+        User guest = createAndSaveUser("guest", Role.GUEST);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
 
         Event event = createAndSaveEvent(now, study, "이벤트");
         Enrollment enrollment = Enrollment.builder()
@@ -1425,7 +1585,7 @@ class EventServiceTest {
         event.addEnrollment(savedEnrollment);
 
         // expected
-        assertThatThrownBy(() -> eventService.cancelCheckInEnrollment(user.getId(), event.getId(), enrollment.getId(), path))
+        assertThatThrownBy(() -> eventService.cancelCheckInEnrollment(guest.getId(), event.getId(), enrollment.getId(), path))
                 .isInstanceOf(InvalidRecruitmentStateException.class);
     }
 
@@ -1436,10 +1596,14 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
         study.startRecruit(now);
+        // 스터디 세팅
+        User guest = createAndSaveUser("guest", Role.GUEST);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
 
         Event event = createAndSaveEvent(now, study, "이벤트");
         Enrollment enrollment = Enrollment.builder()
@@ -1453,7 +1617,7 @@ class EventServiceTest {
         event.addEnrollment(savedEnrollment);
 
         // expected
-        assertThatThrownBy(() -> eventService.cancelCheckInEnrollment(987645634L, event.getId(), enrollment.getId(), path))
+        assertThatThrownBy(() -> eventService.cancelCheckInEnrollment(INVALID_USER_ID, event.getId(), enrollment.getId(), path))
                 .isInstanceOf(EventNotFoundException.class);
     }
 
@@ -1464,10 +1628,14 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
         study.startRecruit(now);
+        // 스터디 세팅
+        User guest = createAndSaveUser("guest", Role.GUEST);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
 
         Event event = createAndSaveEvent(now, study, "이벤트");
         Enrollment enrollment = Enrollment.builder()
@@ -1481,7 +1649,7 @@ class EventServiceTest {
         event.addEnrollment(savedEnrollment);
 
         // expected
-        assertThatThrownBy(() -> eventService.cancelCheckInEnrollment(user.getId(), 987645634L, enrollment.getId(), path))
+        assertThatThrownBy(() -> eventService.cancelCheckInEnrollment(guest.getId(), INVALID_USER_ID, enrollment.getId(), path))
                 .isInstanceOf(EventNotFoundException.class);
     }
 
@@ -1492,10 +1660,14 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
         study.startRecruit(now);
+        // 스터디 세팅
+        User guest = createAndSaveUser("guest", Role.GUEST);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
 
         Event event = createAndSaveEvent(now, study, "이벤트");
         Enrollment enrollment = Enrollment.builder()
@@ -1509,7 +1681,7 @@ class EventServiceTest {
         event.addEnrollment(savedEnrollment);
 
         // expected
-        assertThatThrownBy(() -> eventService.cancelCheckInEnrollment(user.getId(), event.getId(), enrollment.getId(), "wrong"))
+        assertThatThrownBy(() -> eventService.cancelCheckInEnrollment(guest.getId(), event.getId(), enrollment.getId(), "wrong"))
                 .isInstanceOf(StudyNotFoundException.class);
     }
 
@@ -1520,10 +1692,14 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
         study.startRecruit(now);
+        // 스터디 세팅
+        User guest = createAndSaveUser("guest", Role.GUEST);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
 
         Event event = createAndSaveEvent(now, study, "이벤트");
         Enrollment enrollment = Enrollment.builder()
@@ -1537,7 +1713,7 @@ class EventServiceTest {
         event.addEnrollment(savedEnrollment);
 
         // expected
-        assertThatThrownBy(() -> eventService.cancelCheckInEnrollment(user.getId(), event.getId(), 435473453L, path))
+        assertThatThrownBy(() -> eventService.cancelCheckInEnrollment(guest.getId(), event.getId(), INVALID_USER_ID, path))
                 .isInstanceOf(InvalidEnrollmentException.class);
     }
 
@@ -1548,10 +1724,14 @@ class EventServiceTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = createAndSaveUser();
+        User user = createAndSaveUser("admin", Role.ADMIN);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
         study.startRecruit(now);
+        // 스터디 세팅
+        User guest = createAndSaveUser("guest", Role.GUEST);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
 
         Event event = createAndSaveEvent(now, study, "이벤트");
         Enrollment enrollment = Enrollment.builder()
@@ -1559,21 +1739,21 @@ class EventServiceTest {
                 .enrolledAt(now.plusMinutes(10))
                 .accepted(true)
                 .attended(false)
-                .user(user)
+                .user(guest)
                 .build();
         Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
         event.addEnrollment(savedEnrollment);
 
         // expected
-        assertThatThrownBy(() -> eventService.cancelCheckInEnrollment(user.getId(), event.getId(), enrollment.getId(), path))
+        assertThatThrownBy(() -> eventService.cancelCheckInEnrollment(guest.getId(), event.getId(), enrollment.getId(), path))
                 .isInstanceOf(InvalidEnrollmentStateException.class);
     }
 
-    private User createAndSaveUser() {
+    private User createAndSaveUser(String name, Role role) {
         User user = User.builder()
-                .name("testName")
-                .email("test@gmail.com")
-                .role(Role.GUEST)
+                .name(name + "testName")
+                .email(name + "test@gmail.com")
+                .role(role)
                 .build();
 
         return userRepository.save(user);

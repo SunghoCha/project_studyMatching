@@ -57,12 +57,11 @@ class StudyServiceTest {
     Clock clock;
 
     @Test
-    @WithAccount
     @DisplayName("스터디 path 검색 테스트")
     void findByPath() {
         // given
         String path = "test";
-        User user = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
+        User savedUser = createAndSaveUser("admin", Role.ADMIN);
         Study study = Study.builder()
                 .path(path)
                 .title("테스트 스터디1")
@@ -79,12 +78,11 @@ class StudyServiceTest {
     }
 
     @Test
-    @WithAccount
     @DisplayName("매니저 권한으로 스터디 검색 테스트")
     void findAuthorizedStudy_by_manager() {
         // given
         String path = "test";
-        User user = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
+        User savedUser = createAndSaveUser("admin", Role.ADMIN);
         Study study = Study.builder()
                 .path(path)
                 .title("테스트 스터디1")
@@ -93,11 +91,11 @@ class StudyServiceTest {
                 .build();
         Study savedStudy = studyRepository.save(study);
 
-        StudyManager savedManager = studyManagerRepository.save(StudyManager.createManager(user, study));
+        StudyManager savedManager = studyManagerRepository.save(StudyManager.createManager(savedUser, study));
         study.addManager(savedManager);
 
         // when
-        Study foundStudy = studyService.findAuthorizedStudy(user.getId(), path);
+        Study foundStudy = studyService.findAuthorizedStudy(savedUser.getId(), path);
 
         // then
         assertThat(foundStudy).extracting("path", "title", "shortDescription", "fullDescription")
@@ -105,17 +103,11 @@ class StudyServiceTest {
     }
 
     @Test
-    @WithAccount(name = "guest", email = "guest@gmail.com", role = "ROLE_GUEST")
     @DisplayName("권한 없이 매니저 권한 스터디 검색하면 예외 발생")
     void findAuthorizedStudy_without_manager_permissions() {
         // given
         String path = "test";
-        User user = User.builder()
-                .name("관리자")
-                .email("admin@example.com")
-                .role(Role.ADMIN)
-                .build();
-        User savedUser = userRepository.save(user);
+        User savedUser = createAndSaveUser("admin", Role.ADMIN);
 
         Study study = Study.builder()
                 .path(path)
@@ -128,18 +120,17 @@ class StudyServiceTest {
         StudyManager savedManager = studyManagerRepository.save(StudyManager.createManager(savedUser, study));
         study.addManager(savedManager);
 
-        User guest = userRepository.findByEmail("guest@gmail.com").orElseThrow(UserNotFoundException::new);
+        User guest = createAndSaveUser("guest", Role.GUEST);
 
         // then
         assertThatThrownBy(() -> studyService.findAuthorizedStudy(guest.getId(), path)).isInstanceOf(UnauthorizedAccessException.class);
     }
 
     @Test
-    @WithAccount
     @DisplayName("스터디 생성 테스트")
     void create_study_with_correct_input() {
         // given
-        User user = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
+        User savedUser = createAndSaveUser("admin", Role.ADMIN);
 
         StudyCreateRequest request = StudyCreateRequest.builder()
                 .path("path1")
@@ -148,7 +139,7 @@ class StudyServiceTest {
                 .build();
 
         // when
-        StudyCreateResponse response = studyService.createStudy(user.getId(), request);
+        StudyCreateResponse response = studyService.createStudy(savedUser.getId(), request);
 
         // then
         assertThat(response).extracting("path", "title", "shortDescription")
@@ -156,12 +147,11 @@ class StudyServiceTest {
     }
 
     @Test
-    @WithAccount
     @DisplayName("이미 생성된 스터디와 같은 path 입력시 예외 발생")
     void create_study_with_wrong_path() {
         // given
         String path = "test";
-        User user = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
+        User savedUser = createAndSaveUser("admin", Role.ADMIN);
         Study study = Study.builder()
                 .path(path)
                 .title("테스트 스터디1")
@@ -170,7 +160,7 @@ class StudyServiceTest {
                 .build();
         Study savedStudy = studyRepository.save(study);
 
-        StudyManager savedManager = studyManagerRepository.save(StudyManager.createManager(user, savedStudy));
+        StudyManager savedManager = studyManagerRepository.save(StudyManager.createManager(savedUser, savedStudy));
         savedStudy.addManager(savedManager);
 
         StudyCreateRequest request = StudyCreateRequest.builder()
@@ -180,16 +170,15 @@ class StudyServiceTest {
                 .build();
 
         // expected
-        assertThatThrownBy(() -> studyService.createStudy(user.getId(), request)).isInstanceOf(StudyPathAlreadyExistException.class);
+        assertThatThrownBy(() -> studyService.createStudy(savedUser.getId(), request)).isInstanceOf(StudyPathAlreadyExistException.class);
     }
 
     @Test
-    @WithAccount
     @DisplayName("스터디 조회 성공 테스트")
     void get_study_with_correct_input() {
         // given
         String path = "test";
-        User user = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
+        User savedUser = createAndSaveUser("admin", Role.ADMIN);
         Study study = Study.builder()
                 .path(path)
                 .title("테스트 스터디1")
@@ -198,10 +187,10 @@ class StudyServiceTest {
                 .build();
         Study savedStudy = studyRepository.save(study);
 
-        StudyManager savedManager = studyManagerRepository.save(StudyManager.createManager(user, savedStudy));
+        StudyManager savedManager = studyManagerRepository.save(StudyManager.createManager(savedUser, savedStudy));
         savedStudy.addManager(savedManager);
 
-        StudyResponse response = studyService.getStudy(user.getId(), path);
+        StudyResponse response = studyService.getStudy(savedUser.getId(), path);
 
         // expected
         assertThat(response).extracting("path", "title", "shortDescription", "fullDescription")
@@ -209,12 +198,11 @@ class StudyServiceTest {
     }
 
     @Test
-    @WithAccount
     @DisplayName("잘못된 path로 스터디 조회시 예외 발생")
     void get_study_with_wrong_path() {
         // given
         String path = "test";
-        User user = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
+        User savedUser = createAndSaveUser("admin", Role.ADMIN);
         Study study = Study.builder()
                 .path(path)
                 .title("테스트 스터디1")
@@ -223,19 +211,18 @@ class StudyServiceTest {
                 .build();
         Study savedStudy = studyRepository.save(study);
 
-        StudyManager savedManager = studyManagerRepository.save(StudyManager.createManager(user, savedStudy));
+        StudyManager savedManager = studyManagerRepository.save(StudyManager.createManager(savedUser, savedStudy));
         savedStudy.addManager(savedManager);
 
         // expected
-        assertThatThrownBy(() -> studyService.getStudy(user.getId(), "wrong")).isInstanceOf(StudyNotFoundException.class);
+        assertThatThrownBy(() -> studyService.getStudy(savedUser.getId(), "wrong")).isInstanceOf(StudyNotFoundException.class);
     }
 
     @Test
-    @WithAccount
     @DisplayName("전체 스터디 목록 조회 성공 테스트")
     void get_studies_with_correct_input() {
         // given
-        User user = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
+        User savedUser = createAndSaveUser("admin", Role.ADMIN);
         for (int i = 1; i <= 10; i++) {
             Study study = Study.builder()
                     .path("path" + i)
@@ -245,7 +232,7 @@ class StudyServiceTest {
                     .build();
             studyRepository.save(study);
 
-            StudyManager savedManager = studyManagerRepository.save(StudyManager.createManager(user, study));
+            StudyManager savedManager = studyManagerRepository.save(StudyManager.createManager(savedUser, study));
             study.addManager(savedManager);
         }
         // when
@@ -266,12 +253,11 @@ class StudyServiceTest {
     }
 
     @Test
-    @WithAccount
     @DisplayName("관리 스터디 목록 조회 성공 테스트")
     void get_managed_studies_with_correct_input() {
         // given
         // 스터디 세팅
-        User user = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
+        User savedUser = createAndSaveUser("admin", Role.ADMIN);
         for (int i = 1; i <= 10; i++) {
             Study study = Study.builder()
                     .path("path" + i)
@@ -281,12 +267,12 @@ class StudyServiceTest {
                     .build();
             studyRepository.save(study);
 
-            StudyManager savedManager = studyManagerRepository.save(StudyManager.createManager(user, study));
+            StudyManager savedManager = studyManagerRepository.save(StudyManager.createManager(savedUser, study));
             study.addManager(savedManager);
         }
 
         // when
-        PagedResponse<StudyQueryResponse> response = studyService.getMyManagedStudies(user.getId(), PageRequest.of(0, 9));
+        PagedResponse<StudyQueryResponse> response = studyService.getMyManagedStudies(savedUser.getId(), PageRequest.of(0, 9));
         // then
         assertThat(response.getCurrentPage()).isEqualTo(1);
         assertThat(response.getSize()).isEqualTo(9);
@@ -303,17 +289,11 @@ class StudyServiceTest {
     }
 
     @Test
-    @WithAccount(name = "guest", email = "guest@gmail.com", role = "ROLE_GUEST")
     @DisplayName("가입 스터디 목록 조회 성공 테스트")
     void get_joined_studies_with_correct_input() {
         // given
         // 스터디 세팅
-        User user = User.builder()
-                .name("testName")
-                .email("test@gmail.com")
-                .role(Role.ADMIN)
-                .build();
-        User savedUser = userRepository.save(user);
+        User savedUser = createAndSaveUser("admin", Role.ADMIN);
         for (int i = 1; i <= 10; i++) {
             Study study = Study.builder()
                     .path("path" + i)
@@ -327,7 +307,7 @@ class StudyServiceTest {
             study.addManager(savedManager);
         }
 
-        User guest = userRepository.findByEmail("guest@gmail.com").orElseThrow(UserNotFoundException::new);
+        User guest = createAndSaveUser("guest", Role.GUEST);
 
         List<String> pathList = new ArrayList<>();
         for (int i = 3; i <= 7; i++) {
@@ -360,17 +340,11 @@ class StudyServiceTest {
     }
 
     @Test
-    @WithAccount(name = "guest", email = "guest@gmail.com", role = "ROLE_GUEST")
     @DisplayName("가입 스터디가 없을 경우 목록 조회 성공 테스트")
     void get_joined_studies_with_nothing() {
         // given
         // 스터디 세팅
-        User user = User.builder()
-                .name("testName")
-                .email("test@gmail.com")
-                .role(Role.ADMIN)
-                .build();
-        User savedUser = userRepository.save(user);
+        User savedUser = createAndSaveUser("admin", Role.ADMIN);
         for (int i = 1; i <= 10; i++) {
             Study study = Study.builder()
                     .path("path" + i)
@@ -384,7 +358,7 @@ class StudyServiceTest {
             study.addManager(savedManager);
         }
 
-        User guest = userRepository.findByEmail("guest@gmail.com").orElseThrow(UserNotFoundException::new);
+        User guest = createAndSaveUser("guest", Role.GUEST);
 
         // when
         PagedResponse<StudyQueryResponse> response =
@@ -400,12 +374,11 @@ class StudyServiceTest {
     }
 
     @Test
-    @WithAccount
     @DisplayName("스터디 소개 수정 테스트")
     void updateDescription() {
         // given
         String path = "test";
-        User user = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
+        User savedUser = createAndSaveUser("admin", Role.ADMIN);
         Study study = Study.builder()
                 .path(path)
                 .title("테스트 스터디1")
@@ -414,7 +387,7 @@ class StudyServiceTest {
                 .build();
         Study savedStudy = studyRepository.save(study);
 
-        StudyManager savedManager = studyManagerRepository.save(StudyManager.createManager(user, savedStudy));
+        StudyManager savedManager = studyManagerRepository.save(StudyManager.createManager(savedUser, savedStudy));
         savedStudy.addManager(savedManager);
 
         StudyUpdateRequest request = StudyUpdateRequest.builder()
@@ -423,7 +396,7 @@ class StudyServiceTest {
                 .build();
 
         // when
-        StudyUpdateResponse response = studyService.updateDescription(user.getId(), path, request);
+        StudyUpdateResponse response = studyService.updateDescription(savedUser.getId(), path, request);
 
         // then
         assertThat(response).extracting("path", "title", "shortDescription", "fullDescription")
@@ -431,12 +404,11 @@ class StudyServiceTest {
     }
 
     @Test
-    @WithAccount
     @DisplayName("스터디를 매니저 정보와 함께 반환")
     void findStudyWithManager() {
         // given
         String path = "test";
-        User user = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
+        User savedUser = createAndSaveUser("admin", Role.ADMIN);
         Study study = Study.builder()
                 .path(path)
                 .title("테스트 스터디1")
@@ -445,11 +417,11 @@ class StudyServiceTest {
                 .build();
         Study savedStudy = studyRepository.save(study);
 
-        StudyManager savedManager = studyManagerRepository.save(StudyManager.createManager(user, savedStudy));
+        StudyManager savedManager = studyManagerRepository.save(StudyManager.createManager(savedUser, savedStudy));
         savedStudy.addManager(savedManager);
 
         // when
-        Study foundStudy = studyService.findStudyWithManager(user.getId(), path);
+        Study foundStudy = studyService.findStudyWithManager(savedUser.getId(), path);
 
         // then
         assertThat(foundStudy).extracting("path", "title", "shortDescription", "fullDescription")
@@ -459,17 +431,11 @@ class StudyServiceTest {
     }
 
     @Test
-    @WithAccount(name = "guest", email = "guest@gmail.com", role = "ROLE_GUEST")
     @DisplayName("스터디 가입 성공 테스트")
     void joinStudy() {
         // given
         String path = "test";
-        User user = User.builder()
-                .name("testName")
-                .email("test@gmail.com")
-                .role(Role.ADMIN)
-                .build();
-        User savedUser = userRepository.save(user);
+        User savedUser = createAndSaveUser("admin", Role.ADMIN);
         Study study = Study.builder()
                 .path(path)
                 .title("테스트 스터디1")
@@ -482,28 +448,22 @@ class StudyServiceTest {
         savedStudy.addManager(savedManager);
         savedStudy.publish(clock);
 
-        User guest = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
+        User guest = createAndSaveUser("guest", Role.GUEST);
 
         // when
         StudyResponse response = studyService.joinStudy(guest.getId(), path);
 
         // then
         assertThat(response.getMembers()).hasSize(1)
-                .extracting("name", "email").containsExactlyInAnyOrder(Tuple.tuple("guest", "guest@gmail.com"));
+                .extracting("name", "email").containsExactlyInAnyOrder(Tuple.tuple("guestTestName", "guestTest@gmail.com"));
     }
 
     @Test
-    @WithAccount(name = "guest", email = "guest@gmail.com", role = "ROLE_GUEST")
     @DisplayName("스터디 publish 전 가입 시도하면 예외 발생")
     void joinStudy_before_study_publish() {
         // given
         String path = "test";
-        User user = User.builder()
-                .name("testName")
-                .email("test@gmail.com")
-                .role(Role.ADMIN)
-                .build();
-        User savedUser = userRepository.save(user);
+        User savedUser = createAndSaveUser("admin", Role.ADMIN);
         Study study = Study.builder()
                 .path(path)
                 .title("테스트 스터디1")
@@ -515,24 +475,18 @@ class StudyServiceTest {
         StudyManager savedManager = studyManagerRepository.save(StudyManager.createManager(savedUser, savedStudy));
         savedStudy.addManager(savedManager);
 
-        User guest = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
+        User guest = createAndSaveUser("guest", Role.GUEST);
 
         // expected
         assertThatThrownBy(() -> studyService.joinStudy(guest.getId(), path)).isInstanceOf(InvalidStudyJoinConditionException.class);
     }
 
     @Test
-    @WithAccount(name = "guest", email = "guest@gmail.com", role = "ROLE_GUEST")
     @DisplayName("이미 스터디 가입한 멤버가 가입 시도하면 예외 발생")
     void joinStudy_already_study_joined() {
         // given
         String path = "test";
-        User user = User.builder()
-                .name("testName")
-                .email("test@gmail.com")
-                .role(Role.ADMIN)
-                .build();
-        User savedUser = userRepository.save(user);
+        User savedUser = createAndSaveUser("admin", Role.ADMIN);
         Study study = Study.builder()
                 .path(path)
                 .title("테스트 스터디1")
@@ -545,7 +499,7 @@ class StudyServiceTest {
         savedStudy.addManager(savedManager);
         savedStudy.publish(clock);
 
-        User guest = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
+        User guest = createAndSaveUser("guest", Role.GUEST);
         StudyMember savedMember = studyMemberRepository.save(StudyMember.createMember(guest, savedStudy));
         savedStudy.addMember(savedMember);
 
@@ -554,12 +508,11 @@ class StudyServiceTest {
     }
 
     @Test
-    @WithAccount
     @DisplayName("스터디 매니저가 가입 시도하면 예외 발생")
     void joinStudy_by_manager() {
         // given
         String path = "test";
-        User savedUser = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
+        User savedUser = createAndSaveUser("admin", Role.ADMIN);
         Study study = Study.builder()
                 .path(path)
                 .title("테스트 스터디1")
@@ -577,17 +530,11 @@ class StudyServiceTest {
     }
 
     @Test
-    @WithAccount(name = "guest", email = "guest@gmail.com", role = "ROLE_GUEST")
     @DisplayName("스터디 탈퇴 성공 테스트")
     void leaveStudy() {
         // given
         String path = "test";
-        User user = User.builder()
-                .name("testName")
-                .email("test@gmail.com")
-                .role(Role.ADMIN)
-                .build();
-        User savedUser = userRepository.save(user);
+        User savedUser = createAndSaveUser("admin", Role.ADMIN);
 
         Study study = Study.builder()
                 .path(path)
@@ -602,7 +549,7 @@ class StudyServiceTest {
         savedStudy.addManager(savedManager);
         savedStudy.publish(clock);
 
-        User guest = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
+        User guest = createAndSaveUser("guest", Role.GUEST);
         StudyMember savedMember = studyMemberRepository.save(StudyMember.createMember(guest, savedStudy));
         savedStudy.addMember(savedMember);
 
@@ -617,12 +564,11 @@ class StudyServiceTest {
     }
 
     @Test
-    @WithAccount
     @DisplayName("스터디 publish 성공 테스트")
     void publishStudy() {
         // given
         String path = "test";
-        User savedUser = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
+        User savedUser = createAndSaveUser("admin", Role.ADMIN);
         Study study = Study.builder()
                 .path(path)
                 .title("테스트 스터디1")
@@ -644,17 +590,11 @@ class StudyServiceTest {
     }
 
     @Test
-    @WithAccount(name = "guest", email = "guest@gmail.com", role = "ROLE_GUEST")
     @DisplayName("권한없이 스터디 publish 시도하면 예외 발생")
     void publishStudy_without_manager_permissions() {
         // given
         String path = "test";
-        User user = User.builder()
-                .name("testName")
-                .email("test@gmail.com")
-                .role(Role.ADMIN)
-                .build();
-        User savedUser = userRepository.save(user);
+        User savedUser = createAndSaveUser("admin", Role.ADMIN);
         Study study = Study.builder()
                 .path(path)
                 .title("테스트 스터디1")
@@ -666,19 +606,18 @@ class StudyServiceTest {
         StudyManager savedManager = studyManagerRepository.save(StudyManager.createManager(savedUser, savedStudy));
         savedStudy.addManager(savedManager);
 
-        User guest = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
+        User guest = createAndSaveUser("guest", Role.GUEST);
 
         // expected
         assertThatThrownBy(() -> studyService.publishStudy(guest.getId(), path)).isInstanceOf(UnauthorizedAccessException.class);
     }
 
     @Test
-    @WithAccount
     @DisplayName("스터디 모집 시작 성공 테스트")
     void startRecruit() {
         // given
         String path = "test";
-        User savedUser = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
+        User savedUser = createAndSaveUser("admin", Role.ADMIN);
         Study study = Study.builder()
                 .path(path)
                 .title("테스트 스터디1")
@@ -701,12 +640,11 @@ class StudyServiceTest {
     }
 
     @Test
-    @WithAccount
     @DisplayName("스터디 모집 종료 성공 테스트")
     void stopRecruit() {
         // given
         String path = "test";
-        User savedUser = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
+        User savedUser = createAndSaveUser("admin", Role.ADMIN);
         Study study = Study.builder()
                 .path(path)
                 .title("테스트 스터디1")
@@ -731,12 +669,11 @@ class StudyServiceTest {
     }
 
     @Test
-    @WithAccount
     @DisplayName("스터디 경로 수정 성공 테스트")
     void updateStudyPath() {
         // given
         String path = "test";
-        User savedUser = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
+        User savedUser = createAndSaveUser("admin", Role.ADMIN);
         Study study = Study.builder()
                 .path(path)
                 .title("테스트 스터디1")
@@ -759,12 +696,11 @@ class StudyServiceTest {
     }
 
     @Test
-    @WithAccount
     @DisplayName("이미 존재하는 경로로 경로 수정시 예외 발생")
     void updateStudyPath_with_already_exist_path() {
         // given
         String path = "path";
-        User savedUser = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
+        User savedUser = createAndSaveUser("admin", Role.ADMIN);
         for (int i = 1; i <= 2; i++) {
             Study study = Study.builder()
                     .path(path + i)
@@ -784,5 +720,15 @@ class StudyServiceTest {
         // expected
         assertThatThrownBy(() -> studyService.updateStudyPath(savedUser.getId(), "path1", request))
                 .isInstanceOf(StudyPathAlreadyExistException.class);
+    }
+
+    private User createAndSaveUser(String name, Role role) {
+        User user = User.builder()
+                .name(name + "TestName")
+                .email(name + "Test@gmail.com")
+                .role(role)
+                .build();
+
+        return userRepository.save(user);
     }
 }

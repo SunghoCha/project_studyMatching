@@ -3,8 +3,6 @@ package com.app.global.config.auth;
 import com.app.domain.user.User;
 import com.app.domain.user.service.UserService;
 import com.app.global.config.auth.dto.OAuthAttributes;
-import com.app.global.config.auth.dto.CurrentUser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -27,8 +25,6 @@ import java.util.Collections;
 public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
 
     private final UserService userService;
-    private final HttpSession httpSession;
-    private final ObjectMapper objectMapper;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -41,8 +37,6 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
                 .getUserInfoEndpoint()
                 .getUserNameAttributeName();
 
-        // registration이나 userNameAttributeName이 여기서만 쓰이는데 인자로 userRequest와 oAuth2User를 전달하는건 별로인가?
-        // 이렇게 되면 dto가 단순한 역할을 넘어서는 느낌이라 이렇게 하는게 나을지도..
         OAuthAttributes attributes = OAuthAttributes.of(registrationId, userNameAttributeName, oAuth2User.getAttributes());
 
         User user = userService.saveOrUpdate(attributes);

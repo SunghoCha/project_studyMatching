@@ -1,0 +1,32 @@
+2025-02-13 04:47:41 dev INFO  [SpringApplicationShutdownHook] o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-02-13 04:47:42 dev DEBUG [SpringApplicationShutdownHook] org.hibernate.SQL - 
+    [34mdrop[0m [34mtable[0m [34mif[0m [34mexists[0m enrollment [34mcascade[0m 
+2025-02-13 04:47:42 dev DEBUG [SpringApplicationShutdownHook] org.hibernate.SQL - 
+    [34mdrop[0m [34mtable[0m [34mif[0m [34mexists[0m event [34mcascade[0m 
+2025-02-13 04:47:42 dev DEBUG [SpringApplicationShutdownHook] org.hibernate.SQL - 
+    [34mdrop[0m [34mtable[0m [34mif[0m [34mexists[0m notification [34mcascade[0m 
+2025-02-13 04:47:42 dev DEBUG [SpringApplicationShutdownHook] org.hibernate.SQL - 
+    [34mdrop[0m [34mtable[0m [34mif[0m [34mexists[0m study [34mcascade[0m 
+2025-02-13 04:47:42 dev DEBUG [SpringApplicationShutdownHook] org.hibernate.SQL - 
+    [34mdrop[0m [34mtable[0m [34mif[0m [34mexists[0m study_manager [34mcascade[0m 
+2025-02-13 04:47:42 dev DEBUG [SpringApplicationShutdownHook] org.hibernate.SQL - 
+    [34mdrop[0m [34mtable[0m [34mif[0m [34mexists[0m study_member [34mcascade[0m 
+2025-02-13 04:47:42 dev DEBUG [SpringApplicationShutdownHook] org.hibernate.SQL - 
+    [34mdrop[0m [34mtable[0m [34mif[0m [34mexists[0m study_tag [34mcascade[0m 
+2025-02-13 04:47:42 dev DEBUG [SpringApplicationShutdownHook] org.hibernate.SQL - 
+    [34mdrop[0m [34mtable[0m [34mif[0m [34mexists[0m study_zone [34mcascade[0m 
+2025-02-13 04:47:42 dev DEBUG [SpringApplicationShutdownHook] org.hibernate.SQL - 
+    [34mdrop[0m [34mtable[0m [34mif[0m [34mexists[0m tag [34mcascade[0m 
+2025-02-13 04:47:42 dev DEBUG [SpringApplicationShutdownHook] org.hibernate.SQL - 
+    [34mdrop[0m [34mtable[0m [34mif[0m [34mexists[0m users [34mcascade[0m 
+2025-02-13 04:47:42 dev DEBUG [SpringApplicationShutdownHook] org.hibernate.SQL - 
+    [34mdrop[0m [34mtable[0m [34mif[0m [34mexists[0m user_tag [34mcascade[0m 
+2025-02-13 04:47:42 dev DEBUG [SpringApplicationShutdownHook] org.hibernate.SQL - 
+    [34mdrop[0m [34mtable[0m [34mif[0m [34mexists[0m user_zone [34mcascade[0m 
+2025-02-13 04:47:42 dev DEBUG [SpringApplicationShutdownHook] org.hibernate.SQL - 
+    [34mdrop[0m [34mtable[0m [34mif[0m [34mexists[0m zone [34mcascade[0m 
+2025-02-13 04:47:42 dev DEBUG [SpringApplicationShutdownHook] org.hibernate.SQL - 
+    [34mdrop[0m [34msequence[0m [34mif[0m [34mexists[0m study_tag_seq
+2025-02-13 04:47:42 dev WARN  [SpringApplicationShutdownHook] o.s.b.f.s.DisposableBeanAdapter - Invocation of destroy method failed on bean with name 'inMemoryDatabaseShutdownExecutor': org.h2.jdbc.JdbcSQLNonTransientConnectionException: Database is already closed (to disable automatic closing at VM shutdown, add ";DB_CLOSE_ON_EXIT=FALSE" to the db URL) [90121-214]
+2025-02-13 04:47:42 dev INFO  [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2025-02-13 04:47:42 dev INFO  [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.

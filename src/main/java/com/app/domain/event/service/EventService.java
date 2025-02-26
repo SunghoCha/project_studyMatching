@@ -124,7 +124,7 @@ public class EventService {
     public EnrollmentCreateResponse createEnrollment(Long userId, Long eventId, String path) {
         User user = userService.getById(userId);
         Study study = studyService.validateStudyIsRecruiting(path);
-        Event event = eventRepository.findEventWithEnrollmentById(eventId).orElseThrow(EventNotFoundException::new);
+        Event event = eventRepository.findById(eventId).orElseThrow(EventNotFoundException::new);
 
         if (enrollmentRepository.existsByEventAndUser(event, user)) {
             throw new EnrollmentAlreadyExistException();

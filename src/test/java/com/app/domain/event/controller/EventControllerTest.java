@@ -12,7 +12,10 @@ import com.app.domain.study.Study;
 import com.app.domain.study.repository.StudyRepository;
 import com.app.domain.study.studyManager.StudyManager;
 import com.app.domain.study.studyManager.repository.StudyManagerRepository;
+import com.app.domain.study.studyMember.StudyMember;
+import com.app.domain.study.studyMember.repository.StudyMemberRepository;
 import com.app.domain.user.User;
+import com.app.domain.user.constant.Role;
 import com.app.domain.user.repository.UserRepository;
 import com.app.global.error.exception.UserNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,8 +40,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.app.TestUtils.getAuthenticatedEmail;
-
 @Transactional
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -60,6 +61,9 @@ class EventControllerTest {
     StudyManagerRepository studyManagerRepository;
 
     @Autowired
+    StudyMemberRepository studyMemberRepository;
+
+    @Autowired
     EventRepository eventRepository;
 
     @Autowired
@@ -74,7 +78,7 @@ class EventControllerTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
+        User user = userRepository.findByEmail("test@gmail.com").orElseThrow(UserNotFoundException::new);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
 
@@ -115,7 +119,7 @@ class EventControllerTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
+        User user = userRepository.findByEmail("test@gmail.com").orElseThrow(UserNotFoundException::new);
         Study study = createAndSaveStudy(path, user);
 
         EventCreateRequest request = EventCreateRequest.builder()
@@ -145,7 +149,7 @@ class EventControllerTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
+        User user = userRepository.findByEmail("test@gmail.com").orElseThrow(UserNotFoundException::new);
         Study study = createAndSaveStudy(path, user);
         Event event = createAndSaveEvent(now, study, "1");
 
@@ -164,7 +168,7 @@ class EventControllerTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
+        User user = userRepository.findByEmail("test@gmail.com").orElseThrow(UserNotFoundException::new);
         Study study = createAndSaveStudy(path, user);
         List<Event> list = new ArrayList<>();
         for (int i = 1; i <= 3; i++) {
@@ -196,7 +200,7 @@ class EventControllerTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
+        User user = userRepository.findByEmail("test@gmail.com").orElseThrow(UserNotFoundException::new);
         Study study = createAndSaveStudy(path, user);
         study.publish(clock);
 
@@ -240,7 +244,7 @@ class EventControllerTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.MILLIS);
 
         String path = "test";
-        User user = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
+        User user = userRepository.findByEmail("test@gmail.com").orElseThrow(UserNotFoundException::new);
         Study study = createAndSaveStudy(path, user);
         Event event = createAndSaveEvent(now, study, "1");
 
@@ -272,7 +276,7 @@ class EventControllerTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
+        User user = userRepository.findByEmail("test@gmail.com").orElseThrow(UserNotFoundException::new);
         Study study = createAndSaveStudy(path, user);
         Event event = createAndSaveEvent(now, study, "1");
 
@@ -283,18 +287,28 @@ class EventControllerTest {
     }
 
     @Test
-    @WithAccount
+    @WithAccount(name = "guest", email = "guest@gmail.com", role = "ROLE_GUEST")
     @DisplayName("모임 참가 요청 시 성공적으로 참가(enrollment)를 등록한다")
     void newEnrollment() throws Exception {
         // given
         Clock clock = TestUtils.getFixedClock();
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
-
+        // 스터디 세팅
         String path = "test";
-        User user = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
-        Study study = createAndSaveStudy(path, user);
+        User user = User.builder()
+                .name("testName")
+                .email("test@gmail.com")
+                .role(Role.ADMIN)
+                .build();
+        User manager = userRepository.save(user);
+        Study study = createAndSaveStudy(path, manager);
         study.publish(clock);
         study.startRecruit(now);
+        // 스터디멤버 세팅
+        User guest = userRepository.findByEmail("guest@gmail.com").orElseThrow(UserNotFoundException::new);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
+        study.addMember(savedMember);
 
         Event event = createAndSaveEvent(now, study, "1");
         // expected
@@ -305,25 +319,35 @@ class EventControllerTest {
     }
 
     @Test
-    @WithAccount
+    @WithAccount(name = "guest", email = "guest@gmail.com", role = "ROLE_GUEST")
     @DisplayName("모임 참가 취소 요청 시 성공적으로 참가(enrollment)를 삭제한다")
     void cancelEnrollment() throws Exception {
         // given
         Clock clock = TestUtils.getFixedClock();
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
-
+        // 스터디 세팅
         String path = "test";
-        User user = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
-        Study study = createAndSaveStudy(path, user);
+        User user = User.builder()
+                .name("testName")
+                .email("test@gmail.com")
+                .role(Role.ADMIN)
+                .build();
+        User manager = userRepository.save(user);
+        Study study = createAndSaveStudy(path, manager);
         study.publish(clock);
         study.startRecruit(now);
+        // 스터디멤버 세팅
+        User guest = userRepository.findByEmail("guest@gmail.com").orElseThrow(UserNotFoundException::new);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
+        study.addMember(savedMember);
 
         Event event = createAndSaveEvent(now, study, "1");
         Enrollment enrollment = Enrollment.builder()
                 .event(event)
                 .enrolledAt(now.plusMinutes(10))
                 .accepted(event.isAbleToAccept())
-                .user(user)
+                .user(guest)
                 .build();
 
         Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
@@ -344,17 +368,27 @@ class EventControllerTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
-        Study study = createAndSaveStudy(path, user);
+        User manager = userRepository.findByEmail("test@gmail.com").orElseThrow(UserNotFoundException::new);
+        Study study = createAndSaveStudy(path, manager);
         study.publish(clock);
         study.startRecruit(now);
+        // 스터디멤버 세팅
+        User user = User.builder()
+                .name("guest")
+                .email("guest@gmail.com")
+                .role(Role.GUEST)
+                .build();
+        User guest = userRepository.save(user);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
+        study.addMember(savedMember);
 
         Event event = createAndSaveEvent(now, study, "1");
         Enrollment enrollment = Enrollment.builder()
                 .event(event)
                 .enrolledAt(now.plusMinutes(10))
                 .accepted(false)
-                .user(user)
+                .user(guest)
                 .build();
 
         Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
@@ -378,10 +412,20 @@ class EventControllerTest {
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
 
         String path = "test";
-        User user = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
-        Study study = createAndSaveStudy(path, user);
+        User manager = userRepository.findByEmail("test@gmail.com").orElseThrow(UserNotFoundException::new);
+        Study study = createAndSaveStudy(path, manager);
         study.publish(clock);
         study.startRecruit(now);
+        // 스터디멤버 세팅
+        User user = User.builder()
+                .name("guest")
+                .email("guest@gmail.com")
+                .role(Role.GUEST)
+                .build();
+        User guest = userRepository.save(user);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
+        study.addMember(savedMember);
 
         Event event = createAndSaveEvent(now, study, "1");
         Enrollment enrollment = Enrollment.builder()
@@ -404,25 +448,35 @@ class EventControllerTest {
     }
 
     @Test
-    @WithAccount
+    @WithAccount(name = "guest", email = "guest@gmail.com", role = "ROLE_GUEST")
     @DisplayName("모임 참가 성공 시 참석 상태(attended)가 true로 변경된다")
     void checkInEnrollment() throws Exception {
         // given
         Clock clock = TestUtils.getFixedClock();
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
-
+        // 스터디 세팅
         String path = "test";
-        User user = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
-        Study study = createAndSaveStudy(path, user);
+        User user = User.builder()
+                .name("testName")
+                .email("test@gmail.com")
+                .role(Role.ADMIN)
+                .build();
+        User manager = userRepository.save(user);
+        Study study = createAndSaveStudy(path, manager);
         study.publish(clock);
         study.startRecruit(now);
+        // 스터디 멤버 세팅
+        User guest = userRepository.findByEmail("guest@gmail.com").orElseThrow(UserNotFoundException::new);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
+        study.addMember(savedMember);
 
         Event event = createAndSaveEvent(now, study, "1");
         Enrollment enrollment = Enrollment.builder()
                 .event(event)
                 .enrolledAt(now.plusMinutes(10))
                 .accepted(true)
-                .user(user)
+                .user(guest)
                 .build();
 
         Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
@@ -438,26 +492,36 @@ class EventControllerTest {
     }
 
     @Test
-    @WithAccount
+    @WithAccount(name = "guest", email = "guest@gmail.com", role = "ROLE_GUEST")
     @DisplayName("모임 체크인 취소 요청 시 참석 상태(attended)를 false로 변경한다")
     void cancelCheckInEnrollment() throws Exception {
         // given
         Clock clock = TestUtils.getFixedClock();
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
-
+        // 스터디 세팅
         String path = "test";
-        User user = userRepository.findByEmail(getAuthenticatedEmail()).orElseThrow(UserNotFoundException::new);
-        Study study = createAndSaveStudy(path, user);
+        User user = User.builder()
+                .name("testName")
+                .email("test@gmail.com")
+                .role(Role.ADMIN)
+                .build();
+        User manager = userRepository.save(user);
+        Study study = createAndSaveStudy(path, manager);
         study.publish(clock);
         study.startRecruit(now);
-
+        // 스터디 멤버 세팅
+        User guest = userRepository.findByEmail("guest@gmail.com").orElseThrow(UserNotFoundException::new);
+        StudyMember studyMember = StudyMember.createMember(guest, study);
+        StudyMember savedMember = studyMemberRepository.save(studyMember);
+        study.addMember(savedMember);
+        
         Event event = createAndSaveEvent(now, study, "1");
         Enrollment enrollment = Enrollment.builder()
                 .event(event)
                 .enrolledAt(now.plusMinutes(10))
                 .accepted(true)
                 .attended(true)
-                .user(user)
+                .user(guest)
                 .build();
 
         Enrollment savedEnrollment = enrollmentRepository.save(enrollment);

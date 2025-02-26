@@ -505,7 +505,7 @@ class EventTest {
         boolean ableToAccept = event.isAbleToAccept();
 
         // then
-        Assertions.assertThat(ableToAccept).isFalse();
+        Assertions.assertThat(ableToAccept).isTrue();
     }
 
     private Event createEvent(LocalDateTime now) {

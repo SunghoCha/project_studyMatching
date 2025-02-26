@@ -8,6 +8,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -40,12 +41,29 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         String refreshToken = createRefreshToken(oAuth2User);
         log.info("refreshToken 생성 완료");
 
+        ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", accessToken)
+                .httpOnly(true)
+                .secure(false)
+                .sameSite("Strict")
+                .path("/")
+                .maxAge(Long.parseLong(accessTokenExpirationTime) / 1000)
+                .build();
+
+        ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", refreshToken)
+                .httpOnly(true)
+                .secure(false)
+                .sameSite("Strict")
+                .path("/")
+                .maxAge(Long.parseLong(refreshTokenExpirationTime) / 1000)
+                .build();
+
+        response.setHeader("Set-Cookie", accessTokenCookie.toString());
+        response.setHeader("Set-Cookie", refreshTokenCookie.toString());
 
         // TODO: url 변수화
-        String redirectUrlWithToken = "http://localhost:82/login-success?accessToken=" + accessToken
-                + "&refreshToken=" + refreshToken;
+        String redirectUrl = "http://localhost:82/login-success";
 
-        response.sendRedirect(redirectUrlWithToken);
+        response.sendRedirect(redirectUrl);
     }
 
     private String createAccessToken(OAuth2User oAuth2User) {
